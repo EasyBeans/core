@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2007-2011 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 6122 2012-01-17 15:25:22Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>easybeans-modules</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans</groupId>
+  <artifactId>easybeans-core</artifactId>
+  <packaging>jar</packaging>
+  <name>EasyBeans: Core</name>
+  <description>Core of EasyBeans.</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jpa-2.0-spec</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-connector-1.5-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-log</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-marshalling</artifactId>
+      <version>${ow2-util.version}</version>
+    </dependency>    
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-jacc-provider</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-jndi-resolver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-deployment</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-naming</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-deploy-impl</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-pool-impl</artifactId>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>audit-report-impl</artifactId>
+      <version>${ow2-util.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-pool-implenhanced</artifactId>
+      <version>${ow2-util.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-security</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-xmlconfig</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-transaction</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-asm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-asm-commons</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-metadata-ws-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>jotm</groupId>
+      <artifactId>jotm</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.ow2.carol</groupId>
+        <artifactId>carol</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-asm-analysis</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-asm-util</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jws-2.0-spec</artifactId>
+      <version>${ow2-spec.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.1</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>commons-modeler</groupId>
+      <artifactId>commons-modeler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jms_1.1_spec</artifactId>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-event-impl</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-jmx-impl</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <!-- Temporary until the move to src/main/java -->
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+          <include>**/*.xsd</include>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/TestException*.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-maven-plugin-antrmic</artifactId>
+        <executions>
+          <execution>
+             <id>RMIServerRPCImpl</id>
+             <configuration>
+               <iiop>true</iiop>
+               <iiopopts>-always</iiopopts>
+               <classname>
+                 org.ow2.easybeans.rpc.rmi.server.RMIServerRPCImpl
+               </classname>
+               <compilerarg>-poa</compilerarg>
+             </configuration>
+             <goals>
+               <goal>rmic</goal>
+             </goals>
+           </execution>
+          <!-- - - - - - - - - - - - - - - - - - - - - -->
+          <!-- JOTM IIOP (POA enabled) Stubs/Ties      -->
+          <!-- - - - - - - - - - - - - - - - - - - - - -->
+          <execution>
+            <!-- ControlImpl MUST be generated before TransactionFactoryImpl -->
+            <!-- See EZB-245 for details -->
+            <id>ControlImpl</id>
+            <goals>
+              <goal>rmic</goal>
+            </goals>
+            <configuration>
+              <iiop>true</iiop>
+              <iiopopts>-always</iiopopts>
+              <classname>org.objectweb.jotm.ControlImpl</classname>
+              <compilerarg>-poa</compilerarg>
+            </configuration>
+          </execution>
+           <execution>
+            <id>TransactionFactoryImpl</id>
+            <goals>
+              <goal>rmic</goal>
+            </goals>
+            <configuration>
+              <iiop>true</iiop>
+              <iiopopts>-always</iiopopts>
+              <classname>org.objectweb.jotm.TransactionFactoryImpl</classname>
+              <compilerarg>-poa</compilerarg>
+            </configuration>
+          </execution>
+          <execution>
+            <id>SubCoordinator</id>
+            <goals>
+              <goal>rmic</goal>
+            </goals>
+            <configuration>
+              <iiop>true</iiop>
+              <iiopopts>-always</iiopopts>
+              <classname>org.objectweb.jotm.SubCoordinator</classname>
+              <compilerarg>-poa</compilerarg>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

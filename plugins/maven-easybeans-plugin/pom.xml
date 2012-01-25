@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2009-2012 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 6143 2012-01-25 14:15:00Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>easybeans-plugins</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>maven-easybeans-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+  <name>EasyBeans: Plugin :: Launcher Plugin</name>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-module-docbook-simple</artifactId>
+            <version>1.0-alpha-10</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-maven-plugin-deployment-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-audit</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-carol</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-cmi</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-depmonitor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-event</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-hsqldb</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jca-workmanager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jdbcpool</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jmx</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-joram</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jotm</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-mail</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-quartz</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-remotejndiresolver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-smartclient-server</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-management</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-statistic</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+  </dependencies>
+</project>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fileset-config file-format-version="1.2.0" simple-config="false">
+    <local-check-config name="EasyBeans" location=".checkstyle_eclipse_config" type="project" description="Checkstyle for EasyBeans project">
+        <additional-data name="protect-config-file" value="false"/>
+    </local-check-config>
+    <fileset name="Checkstyle for EasyBeans" enabled="true" check-config-name="EasyBeans" local="true">
+        <file-match-pattern match-pattern=".java$" include-pattern="true"/>
+        <file-match-pattern match-pattern="RMIServerRPCImpl_Stub.java" include-pattern="false"/>
+    </fileset>
+</fileset-config>

@@ -1,0 +1,609 @@
+<plugin>
+  <osgi.framework.configuration><![CDATA[org.osgi.framework.system.packages=org.osgi.framework; version=1.6.0, \
+ org.osgi.framework.launch; version=1.0.0, \
+ org.osgi.framework.hooks.service; version=1.0.0, \
+ org.osgi.framework.wiring; version=1.0.0, \
+ org.osgi.service.packageadmin; version=1.2.0, \
+ org.osgi.service.startlevel; version=1.1.0, \
+ org.osgi.service.url; version=1.0.0, \
+ org.osgi.util.tracker; version=1.4.0, \
+ javax.accessibility; \
+ javax.activity; \
+ javax.imageio; \
+ javax.imageio.event; \
+ javax.imageio.metadata; \
+ javax.imageio.plugins.bmp; \
+ javax.imageio.plugins.jpeg; \
+ javax.imageio.spi; \
+ javax.imageio.stream; \
+ javax.management; \
+ javax.management.loading; \
+ javax.management.modelmbean; \
+ javax.management.monitor; \
+ javax.management.openmbean; \
+ javax.management.relation; \
+ javax.management.remote; \
+ javax.management.remote.rmi; \
+ javax.management.timer; \
+ javax.naming; \
+ javax.naming.directory; \
+ javax.naming.event; \
+ javax.naming.ldap; \
+ javax.naming.spi; \
+ javax.net; \
+ javax.net.ssl; \
+ javax.print; \
+ javax.print.attribute; \
+ javax.print.attribute.standard; \
+ javax.print.event; \
+ javax.rmi; \
+ javax.rmi.CORBA; \
+ javax.rmi.ssl; \
+ javax.security.auth; \
+ javax.security.auth.callback; \
+ javax.security.auth.kerberos; \
+ javax.security.auth.login; \
+ javax.security.auth.spi; \
+ javax.security.auth.x500; \
+ javax.security.sasl; \
+ javax.sound.midi; \
+ javax.sound.midi.spi; \
+ javax.sound.sampled; \
+ javax.sound.sampled.spi; \
+ javax.sql; \
+ javax.sql.rowset; \
+ javax.sql.rowset.serial; \
+ javax.sql.rowset.spi; \
+ javax.swing; \
+ javax.swing.border; \
+ javax.swing.colorchooser; \
+ javax.swing.event; \
+ javax.swing.filechooser; \
+ javax.swing.plaf; \
+ javax.swing.plaf.basic; \
+ javax.swing.plaf.metal; \
+ javax.swing.plaf.multi; \
+ javax.swing.plaf.synth; \
+ javax.swing.table; \
+ javax.swing.text; \
+ javax.swing.text.html; \
+ javax.swing.text.html.parser; \
+ javax.swing.text.rtf; \
+ javax.swing.tree; \
+ javax.swing.undo; \
+ javax.xml; \
+ javax.xml.datatype; \
+ javax.xml.namespace; \
+ javax.xml.parsers; \
+ javax.xml.transform; \
+ javax.xml.transform.dom; \
+ javax.xml.transform.sax; \
+ javax.xml.transform.stream; \
+ javax.xml.validation; \
+ javax.xml.xpath; \
+ org.ietf.jgss; \
+ org.omg.CORBA; \
+ org.omg.CORBA_2_3; \
+ org.omg.CORBA_2_3.portable; \
+ org.omg.CORBA.DynAnyPackage; \
+ org.omg.CORBA.ORBPackage; \
+ org.omg.CORBA.portable; \
+ org.omg.CORBA.TypeCodePackage; \
+ org.omg.CosNaming; \
+ org.omg.CosNaming.NamingContextExtPackage; \
+ org.omg.CosNaming.NamingContextPackage; \
+ org.omg.Dynamic; \
+ org.omg.DynamicAny; \
+ org.omg.DynamicAny.DynAnyFactoryPackage; \
+ org.omg.DynamicAny.DynAnyPackage; \
+ org.omg.IOP; \
+ org.omg.IOP.CodecFactoryPackage; \
+ org.omg.IOP.CodecPackage; \
+ org.omg.Messaging; \
+ org.omg.PortableInterceptor; \
+ org.omg.PortableInterceptor.ORBInitInfoPackage; \
+ org.omg.PortableServer; \
+ org.omg.PortableServer.CurrentPackage; \
+ org.omg.PortableServer.POAManagerPackage; \
+ org.omg.PortableServer.POAPackage; \
+ org.omg.PortableServer.portable; \
+ org.omg.PortableServer.ServantLocatorPackage; \
+ org.omg.SendingContext; \
+ org.omg.stub.java.rmi; \
+ org.omg.stub.javax.management.remote.rmi; \
+ org.w3c.dom; \
+ org.w3c.dom.bootstrap; \
+ org.w3c.dom.css; \
+ org.w3c.dom.events; \
+ org.w3c.dom.html; \
+ org.w3c.dom.ls; \
+ org.w3c.dom.ranges; \
+ org.w3c.dom.stylesheets; \
+ org.w3c.dom.traversal; \
+ org.w3c.dom.views; \
+ org.xml.sax; \
+ org.xml.sax.ext; \
+ org.xml.sax.helpers; \
+ sun.rmi.server; \
+ sun.rmi.transport; \
+ sun.rmi.registry; \
+ version=1.5.0
+ 
+org.osgi.framework.bootdelegation=sun.*,com.sun.*
+org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.api
+ ]]></osgi.framework.configuration>
+
+  <test-framework>
+    <bundles>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-testng4osgi</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-atinject-1.0-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>easybeans-plugins-osgi-tester-api</artifactId>
+        <version>${project.version}</version>
+      </bundle>
+
+    </bundles>
+
+  </test-framework>
+
+  <framework>
+    <interfaces-ready>
+      <interfaces>
+        <interface>org.ow2.easybeans.osgi.agent.EZBAgentReady
+        </interface>
+      </interfaces>
+      <wait>30</wait>
+    </interfaces-ready>
+
+    <bundles>
+
+      <!-- OSGi services -->
+
+      <bundle>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>4.2.0</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr</artifactId>
+        <version>${felix.scr.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.dependencymanager</artifactId>
+        <version>${felix.dm.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>1.2.8</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.log</artifactId>
+        <version>1.0.1</version>
+      </bundle>
+
+      <!-- Java EE API -->
+      <bundle>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-jpa-2.0-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-javaee-5-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </bundle>
+
+      <!-- Apache dependencies -->
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-bundles-externals-commons-modeler</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-bundles-externals-commons-logging</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-bundles-externals-commons-collections</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+
+
+      <!-- EasyBeans -->
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-api</artifactId>
+        <version>${project.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-modules-core</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+
+      <!-- Rmi interceptors -->
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-modules-rmi-interceptors</artifactId>
+        <version>${project.version}</version>
+      </bundle>
+
+
+      <!-- OW2 dependencies -->
+      <bundle>
+        <groupId>org.ow2.jonas.osgi</groupId>
+        <artifactId>monolog</artifactId>
+        <version>5.1.1</version>
+      </bundle>
+
+
+
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-archive-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-archive-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-metadata-common-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-metadata-common-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-metadata-ejbjar-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-metadata-ejbjar-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-metadata-ws-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-metadata-ws-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-event-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-event-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-jmx-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-jmx-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-xmlconfig</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-xml</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-log</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-i18n</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-marshalling</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-file</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-execution</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-stream</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-url</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-scan-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-scan-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-deploy-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-ee-deploy-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-pool-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-pool-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-substitution</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-schemas</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-repository-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-repository-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-reader</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-deploy-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-deploy-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-deployer</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-fetcher-api</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-fetcher-impl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-fetcher-impl-url</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-fetcher-impl-maven2</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>util-plan-monitor</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-bundles-externals-javassist</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-bundles-externals-slf4j-jcl</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-bundles-externals-jaxb2</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+
+      <bundle>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-audit-report</artifactId>
+        <version>${ow2-bundle.version}</version>
+      </bundle>
+
+
+
+
+      <!-- EasyBeans components -->
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-carol</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-jotm</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-joram</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-quartz</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-work-manager</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-smartclient</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-statistic</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-jmx</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-jdbcpool</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-hsqldb</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-component-event</artifactId>
+        <version>${project.version}</version>
+        <start>false</start>
+      </bundle>
+
+      <!-- EasyBeans Agent -->
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+        <artifactId>easybeans-agent</artifactId>
+        <version>${project.version}</version>
+      </bundle>
+
+
+
+      <!-- For a GUI console -->
+      <!-- 
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.main</artifactId>
+        <version>1.0.1</version>
+      </bundle>
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.shell.tui</artifactId>
+        <version>1.0.0</version>
+      </bundle>
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.shell</artifactId>
+        <version>1.0.0</version>
+      </bundle>
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.shell.gui</artifactId>
+        <version>0.9.0-incubator-2007.12.14</version>
+      </bundle>
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.shell.gui.plugin</artifactId>
+        <version>0.9.0-incubator-2007.12.14</version>
+      </bundle>
+      <bundle>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.osgi.service.obr</artifactId>
+        <version>1.0.2</version>
+      </bundle>
+       -->
+
+
+    </bundles>
+  </framework>
+</plugin>

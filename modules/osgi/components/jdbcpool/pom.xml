@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.osgi</groupId>
+    <artifactId>easybeans-components</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans.osgi</groupId>
+  <artifactId>easybeans-component-jdbcpool</artifactId>
+  <packaging>bundle</packaging>
+  <name>EasyBeans/OSGi :: Components :: JDBC Pool</name>
+  <description>OSGi Wrapper for the EasyBeans JDBC Pool component</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>org.ow2.easybeans.component.jdbcpool</Bundle-SymbolicName>
+            <Import-Package><![CDATA[
+            javax.transaction;version=1.1.0,
+            org.apache.commons.logging.*,
+            javax.transaction.xa;version=1.1.0,
+            *]]></Import-Package>
+            <!-- Allow all classes to be dynamically imported (JDBC Drivers) -->
+            <DynamicImport-Package>*</DynamicImport-Package>
+            <Private-Package />
+            <Export-Package>org.ow2.easybeans.component.jdbcpool</Export-Package>
+            <Embed-StripGroup>true</Embed-StripGroup>
+            <Embed-Directory>dependencies</Embed-Directory>
+            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Service-Component><![CDATA[OSGI-INF/jdbcpool-component-factory.xml]]></Service-Component>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.easybeans.osgi</groupId>
+      <artifactId>easybeans-modules-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jdbcpool</artifactId>
+    </dependency>
+  </dependencies>
+</project>

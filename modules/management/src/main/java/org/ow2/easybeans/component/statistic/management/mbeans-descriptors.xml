@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mbeans-descriptors PUBLIC
+ "-//Apache Software Foundation//DTD Model MBeans Configuration File"
+ "http://jakarta.apache.org/commons/dtds/mbeans-descriptors.dtd">
+
+<!--
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - EasyBeans
+ - Copyright (C) 2008 Bull S.A.S.
+ - Contact: easybeans@ow2.org
+ -
+ - This library is free software; you can redistribute it and/or
+ - modify it under the terms of the GNU Lesser General Public
+ - License as published by the Free Software Foundation; either
+ - version 2.1 of the License, or any later version.
+ -
+ - This library is distributed in the hope that it will be useful,
+ - but WITHOUT ANY WARRANTY; without even the implied warranty of
+ - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ - Lesser General Public License for more details.
+ -
+ - You should have received a copy of the GNU Lesser General Public
+ - License along with this library; if not, write to the Free Software
+ - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ - USA
+ -
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - $Id: mbeans-descriptors.xml 5369 2010-02-24 14:58:19Z benoitf $
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -->
+
+<mbeans-descriptors>
+  <!-- =========================================================== -->
+  <!--                  StatisticComponent MBean Description                -->
+  <!-- =========================================================== -->
+  <mbean name="ezb:StatisticComponent"
+         className="org.ow2.easybeans.component.statistic.management.StatisticComponentMBean"
+         type="org.ow2.easybeans.component.statistic.StatisticComponent"
+         description="EJB3 Statistic Component"
+         domain="EasyBeans">
+
+    <operation name="getStatisticFactoryIds" description="Get statistic factories ids." impact="INFO" returnType="java.util.List">
+      
+    </operation>
+    
+    <operation name="getStatisticFactoryMode" description="Get the statistic factory mode." impact="INFO" returnType="java.lang.String">
+      <parameter name="statisticFactoryId" description="The statistic factory id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="setStatisticFactoryMode" description="Set the statistic factory mode." impact="ACTION" returnType="void">
+      <parameter name="statisticFactoryId" description="The statistic factory id." type="java.lang.String"/>
+      <parameter name="statisticFactoryMode" description="The statistic factory mode (INHERIT, MANUAL)." type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticFactoryState" description="Get the statistic factory state." impact="INFO" returnType="boolean">
+      <parameter name="statisticFactoryId" description="The statistic factory id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="setStatisticFactoryState" description="Set the statistic factory state." impact="ACTION" returnType="void">
+      <parameter name="statisticFactoryId" description="The statistic factory id." type="java.lang.String"/>
+      <parameter name="statisticFactoryState" description="The statistic factory state." type="boolean"/>
+    </operation>
+    
+    <operation name="getStatisticProviderIds" description="Get statistic providers ids." impact="INFO" returnType="java.util.List">
+      
+    </operation>
+    
+    <operation name="getStatisticProviderMode" description="Get the statistic provider mode." impact="INFO" returnType="java.lang.String">
+      <parameter name="statisticProviderId" description="The statistic provider id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="setStatisticProviderMode" description="Set the statistic provider mode." impact="ACTION" returnType="void">
+      <parameter name="statisticProviderId" description="The statistic provider id." type="java.lang.String"/>
+      <parameter name="statisticProviderMode" description="The statistic provider mode (INHERIT, MANUAL)." type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticProviderState" description="Get the statistic provider state." impact="INFO" returnType="boolean">
+      <parameter name="statisticProviderId" description="The statistic provider id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="setStatisticProviderState" description="Set the statistic provider state." impact="ACTION" returnType="void">
+      <parameter name="statisticProviderId" description="The statistic provider id." type="java.lang.String"/>
+      <parameter name="statisticProviderState" description="The statistic provider state." type="boolean"/>
+    </operation>
+    
+    <operation name="getStatisticIds" description="Get statistics ids." impact="INFO" returnType="java.util.List">
+      
+    </operation>
+    
+    <operation name="getStatisticMode" description="Get the statistic mode." impact="INFO" returnType="java.lang.String">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="setStatisticMode" description="Set the statistic mode." impact="ACTION" returnType="void">
+      <parameter name="statisticId" description="The statistic id." type="java.lang.String"/>
+      <parameter name="statisticMode" description="The statistic mode (AUTO, MANUAL)." type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticState" description="Get the statistic state." impact="INFO" returnType="boolean">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="setStatisticState" description="Set the statistic state." impact="ACTION" returnType="void">
+      <parameter name="statisticId" description="The statistic id." type="java.lang.String"/>
+      <parameter name="statisticState" description="The statistic state." type="boolean"/>
+    </operation>
+    
+    <operation name="resetStatistic" description="Reset the statistic." impact="ACTION" returnType="void">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticName" description="Get the statistic name." impact="INFO" returnType="java.lang.String">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticDescription" description="Get the statistic description." impact="INFO" returnType="java.lang.String">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticValue" description="Get the statistic value." impact="INFO" returnType="java.lang.String">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticStartTime" description="Get the statistic start time." impact="INFO" returnType="java.lang.Long">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+    
+    <operation name="getStatisticLastSampleTime" description="Get the statistic last sample time." impact="INFO" returnType="java.lang.Long">
+      <parameter name="statisticId" description="The statistic id" type="java.lang.String"/>
+    </operation>
+
+  </mbean>
+</mbeans-descriptors>

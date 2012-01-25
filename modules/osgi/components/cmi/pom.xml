@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.osgi</groupId>
+    <artifactId>easybeans-components</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans.osgi</groupId>
+  <artifactId>easybeans-component-cmi</artifactId>
+  <packaging>pom</packaging>
+  <name>EasyBeans/OSGi :: Components :: CMI</name>
+  <description>OSGi Wrapper for the EasyBeans CMI component</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.easybeans.osgi</groupId>
+      <artifactId>easybeans-modules-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-cmi</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>

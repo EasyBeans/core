@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2009 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: examples.xml 5369 2010-02-24 14:58:19Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+<chapter id="examples">
+  <title>Examples</title>
+    <section id="lifecycle_unbound">
+      <title>Managing unbound lifecycle</title>
+      <section>
+        <title>Behavior</title>
+        <para>
+          Concerning project that are not bound to the Maven build lifecycle, you can use the EasyBeans plugin to run EasyBeans by using the <emphasis>run</emphasis> goal.
+        </para>
+        <para>
+          In this case, there are 2 behaviors :
+        </para>
+        <para>
+          <itemizedlist>
+            <listitem>
+              <para>
+                Default configuration
+              </para>
+              <para>
+                No POM configuration is needed to run the mojo. EasyBeans is lauched with plugin default options.
+              </para>
+              <para>
+                In this case, automatic deployment is enabled, as said by the plugin log :
+                <screen>[INFO] Automatic deployment is enabled with a scan delay of 1000 ms.</screen>
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                User configuration
+              </para>
+              <para>
+                POM can be configured explicitly to use the EasyBeans plugin with options. For example, the following code inactivate automatic re-deployment :
+                <programlisting><![CDATA[<plugin>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>maven-easybeans-plugin</artifactId>
+    <version>1.0</version>
+    <configuration>
+        <autoDeployment>false</autoDeployment>
+    </configuration>
+</plugin>]]></programlisting>
+              </para>
+              <para>
+                In this case, re-deployement is manual. Just type <emphasis>Enter</emphasis> to deploy a modified deployed file again.
+                <screen>[INFO] Automatic deployment is disabled. Press [ENTER] for redeploy archives.</screen>
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </section>
+      <section>
+        <title>Default deployment behavior</title>
+        <para>
+          By default, when using EasyBeans plugin out of the Maven build lifecycle, the following files are deployed:
+          <itemizedlist>
+            <listitem>
+              <para>
+                Project deployable archive included in <filename>${basedir}/target</filename> folder.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                All deployables archives included in the <filename>target</filename> folders of all project childs.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Local repository installed archetypes related to current POM artifact.
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+        <para>
+          If you want to deploy more archives, you must add them in the POM configuration as explained in the
+          <ulink url="#additional_files">"Using additional resources"</ulink> section.
+        </para>
+      </section>
+    </section>
+    <section id="lyfecycle_bound">
+      <title>Managing bound lifecycle</title>
+      <section>
+        <title>Behavior</title>
+        <para>
+          Bound to the Maven build lifecycle, EasyBeans plugin runs at the <emphasis>pre-integration-test</emphasis> phase by
+          calling <emphasis>integration-test</emphasis> phase or a following build phase like <emphasis>install</emphasis> or <emphasis>deploy</emphasis> by using maven command.
+          So, EasyBeans is started with all configured options.
+        </para>
+        <para>
+          Then <ulink url="#files_to_deploy_bound">several files are deployed</ulink> into this container.
+        </para>
+        <para>
+          At this time, Maven execute the <emphasis>integration-test</emphasis> phase and runs tests by using the Surefire plugin. Tests must be
+          added in the POM configuration by following instructions detailed in the <ulink url="#run_test">"Running a test"</ulink> section.
+          Finally, when tests are passed, the <emphasis>post-integration-test</emphasis> phase is called. EasyBeans stops and all resources are released.
+        </para>
+      </section>
+      <section>
+        <title>Pom configuration</title>
+        <para>
+          To use the EasyBeans plugin with your Maven project, and bound it to the integration-test lifecycle phase,
+          just add the following code to the <filename>pom.xml</filename> file:
+        </para>
+        <para>
+          <programlisting><![CDATA[<plugin>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>maven-easybeans-plugin</artifactId>
+    <version>1.0</version>
+    <executions>
+        <execution>
+            <id>start-maven-plugin</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>stop-maven-plugin</id>
+            <phase>post-integration-test</phase>
+            <goals>
+                <goal>stop</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>]]></programlisting>
+        </para>
+      </section>
+      <section id="files_to_deploy_bound">
+        <title>Default deployement behavior</title>
+        <para>
+          By default, when using EasyBeans plugin along the Maven build lifecycle, the following files are deployed:
+          <itemizedlist>
+            <listitem>
+              <para>
+                All deployables archives included in <filename>${basedir}/target</filename> folder.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Local repository installed archetypes related to current POM artifact.
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+        <para>
+          If you want to deploy more archives, you must add them to the POM configuration as explained in the
+          <ulink url="#additional_files">"Using additional resources"</ulink> section.
+        </para>
+      </section>
+    </section>
+
+    <section id="additional_files">
+      <title>Using additional resources</title>
+      <para>
+        You can include some additional files to deploy with your project to test it.
+      </para>
+      <section>
+        <title>Methods to add other files to deploy</title>
+        <para>
+          There are four ways to declare files that need to be deployed:
+        </para>
+
+          <itemizedlist>
+            <listitem>
+              <para>
+                Give an URL.
+                <programlisting><![CDATA[<urls>
+    <url>http://www.easybeans.net/maven-plugin/files/ejb-project.jar</url>
+</urls>]]></programlisting>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Give a file path.
+                <programlisting><![CDATA[<files>
+    <file>./resources/additional-files/ejb-project1.jar</file>
+    <file>./resources/additional-files/ejb-project2.jar</file>
+</files>]]></programlisting>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Give an absolute directory path. The directory will be scanned to deploy all files included in.
+                <programlisting><![CDATA[<directories>
+    <directory>./resources/additional-files/</directory>
+</directories>]]></programlisting>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Give a maven project artifact. In this case,
+                all artifact information tags are required.
+                <programlisting><![CDATA[<artifacts>
+    <artifact>
+        <groupId>org.ow2.easybeans.maven-easybeans-plugin-examples</groupId>
+        <artifactId>EJB-project</artifactId>
+        <version>1.0</version>
+        <type>ear</type>
+    </artifact>
+</artifacts>]]></programlisting>
+              </para>
+            </listitem>
+          </itemizedlist>
+      </section>
+      <section>
+        <title>Integration</title>
+        <para>
+          Additional files configurations needs to be declared in the EasyBeans plugin POM declaration.
+        </para>
+        <para>
+          Here is a complete declaration to deploy two files from the <filename>.resources/additional-files/</filename>
+          folder and a maven project artifact located in the local maven repository.
+        </para>
+        <para>
+          <programlisting><![CDATA[<plugin>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>maven-easybeans-plugin</artifactId>
+    <version>1.0</version>
+
+    <configuration>
+        <deployables>
+            <files>
+                <file>./resources/additional-files/ejb-project1.jar</file>
+                <file>./resources/additional-files/ejb-project2.jar</file>
+            </files>
+            <artifacts>
+                <artifact>
+                    <groupId>org.ow2.easybeans.maven-easybeans-plugin-examples</groupId>
+                    <artifactId>EJB-project</artifactId>
+                    <version>1.0</version>
+                    <type>ear</type>
+                </artifact>
+            </artifacts>
+        </deployables>
+    </configuration>
+
+    <executions>
+        <execution>
+            <id>start-easybeans</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>stop-easybeans</id>
+            <phase>post-integration-test</phase>
+            <goals>
+                <goal>stop</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>]]></programlisting>
+        </para>
+      </section>
+    </section>
+    <section id="complex_config">
+      <title>Making complex configuration</title>
+      <section id="config_deployables">
+        <title>deployables</title>
+        <para>
+          The list of deployable files to add can be configured as explained in the
+          <ulink url="#additional_files">"Using additional resources"</ulink> section.
+        </para>
+      </section>
+      <section id="config_scanInterval">
+        <title>scanInterval</title>
+        <para>
+          To change the time interval between two re-deployement in millisecond, just add the following code in the
+          <emphasis>configuration</emphasis> tag:
+          <programlisting><![CDATA[<scanInterval>2000</scanInterval>]]></programlisting>
+          This Option is used only if automatic re-deployment is active.
+        </para>
+      </section>
+      <section id="config_autoDeployment">
+        <title>autoDeployment</title>
+        <para>
+          Defines if re-deployment is automatic or manual.
+          <programlisting><![CDATA[<autoDeployment>false</autoDeployment>]]></programlisting>
+          This Option can be set to true or false, but is set to true by default.
+        </para>
+      </section>
+      <section id="config_wait">
+        <title>wait</title>
+        <para>
+         This option must not be manually modified. It is related to the behavior of the plugin: bound or not to the Maven build lifecycle.
+         You can set this option at your own risk by using a <emphasis>wait</emphasis> tag set to <emphasis>true</emphasis> or <emphasis>false</emphasis>.
+        </para>
+      </section>
+      <section id="config_serverConfig">
+        <title>serverConfig</title>
+        <para>
+         This option is used to set the EasyBeans configuration file path. By default, <filename>easybeans-default.xml</filename> located in
+         the EasyBeans dependency is used.
+        </para>
+        <para>
+         Add the following code in the <emphasis>configuration</emphasis> tag if you want to set the <filename>${basedir}/myEZBConfig.xml</filename>
+         as the used EasyBeans configuration file.
+         <programlisting><![CDATA[<serverConfig>${basedir}/myEZBConfig.xml</serverConfig>]]></programlisting>
+        </para>
+      </section>
+      <!-- ADDED 25-02-09 -->
+      <section id="config_checkLocalRepository">
+        <title>checkLocalRepository</title>
+        <para>
+         This option is used to set if EasyBeans plugin has to deploy project artifact installed in the local Maven repository when this resource
+         is not found in the <filename class="dorectory">${basedir}/target</filename> folder.
+        </para>
+        <para>
+         Add the following code in the <emphasis>configuration</emphasis> tag if you want to set this option <emphasis>true</emphasis> or <emphasis>false</emphasis>:
+         <programlisting><![CDATA[<checkLocalRepository>true</checkLocalRepository>]]></programlisting>
+        </para>
+      </section>
+      <!-- /ADDED 25-02-09 -->
+      <section>
+        <title>Integration</title>
+        <para>
+         All these options must be added in the <emphasis>configuration</emphasis> tag of the plugin POM declaration.
+         Next is a code to set all of these options to specific values in the case of an usage not bound to the Maven build lifecycle.
+        </para>
+        <para>
+          <programlisting><![CDATA[<plugin>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>maven-easybeans-plugin</artifactId>
+    <version>1.0</version>
+    <configuration>
+        <deployables>
+            <urls>
+                <url>http://www.easybeans.net/maven-plugin/ejb-project1.jar</url>
+                <url>http://www.easybeans.net/maven-plugin/ejb-project2.jar</url>
+            </urls>
+        </deployables>
+        <scanInterval>2000</scanInterval>
+        <autoDeployment>true</autoDeployment>
+        <wait>true</wait>
+        <serverConfig>${basedir}/myEZBConfig.xml</serverConfig>
+    </configuration>
+</plugin>]]></programlisting>
+        </para>
+      </section>
+
+    </section>
+    <section id="run_test">
+      <title>Running a test</title>
+      <para>
+        There is two methods to run tests as there are two ways to use EasyBeans plugin.
+      </para>
+      <section>
+        <title>Bound lifecycle test - Automatic test</title>
+        <para>
+          When you use the plugin along the Maven build lifecycle, tests can be run automatically
+          by using the Maven Surefire plugin. Instructions on how to use this plugin are available
+          <ulink url="http://maven.apache.org/plugins/maven-surefire-plugin/">here</ulink>.
+        </para>
+        <para>
+          So, JUnit tests can be run automatically by adding the following code to the POM configuration:
+          <programlisting><![CDATA[<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <skipTests>true</skipTests>
+    </configuration>
+    <executions>
+        <execution>
+            <phase>integration-test</phase>
+            <goals>
+                <goal>test</goal>
+            </goals>
+            <configuration>
+                <skipTests>false</skipTests>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>]]></programlisting>
+        </para>
+        <para>
+          As we can see, tests are launched during the integration-test phase, just after tested resources are deployed.
+        </para>
+      </section>
+      <section>
+        <title>Unbound lifecycle test - Manual test</title>
+        <para>
+          Once EasyBeans is started using the Maven command (mvn easybeans:run), tests can be launched manually on deployed EJBs.
+          For example, a client can be launched to test all remote methods.
+        </para>
+        <para>
+          This client can be an another Maven project launched as a normal Jar project.
+        </para>
+      </section>
+    </section>
+    <section id="stop_config">
+      <title>Stopping goal configuration</title>
+      <section id="config_stopPort">
+        <title>stopPort</title>
+        <para>
+         This option must be set to the port to contact EasyBeans. This port is 1099 by default.
+         <programlisting><![CDATA[<stopPort>2055</stopPort>]]></programlisting>
+        </para>
+      </section>
+      <section id="config_hostname">
+        <title>hostname</title>
+        <para>
+         This option must be set to the hostname where EasyBeans is launched. This hostname is <filename>localhost</filename> by default.
+         <programlisting><![CDATA[<hostname>192.168.0.126</hostname>]]></programlisting>
+        </para>
+      </section>
+      <section>
+        <title>Integration</title>
+        <para>
+         All these options must be added in the <emphasis>configuration</emphasis> tag of the plugin POM declaration.
+         Next is a code to set all of these options to specific values in the case of an usage bound to the Maven build lifecycle.
+        </para>
+        <para>
+          <programlisting><![CDATA[<plugin>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>maven-easybeans-plugin</artifactId>
+    <version>1.0</version>
+    <configuration>
+        <serverConfig>${basedir}/myEZBConfig.xml</serverConfig>
+    </configuration>
+    <executions>
+        <execution>
+            <id>start-easybeans</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>stop-easybeans</id>
+            <phase>post-integration-test</phase>
+            <goals>
+                <goal>stop</goal>
+            </goals>
+            <configuration>
+                <stopPort>2055</stopPort>
+                <hostname>192.168.0.126</hostname>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>]]></programlisting>
+        </para>
+        <note>
+          <para>
+            <emphasis>Configuration</emphasis> tag can be added in the
+            <emphasis>plugin</emphasis> tag and/or in the goal <emphasis>execution</emphasis> tag.
+          </para>
+        </note>
+      </section>
+    </section>
+    <section id="calculator">
+      <title>Writing and testing a calculator bean</title>
+      <para>
+        This tutorial explains how to create a simple EJB project and how to test it automatically with the EasyBeans plugin.
+      </para>
+      <section>
+        <title>Requirement</title>
+        <para>
+          The only required configuration is to have Maven 2 installed and an internet connection.
+        </para>
+      </section>
+      <section>
+        <title>Creating a new Maven project</title>
+        <para>
+          On to creating an Ejb project! In order to create the Calculator Maven project, execute the following from the command line:
+        </para>
+        <para>
+          <screen>mvn archetype:create \
+  -DarchetypeGroupId=org.apache.maven.archetypes \
+  -DgroupId=org.ow2.easybeans.maveneasybeansplugin.myapps \
+  -DartifactId=Calculator \
+  -Dversion=1.0-SNAPSHOT</screen>
+        </para>
+        <para>
+          Once you have executed this command, you will notice a few things have happened. First, you will notice that a directory
+          named <filename class="directory">Calculator</filename> has been created for the new project, and this directory contains
+          a file named <filename>pom.xml</filename> that should look like this:
+        </para>
+        <programlisting><![CDATA[<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.ow2.easybeans.maveneasybeansplugin.myapps</groupId>
+    <artifactId>Calculator</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>Calculator</name>
+    <url>http://maven.apache.org</url>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>]]></programlisting>
+
+        <para>
+          To create an EJB project, packaging must be set to <emphasis>ejb</emphasis> and a dependency must be added. Moreover, we change JUnit version from 3.8.1 to 4.2 to test our EJBs.
+        </para>
+          <programlisting><![CDATA[<packaging>ejb</packaging>
+ ...
+<dependencies>
+  <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.2</version>
+      <scope>test</scope>
+  </dependency>
+  <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-ejb-3.0-spec</artifactId>
+        <scope>compile</scope>
+  </dependency>
+</dependencies>
+ ...
+]]></programlisting>
+        <para>
+          Now, we must add build configurations to build a J2EE project.
+        </para>
+        <programlisting><![CDATA[<build>
+    <plugins>
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>2.0.2</version>
+            <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-ejb-plugin</artifactId>
+            <configuration>
+                <ejbVersion>3.0</ejbVersion>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>]]></programlisting>
+        <para>
+          At this step, the EJB project can be build.
+        </para>
+      </section>
+      <section>
+        <title>Writing code for the bean</title>
+        <para>
+            The HelloWorld bean is divided into two parts: the business
+            interface, and the class implementing this interface.
+        </para>
+        <section>
+          <title>Writing the Interface</title>
+          <para>
+            For the example, the interface declares only one method:
+            <methodname>add(int a, int b)</methodname>
+          </para>
+          <para>
+            Copy the following code into a file named <filename>CalculatorInterface.java</filename>
+            located in the <filename>org.ow2.easybeans.maveneasybeansplugin.myapps</filename> package.
+          </para>
+          <programlisting>package org.ow2.easybeans.maveneasybeansplugin.myapps;
+
+/**
+ * Interface of the Calculator example.
+ * @author Julien Blais
+ */
+public interface CalculatorInterface {
+
+    /**
+     * Returns a + b.
+     */
+    int add(int a, int b);
+}</programlisting>
+        <note>
+          <para>
+            Even if this interface is used as a remote interface, it does
+            not need to extend <interfacename>java.rmi.Remote</interfacename>
+            interface.
+          </para>
+        </note>
+      </section>
+      <section>
+        <title>Writing the Business Code</title>
+
+        <para>
+          The following code implements the existing interface.
+        </para>
+        <para>
+          This bean will be a stateless session bean, thus the class will be
+          annotated with <structname>@Stateless</structname> annotation.
+        </para>
+
+        <para>
+          In addition, the interface must be a remote interface to be
+          available for remote clients. This is done by using the
+          <structname>@Remote</structname> annotation.
+        </para>
+
+        <programlisting>package org.ow2.easybeans.maveneasybeansplugin.myapps;
+
+import javax.ejb.Remote;
+import javax.ejb.Stateless;
+
+/**
+ * Business code for the Calculator interface.
+ * @author Julien Blais
+ */
+@Stateless
+@Remote(CalculatorInterface.class)
+public class CalculatorBean implements CalculatorInterface {
+    /**
+     * Add method implementation
+     */
+    public int add(int a, int b) {
+        return a + b;
+    }
+}</programlisting>
+      </section>
+      <section>
+        <title>Writing the test class</title>
+        <para>
+          Here is an example of a test class to test the Calculator.
+          Note how the JNDI name of the bean is set by EasyBeans by default when deployed.
+        </para>
+        <programlisting><![CDATA[package org.ow2.easybeans.maveneasybeansplugin.myapps;
+
+import java.util.Hashtable;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+
+/**
+ *
+ * @author Julien
+ */
+public class CalculatorTest {
+    /**
+     * JNDI name of the bean.
+     */
+    private static final String JNDI_NAME =
+            "org.ow2.easybeans.maveneasybeansplugin.myapps.CalculatorBean"
+            + "_" + CalculatorInterface.class.getName() + "@Remote";
+
+    /**
+     * EJB to test.
+     */
+    private static CalculatorInterface calc = getEJB();
+
+    /**
+     * Rigourous Test :-) for Calculator.
+     */
+    @Test
+    public void testDirectory() {
+        try {
+            System.out.println("[Start testing Calculator Ejb's]");
+
+            int a = 13;
+            int b = -36;
+            int result = calc.add(a, b);
+            assertTrue(result == (a + b));
+
+            System.out.println("[End testing Calculator Ejb's]");
+
+        } catch (Exception ex) {
+                ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Get the Calculator EJB interface.
+     * @return Interface of EJB
+     */
+    private static CalculatorInterface getEJB() {
+        CalculatorInterface calculator = null;
+
+        try {
+            System.setProperty("java.rmi.server.useCodebaseOnly", "true");
+            Context initialContext = getInitialContext();
+            calculator = (CalculatorInterface) initialContext.lookup(JNDI_NAME);
+
+        } catch (NamingException ex) {
+            ex.printStackTrace();
+        }
+        return calculator;
+    }
+
+    /**
+     * Get Initial Context.
+     * @return smartFactory initialised context
+     * @throws NamingException naming exception
+     */
+    private static Context getInitialContext() throws NamingException {
+
+        Hashtable<String, Object> env = new Hashtable<String, Object>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "org.ow2.easybeans.component.smartclient.spi.SmartContextFactory");
+        env.put(Context.PROVIDER_URL, "smart://localhost:2503");
+        return new InitialContext(env);
+    }
+}]]></programlisting>
+        <para>
+          As seen, we used <interfacename>SmartContextFactory</interfacename> to contact the EJB deployed by EasyBeans.
+          So, we need to depend of this component to run the tests. Just add the following dependency to the POM:
+        </para>
+        <programlisting><![CDATA[<dependency>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>easybeans-component-smartclient</artifactId>
+</dependency>]]></programlisting>
+      </section>
+      <section>
+        <title>EasyBeans plugin and test plugin integration</title>
+        <para>
+          We just need to add the following code to bound the project into the Maven build lifecycle to deploy the EJB and test it:
+        </para>
+        <programlisting><![CDATA[<plugin>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>maven-easybeans-plugin</artifactId>
+    <version>1.0</version>
+    <executions>
+        <execution>
+            <id>start-maven-plugin</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>stop-maven-plugin</id>
+            <phase>post-integration-test</phase>
+            <goals>
+                <goal>stop</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <skipTests>true</skipTests>
+    </configuration>
+    <executions>
+        <execution>
+            <phase>integration-test</phase>
+            <goals>
+                <goal>test</goal>
+            </goals>
+            <configuration>
+                <skipTests>false</skipTests>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>]]></programlisting>
+        <para>
+          To test the application, you just need to run the following maven command:
+        </para>
+        <screen>mvn integration-test</screen>
+        <para>
+          EasyBeans starts. Then the Caclulator EJB is deployed and finally, tests are launched and EasyBeans stops.
+        </para>
+      </section>
+    </section>
+  </section>
+</chapter>

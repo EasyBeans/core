@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - EasyBeans
+ - Copyright (C) 2006-2008 Bull S.A.S.
+ - Contact: easybeans@ow2.org
+ -
+ - This library is free software; you can redistribute it and/or
+ - modify it under the terms of the GNU Lesser General Public
+ - License as published by the Free Software Foundation; either
+ - version 2.1 of the License, or any later version.
+ -
+ - This library is distributed in the hope that it will be useful,
+ - but WITHOUT ANY WARRANTY; without even the implied warranty of
+ - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ - Lesser General Public License for more details.
+ -
+ - You should have received a copy of the GNU Lesser General Public
+ - License along with this library; if not, write to the Free Software
+ - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ - USA
+ -
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - $Id: easybeans-mapping.xml 5369 2010-02-24 14:58:19Z benoitf $
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -->
+
+ <xmlconfig-mapping xmlns="http://easybeans.ow2.org/xml/ns/xmlconfig"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://easybeans.ow2.org/xml/ns/xmlconfig
+                                        http://easybeans.ow2.org/xml/ns/xmlconfig/xmlconfig-mapping_1_0.xsd">
+
+    <class name="org.ow2.easybeans.server.ServerConfig" alias="config">
+        <attribute name="shouldWait" alias="wait" />
+        <attribute name="useMBeans" alias="mbeans" />
+        <attribute name="useNaming" alias="naming" />
+        <attribute name="initJACC" alias="jacc" />
+        <attribute name="directoryScanningEnabled" alias="scanning" />
+        <attribute name="startJMXConnector" alias="connector" />
+        <attribute name="registerDeployerMBean" alias="deployer" />
+        <attribute name="registerJ2EEServerMBean" alias="j2eeserver" />
+        <attribute name="description" />
+    </class>
+
+    <class name="org.ow2.easybeans.component.Components"
+        alias="components" />
+
+    <class name="org.ow2.easybeans.component.util.Property"
+        alias="property" />
+
+    <package name="org.ow2.easybeans.component.carol">
+        <class name="CarolComponent" alias="rmi" />
+        <class name="Protocol" alias="protocol">
+          <attribute name="portNumber" alias="port" />
+        </class>
+    </package>
+
+    <class name="org.ow2.easybeans.component.cmi.CmiComponent" alias="cmi">
+        <attribute name="serverConfig" alias="config" />
+        <attribute name="eventComponent" alias="event" />
+    </class>
+
+    <class
+        name="org.ow2.easybeans.component.smartclient.server.SmartClientEndPointComponent"
+        alias="smart-server">
+        <attribute name="portNumber" alias="port" />
+        <attribute name="registryComponent" alias="rmi" />
+    </class>
+
+    <class name="org.ow2.easybeans.component.jotm.JOTMComponent"
+        alias="tm" />
+
+    <class name="org.ow2.easybeans.component.joram.JoramComponent" alias="jms">
+       <attribute name="topic" isList="true" getter="getTopics" setter="setTopics" element="true"/>
+       <attribute name="queue" isList="true" getter="getQueues" setter="setQueues" element="true"/>
+       <attribute name="transactionComponent" alias="tm" />
+    </class>
+
+    <class
+        name="org.ow2.easybeans.component.jdbcpool.JDBCPoolComponent"
+        alias="jdbcpool">
+        <attribute name="transactionComponent" alias="tm" />
+    </class>
+      
+    <class
+        name="org.ow2.easybeans.component.remotejndiresolver.RemoteJNDIResolverComponent"
+        alias="jndi-resolver">
+    </class>
+
+    <package name="org.ow2.easybeans.component.hsqldb">
+        <class name="HSQLDBComponent" alias="hsqldb">
+            <attribute name="databaseName" alias="dbName" />
+            <attribute name="portNumber" alias="port" />
+        </class>
+        <class name="User" alias="user">
+            <attribute name="userName" alias="name" />
+        </class>
+    </package>
+
+    <package name="org.ow2.easybeans.component.quartz">
+        <class name="QuartzComponent" alias="timer" />
+    </package>
+
+    <package name="org.ow2.easybeans.component.mail">
+      <class name="MailComponent" alias="mail" />
+      <class name="Session" alias="session">
+        <attribute name="JNDIName" alias="jndiName" />
+      </class>
+      <class name="MimePart" alias="mimepart">
+        <attribute name="subject" element="true" />
+        <attribute name="JNDIName" alias="jndiName" />
+      </class>
+      <class name="MailAddress" alias="email" element-attribute="name" />
+      <class name="Auth" alias="auth">
+        <attribute name="username" alias="name" />
+      </class>
+    </package>
+
+    <class name="org.ow2.easybeans.component.event.EventComponent" alias="event">
+      <attribute name="eventService" alias="event-service" optional="true" />
+    </class>
+    
+    <class name="org.ow2.easybeans.component.event.EventComponent" alias="event">
+      <attribute name="eventService" alias="event-service" optional="true" />
+    </class>
+
+    <class name="org.ow2.easybeans.component.jmx.JmxComponent" alias="jmx">
+      <attribute name="commonsModelerExtService" alias="modeler-service" optional="true" />
+    </class>
+
+    <class name="org.ow2.easybeans.component.statistic.StatisticComponent" alias="statistic">
+        <attribute name="eventComponent" alias="event" />
+        <attribute name="jmxComponent" alias="jmx" />
+    </class>
+    
+    <class name="org.ow2.easybeans.component.audit.AuditComponent" alias="audit">
+        <attribute name="eventComponent" alias="event" />
+    </class>
+
+    <package name="org.ow2.easybeans.component.depmonitor">
+        <class name="DepMonitorComponent" alias="depmonitor">
+        </class>
+        <class name="ScanningMonitor" alias="scanning">
+            <attribute name="waitTime" alias="period" />
+        </class>
+        <class name="LoadOnStartupMonitor" alias="loadOnStartup">
+        </class>
+    </package>
+
+    <class name="org.ow2.easybeans.component.jca.workmanager.ResourceWorkManagerComponent" alias="work-manager">
+        <attribute name="minPoolSize" alias="min" />
+        <attribute name="maxPoolSize" alias="max" />
+        <attribute name="transactionComponent" alias="tm" />
+    </class>
+
+</xmlconfig-mapping>

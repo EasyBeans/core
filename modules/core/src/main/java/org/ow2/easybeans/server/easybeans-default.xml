@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - EasyBeans
+ - Copyright (C) 2008-2009 Bull S.A.S.
+ - Contact: easybeans@ow2.org
+ -
+ - This library is free software; you can redistribute it and/or
+ - modify it under the terms of the GNU Lesser General Public
+ - License as published by the Free Software Foundation; either
+ - version 2.1 of the License, or any later version.
+ -
+ - This library is distributed in the hope that it will be useful,
+ - but WITHOUT ANY WARRANTY; without even the implied warranty of
+ - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ - Lesser General Public License for more details.
+ -
+ - You should have received a copy of the GNU Lesser General Public
+ - License along with this library; if not, write to the Free Software
+ - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ - USA
+ -
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - $Id: easybeans-default.xml 5369 2010-02-24 14:58:19Z benoitf $
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -->
+<easybeans xmlns="http://org.ow2.easybeans.server">
+
+    <!-- Infinite loop (daemon managed by Easybeans): wait="true"
+         Enable MBeans: mbeans="true"
+         Disable the naming: naming="false"
+         Use JOnAS JACC provider and not EasyBeans JACC: jacc="false"
+         Disable old way to use file monitoring to detect archives: scanning="false"
+         (it has been replaced by the new depmonitor component)
+         Using JMX Connector: connector="true"
+         Enable Deployer and J2EEServer MBeans: deployer="true" & j2eeserver="true"
+    -->
+    <config
+        wait="true"
+        mbeans="true"
+        naming="true"
+        jacc="true"
+        scanning="false"
+        connector="true"
+        deployer="true"
+        j2eeserver="true" />
+
+    <!-- Define components that will be started at runtime -->
+    <components>
+        <!-- RMI/JRMP will be used as protocol layer -->
+        <rmi>
+           <protocol name="jrmp" port="1099" hostname="localhost" />
+        </rmi>
+
+        <!-- Deploy files inside easybeans-deploy directory -->
+        <depmonitor>
+          <scanning directory="easybeans-deploy" />
+        </depmonitor>
+
+        <!-- Start a transaction service -->
+        <tm />
+        
+        <!-- Work Manager -->
+        <work-manager min="5" max="50" tm="#tm"/>
+
+        <!-- Start a JMS provider -->
+        <jms port="16030" hostname="localhost" workManager="#work-manager" tm="#tm">
+          <topic>dummyTopic</topic>
+        </jms>
+
+        <!-- Creates an embedded HSQLDB database -->
+        <hsqldb port="9001" dbName="jdbc_1">
+            <user name="easybeans" password="easybeans" />
+        </hsqldb>
+
+        <!-- Creates a JDBC pool with jdbc_1 JNDI name -->
+        <jdbcpool jndiName="jdbc_1" username="easybeans"
+            password="easybeans"
+            url="jdbc:hsqldb:hsql://localhost:9001/jdbc_1"
+            driver="org.hsqldb.jdbcDriver"
+            tm="#tm" />
+
+        <!-- Start smartclient server with a link to the rmi component-->
+        <smart-server port="2503" rmi="#rmi" />
+
+        <!-- JNDI Resolver -->
+        <jndi-resolver />
+
+		<!-- JMX component -->
+        <jmx />
+
+        <!-- Statistic component -->
+        <statistic event="#event" jmx="#jmx" />
+        
+        <audit event="#event" />
+    </components>
+</easybeans>

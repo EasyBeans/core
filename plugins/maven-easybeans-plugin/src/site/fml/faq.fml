@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<faqs id="FAQ" title="Frequently Asked Questions">
+  <part id="General">
+    <faq id="reuse-test-code">
+      <question>how can I set the goal Stop of the plugin?</question>
+      <answer>
+        <p>
+          Visit this link for your reference,
+          <a href="examples.html#config_stopPort">
+            stop port 
+          </a>
+        </p>
+      </answer>
+    </faq>
+    <faq id="reuse-test-code">
+      <question>How can I bound my project build lifecycle with the EasyBeans plugin ? </question>
+      <answer>
+        <p>
+          Visit this link for your reference,
+          <a href="examples.html#lifecycle_bound">
+            Managing bound lifecycle
+          </a>
+        </p>
+      </answer>
+    </faq>
+	    <faq id="reuse-test-code">
+      <question>How can I test my EJB project out of the Maven build lifecycle ?</question>
+      <answer>
+        <p>
+          Visit this link for your reference,
+          <a href="examples.html#lifecycle_unbound">
+            Managing Unbound lifecycle
+          </a>
+        </p>
+      </answer>
+    </faq>
+      <faq id="reuse-test-code">
+      <question>How can I add some others EJB project deployed with my application to test it ?</question>
+      <answer>
+        <p>
+          Visit this link for your reference,
+          <a href="examples.html#additional_files">
+            Using additional resources
+          </a>
+        </p>
+      </answer>
+    </faq>
+	<faq id="reuse-test-code">
+      <question>How can I set my own properties before EasyBeans is started ?</question>
+      <answer>
+        <p>
+          Visit this link for your reference,
+          <a href="examples.html#complex_config">
+           Making complex configuration
+          </a>
+        </p>
+      </answer>
+    </faq>
+    	<faq id="reuse-test-code">
+      <question>How can I test my EJB application ?</question>
+      <answer>
+        <p>
+          Visit this link for your reference,
+          <a href="examples.html#run_test">
+            Running a test
+          </a>
+        </p>
+      </answer>
+    </faq>
+  </part>
+</faqs>
+
+
+
+
+

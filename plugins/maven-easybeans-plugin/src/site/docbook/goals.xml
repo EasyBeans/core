@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2009 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: goals.xml 5369 2010-02-24 14:58:19Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+<chapter id="goals">
+  <title>Goals</title>
+    <section id="easybeans:run">
+      <title>easybeans:run</title>
+      <para>
+        Call this target to:
+      </para>
+      <para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              Start EasyBeans
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Deploy all project resources
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Deploy all additional resources declared to the POM configuration
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        In the case of a bound to the Maven build lifecycle project, <emphasis>run</emphasis>
+        goal automaticaly stops.
+      </para>
+      <para>
+        In the other case, all deployed resources are scanned and deployed again if necessary.
+        This <emphasis>re-deployment</emphasis> may be:
+      </para>
+      <para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              Automatic (default)
+            </para>
+            <para>
+              Re-deployment is done on every project modification.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Manual
+            </para>
+            <para>
+              Re-deplyment is done on [Enter] button push.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        Moreover, in the all cases, <emphasis>run</emphasis> goal automaticaly found
+        deployable files into the current project, and in the local repository.
+        For unbound projects, deployable files located into children projects are automaticaly
+        deployed too.
+      </para>
+      <section>
+        <title>Parameters</title>
+        <para>Pom parameters for goal run are :
+          <table frame="none" pgwide="1">
+            <title>Run goal parameters</title>
+            <tgroup cols="3" align="left" colsep="1" rowsep="1">
+              <thead>
+                <row>
+                  <entry>Name</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                  <entry>Default-value</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry><ulink url="examples.html#config_deployables">deployables</ulink></entry>
+                  <entry>List</entry>
+                  <entry>List of additional deployables of current project</entry>
+                  <entry>-</entry>
+                </row>
+                <row>
+                  <entry><ulink url="examples.html#config_scanInterval">scanInterval</ulink></entry>
+                  <entry>Long</entry>
+                  <entry>The interval in milliseconds to scan EJBs for change</entry>
+                  <entry>1000</entry>
+                </row>
+                <row>
+                  <entry><ulink url="examples.html#config_autoDeployment">autoDeployment</ulink></entry>
+                  <entry>boolean</entry>
+                  <entry>Activate automatic redeployment or manual redeployment</entry>
+                  <entry>true</entry>
+                </row>
+                <row>
+                  <entry><ulink url="examples.html#config_wait">wait</ulink></entry>
+                  <entry>String</entry>
+                  <entry>Define if the plugin waits after the launch of server</entry>
+                  <entry>-</entry>
+                </row>
+                <row>
+                  <entry><ulink url="examples.html#config_serverConfig">serverConfig</ulink></entry>
+                  <entry>String</entry>
+                  <entry>Path of EasyBeans configuration XML file</entry>
+                  <entry>-</entry>
+                </row>
+                <!-- ADDED 25-02-09 -->
+                <row>
+                  <entry><ulink url="examples.html#config_checkLocalRepository">checkLocalRepository</ulink></entry>
+                  <entry>boolean</entry>
+                  <entry>If plugin automatocaly check artifacts in the local repository</entry>
+                  <entry>true</entry>
+                </row>
+                <!-- /ADDED 25-02-09 -->
+              </tbody>
+            </tgroup>
+          </table>
+        </para>
+
+      </section>
+
+    </section>
+    <section id="easybeans:stop">
+      <title>easybeans:stop</title>
+      <para>
+        Call this target to stop EasyBeans.
+      </para>
+      <section>
+        <title>Parameters</title>
+        <para>Pom parameters for goal stop are :
+          <table frame="none" pgwide="1">
+            <title>Stop goal parameters</title>
+            <tgroup cols="3" align="left" colsep="1" rowsep="1">
+              <thead>
+                <row>
+                  <entry>Name</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                  <entry>Default-value</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry><ulink url="examples.html#config_stopPort">stopPort</ulink></entry>
+                  <entry>Integer</entry>
+                  <entry>Port to contact to stop EasyBeans</entry>
+                  <entry>1099</entry>
+                </row>
+                <row>
+                  <entry><ulink url="examples.html#config_hostname">hostname</ulink></entry>
+                  <entry>String</entry>
+                  <entry>Hostname to contact to stop EasyBeans</entry>
+                  <entry>localhost</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table>
+        </para>
+
+      </section>
+    </section>
+</chapter>
+

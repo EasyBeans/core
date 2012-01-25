@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mbeans-descriptors PUBLIC
+ "-//Apache Software Foundation//DTD Model MBeans Configuration File"
+ "http://jakarta.apache.org/commons/dtds/mbeans-descriptors.dtd">
+
+<!--
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - EasyBeans
+ - Copyright (C) 2006 Bull S.A.S.
+ - Contact: easybeans@ow2.org
+ -
+ - This library is free software; you can redistribute it and/or
+ - modify it under the terms of the GNU Lesser General Public
+ - License as published by the Free Software Foundation; either
+ - version 2.1 of the License, or any later version.
+ -
+ - This library is distributed in the hope that it will be useful,
+ - but WITHOUT ANY WARRANTY; without even the implied warranty of
+ - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ - Lesser General Public License for more details.
+ -
+ - You should have received a copy of the GNU Lesser General Public
+ - License along with this library; if not, write to the Free Software
+ - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ - USA
+ -
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - $Id: mbeans-descriptors-ext.xml 5369 2010-02-24 14:58:19Z benoitf $
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -->
+
+<mbeans-descriptors>
+
+  <mbean name="ezb:J2EEServer">
+
+    <operation name="stop" description="Stop the server"
+      impact="ACTION" returnType="void">
+    </operation>
+
+    <attribute name="Stopped"
+               description="Stopped attribute"
+               type="boolean"
+               writeable="false"
+               is="true" />
+
+  </mbean>
+
+</mbeans-descriptors>

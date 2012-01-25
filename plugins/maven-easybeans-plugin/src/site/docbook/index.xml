@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2009 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: index.xml 5369 2010-02-24 14:58:19Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<chapter id="plugin_introduction">
+    <section>
+        <title>Maven EasyBeans Plugin</title>
+        <para>
+      
+ Welcome to the Maven Easybeans Plugin documentation home page.
+        </para>
+
+
+    </section>
+
+    <section>
+        <title>About EasyBeans</title>
+
+        <para>
+      EasyBeans is an open-source Enterprise JavaBeans (EJB) container hosted by the OW2 Consortium. 
+      The License used by EasyBeans is the LGPL. EasyBeans is the EJB 3.0 container of the JOnAS application server.
+        </para>
+
+        <para>
+      EasyBeans main goal is to ease the development of Enterprise JavaBeans. 
+      It uses some new architecture design like the bytecode injection (with ASM ObjectWeb tool), IoC, POJO and can 
+      be embedded in OSGi bundles or other frameworks (Spring, Eclipse plugins, etc.).
+        </para>
+    
+        <para>
+      It aims at providing an EJB 3.0 container as specified in the Java Platform Enterprise Edition 5.x (Java EE). 
+      It means that Session beans (Stateless or Stateful), Message Driven Beans (MDB) are available on EasyBeans.
+        </para>
+    
+        <section>
+            <title>Getting Easybeans</title>
+      
+            <para>
+        EasyBeans is available on <ulink url="http://www.easybeans.org/">EasyBeans.org home page</ulink>
+            </para>
+        </section>
+    
+        <section>
+            <title>Easybeans standard use</title>
+            <para>
+        EasyBeans user's guide is available <ulink url="http://www.easybeans.org/doc/userguide/en/integrated/userguide.html">here</ulink>.
+            </para>
+      
+            <para>
+        In order to use EasyBeans (standalone version) to deploy an ejb3 application and test itself in a simple way,
+        we need to :
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>Start EasyBeans using a standalone jar package for example</para>
+                        <para>
+                            <screen>java -jar ow2-easybeans-hibernate-1.1.0-M1.jar</screen>
+                        </para>
+                    </listitem>
+  
+                    <listitem>
+            <para>Deploy an ejb3 application package into <structname>easybeans-deploy</structname> folder</para>
+                    </listitem>
+          
+                    <listitem>
+                        <para>Launch tests</para>
+                    </listitem>
+          
+                    <listitem>
+                        <para>Stop EasyBeans</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+    </section>
+  
+    <section>
+        <title>What is Easybeans Maven Plugin ?</title>
+        <section>
+            <title>Motivations</title>
+            <section>
+                <title>J2EE and Maven</title>
+            <!--<para>
+              Developper et tester une application J2EE necessite un nombre de manipulations importantes.
+              Aujourd'hui, de nombreux projets sont developpes en utilisant le gestionnaire de projets Maven 2.
+              Cet outil permet d'automatiser la gestion des dependances du projet, ainsi que sa construction, son installation et son deploiement.
+              Pour realiser toutes ces taches, Maven utilise des plugins qui ont chacun un role precis (compilation, construction des paquets, ...). 
+            </para>-->
+                <para>
+              Developing and testing a J2EE application requires a large number of manipulations.
+              Today, many projects are developed using the Maven 2 project manager.
+              This tool can automate Java project dependencies management as well as its construction, installation and deployment.
+              To process all these tasks, Maven uses plugins which have a specific role (compilation, package construction, tests...).
+              Maven uses a xml file known as a Project Object Model (POM) to describe the software project being built, its dependencies on other external 
+              modules and components, and the build order.
+                </para>
+                <para>
+              To learn more about Maven, please visit 
+                    <ulink url="http://maven.apache.org/">http://maven.apache.org/</ulink>.
+                </para>
+            </section>
+            <section>
+                <title>EJB project using EasyBeans and Maven</title>
+                <para>
+              As seen, Maven optimizes project achievement time by helping developers during the implementation and testing phases . 
+              When creating an EJB application, tests can't be undertaken by just using Maven because EJBs need to be deployed in an EJB container.
+              As EasyBeans is an EJB container, it is useful to run it with Maven just by referencing dependencies and build configurations in the POM of the project.
+                </para>
+                <para>
+              The solution is to create a Maven plugin that starts EasyBeans and deploys the project before tests are launched.
+                </para>
+            <!--
+            <para>
+              Le plugin maven easybeans est donc une pierre supplementaire ajoutee a l'edifice Maven
+            </para>
+            -->
+            </section>
+        </section>
+        <section>
+            <title>Objectives</title>
+            <para>
+          The Maven EasyBeans plugin has 4 objectives:
+                <itemizedlist>
+                    <listitem>
+                        <para>Start EasyBeans</para>
+                    </listitem>
+    
+                    <listitem>
+                        <para>Deploy all EJB applications from the project</para>
+                    </listitem>
+            
+                    <listitem>
+                        <para>Automate the deployment of modified EJBs</para>
+                    </listitem>
+            
+                    <listitem>
+                        <para>Stop EasyBeans</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+          Once EJB are deployed, integration tests can be launched. 
+            </para>
+            <para>
+          Moreover, EasyBeans plugin can be configured in some ways as explained in the followings <ulink url="examples.html">examples</ulink>.
+            </para>
+        </section>
+        <section>
+            <title>Goals Overview</title>
+            <para>
+        The EasyBeans Maven plugin has 2 goals:
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="goals.html#easybeans:run">easybeans:run</ulink>
+                            </command>
+                runs EasyBeans and deploy EJBs
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="goals.html#easybeans:stop">easybeans:stop</ulink>
+                            </command>
+                Stop EasyBeans
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section>
+            <title>Usage</title>
+            <para>
+        Instructions on how to use the EasyBeans Plugin can be found
+                <ulink url="usage.html">here</ulink>.
+            </para>
+        </section>
+        <section>
+            <title>Examples</title>
+            <para>
+        The following examples show how to use the EasyBeans Plugin in more advanced use-cases.
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#lifecycle_unbound">Managing unbound lifecycle</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#lyfecycle_bound">Managing bound lifecycle</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#additional_files">Using additional resources</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#complex_config">Making complex configuration</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#run_test">Running a test</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#stop_config">Stopping goal configuration</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>
+                                <ulink url="examples.html#calculator">Writing and testing a calculator bean</ulink>
+                            </command>
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+    
+    </section>
+</chapter>

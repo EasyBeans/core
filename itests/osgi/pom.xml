@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2012 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 6149 2012-01-25 14:52:19Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.itests</groupId>
+    <artifactId>easybeans-itests</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>easybeans-itests-osgi</artifactId>
+  <packaging>pom</packaging>
+  <name>EasyBeans: iTests :: OSGi</name>
+  <description>Launching the integration tests of EasyBeans OSGi</description>
+
+  <build>
+
+    <plugins>
+      <!--
+        Make sure tests always use randomly assigned and available ports
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-port-numbers</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>reserve-network-port</goal>
+            </goals>
+            <configuration>
+              <portNames>
+                <portName>smartFactory.port</portName>
+                <portName>carol.port</portName>
+                <portName>jms.port</portName>
+                <portName>db.port</portName>
+              </portNames>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>maven-easybeans-osgi</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+
+          <modules>
+
+            <module>
+              <groupId>org.ow2.easybeans.tests</groupId>
+              <artifactId>easybeans-tests-osgi-simple</artifactId>
+              <version>${easybeans-tests-applications.version}</version>
+            </module>
+
+          </modules>
+
+          <frameworkDependencies>
+            <dependency>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>org.apache.felix.framework</artifactId>
+              <version>${osgi.felix.framework.version}</version>
+            </dependency>
+          </frameworkDependencies>
+
+          <!-- Fork the JVM -->
+          <fork>true</fork>
+
+          <!-- Debugging ? -->
+          <debug>
+            <port>4142</port>
+            <suspend>true</suspend>
+            <enabled>false</enabled>
+          </debug>
+          <!-- Wait XX seconds if needs some GUI or something like that-->
+          <!-- <waitAfterStart>300</waitAfterStart> -->
+        </configuration>
+        <executions>
+          <execution>
+            <id>test-osgi-plugin</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
+
+      <!--  Skip the tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>

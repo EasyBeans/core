@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.osgi</groupId>
+    <artifactId>easybeans-osgi</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans.osgi</groupId>
+  <artifactId>easybeans-components</artifactId>
+  <packaging>pom</packaging>
+  <name>EasyBeans/OSGi :: Components</name>
+  <description>Link to the EasyBeans components OSGi Wrappers</description>
+
+  <modules>
+    <module>audit</module>
+    <module>carol</module>
+    <module>cmi</module>
+    <module>event</module>
+    <module>hsqldb</module>
+    <module>jdbcpool</module>
+    <module>jmx</module>
+    <module>joram</module>
+    <module>jotm</module>
+    <module>quartz</module>
+    <module>statistic</module>
+    <module>work-manager</module>
+    <module>smartclient</module>
+  </modules>
+
+</project>

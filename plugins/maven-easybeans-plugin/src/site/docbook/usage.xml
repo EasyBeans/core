@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2009 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: usage.xml 5369 2010-02-24 14:58:19Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<chapter id="usage">
+    <section>
+
+        <title>Usage</title>
+        <para>
+      How to use the Maven EasyBeans Plugin?
+        </para>
+    </section>
+    <section>
+        <title>Command line</title>
+        <section>
+            <title>Out of the build lifecycle</title>
+            <para>
+          To run EasyBeans with Maven out of the build lifecycle, 
+          the EasyBeans Plugin can be invoked by calling the run goal.
+            </para>
+            <para>
+                <screen>mvn org.ow2.easybeans:maven-easybeans-plugin:run</screen>
+            </para>
+            <section>
+                <title>Shorter command line</title>
+                <para>
+            This command line is verbose and can be shorted by adding the following code to the <filename>settings.xml</filename> file:
+                </para>
+                <para>
+                    <programlisting><![CDATA[<pluginGroups>
+    <pluginGroup>  
+        <groupId>org.ow2.easybeans</groupId>
+    </pluginGroup>
+</pluginGroups>]]></programlisting>
+                </para>
+                <para>
+            The command line to invoke EasyBeans plugin is now :
+                </para>
+                <para>
+                    <screen>mvn easybeans:run</screen>
+                </para>
+            </section>
+        </section>
+        <section>
+            <title>Along of the build lifecycle</title>
+            <para>
+          To run EasyBeans with Maven along the build lifecycle, run the integration tests and then stop EasyBeans,
+          the EasyBeans Plugin can be invoked by calling the <command>integration-test</command> phase of the lifecycle.
+            </para>
+            <para>
+                <screen>mvn integration-test</screen>
+            </para>
+        </section>
+    </section>
+    <section>
+        <title>POM configuration</title>
+        <para>
+        Here is the minimal configuration avalaible to add the plugin in the POM build section (needed if you want to
+        tell the EasyBeans plugin version you want to use explicitly):
+        </para>
+      <para>
+        <programlisting><![CDATA[<plugin>
+  <groupId>org.ow2.easybeans</groupId>
+  <artifactId>maven-easybeans-plugin</artifactId>
+  <version>1.0</version>
+</plugin>]]></programlisting>
+      </para>
+      <para>
+        To specify more options, just add a <emphasis>configuration</emphasis> tag in the previous plugin declaration.
+      </para>
+      <para>
+        <programlisting><![CDATA[<plugin>
+  <groupId>org.ow2.easybeans</groupId>
+  <artifactId>maven-easybeans-plugin</artifactId>
+  <version>1.0</version>
+  <configuration>
+      ...
+  </configuration>
+</plugin>]]></programlisting>
+      </para>
+      <para>
+        Read <ulink url="examples.html#complex_config">Complex configuration section</ulink> for more indications on available options.
+      </para>
+    </section>
+</chapter>

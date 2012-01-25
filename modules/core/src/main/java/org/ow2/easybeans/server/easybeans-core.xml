@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - EasyBeans
+ - Copyright (C) 2008-2009 Bull S.A.S.
+ - Contact: easybeans@ow2.org
+ -
+ - This library is free software; you can redistribute it and/or
+ - modify it under the terms of the GNU Lesser General Public
+ - License as published by the Free Software Foundation; either
+ - version 2.1 of the License, or any later version.
+ -
+ - This library is distributed in the hope that it will be useful,
+ - but WITHOUT ANY WARRANTY; without even the implied warranty of
+ - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ - Lesser General Public License for more details.
+ -
+ - You should have received a copy of the GNU Lesser General Public
+ - License along with this library; if not, write to the Free Software
+ - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ - USA
+ -
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - $Id: easybeans-core.xml 5369 2010-02-24 14:58:19Z benoitf $
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -->
+
+<easybeans xmlns="http://org.ow2.easybeans.server">
+  <!-- Define the core components that will be started at runtime -->
+  <components>
+
+    <!-- Timer Component -->
+    <timer>
+      <property name="org.quartz.scheduler.instanceName" value="EasyBeans" />
+      <property name="org.quartz.threadPool.class" value="org.quartz.simpl.SimpleThreadPool" />
+      <property name="org.quartz.threadPool.threadCount" value="5" />
+      <property name="org.quartz.threadPool.threadPriority" value="4" />
+      <property name="org.quartz.jobStore.class" value="org.quartz.simpl.RAMJobStore" />
+    </timer>
+
+    <!-- Event component -->
+    <event event-service="#event-service"/>
+    
+  </components>
+</easybeans>

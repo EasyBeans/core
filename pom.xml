@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2007-2012 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 6144 2012-01-25 14:15:26Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans</groupId>
+  <artifactId>easybeans</artifactId>
+  <packaging>pom</packaging>
+  <name>EasyBeans</name>
+  <version>2.0.0-alpha-SNAPSHOT</version>
+
+
+  <!-- Define properties -->
+  <properties>
+    <ow2-util.version>1.0.35-SNAPSHOT</ow2-util.version>
+    <ow2-util-ant-tasks.version>1.0.35-SNAPSHOT</ow2-util-ant-tasks.version>
+    <ow2-spec.version>1.0.10</ow2-spec.version>
+    <joram.version>5.3.1</joram.version>
+    <cmi.version>2.2.6</cmi.version>
+    <carol.version>3.0.8</carol.version>
+    <monolog.version>2.1.12</monolog.version>
+    <slf4j.version>1.5.8</slf4j.version>
+    <testng.version>6.3.1</testng.version>
+    
+
+    <!-- OSGi -->
+    <ow2-bundle.version>1.0.33-SNAPSHOT</ow2-bundle.version>
+    <felix.dm.version>2.0.1</felix.dm.version>
+    <felix.scr.version>1.6.0</felix.scr.version>
+    <ipojo.version>1.4.0</ipojo.version>
+
+    <!-- Test properties -->
+    <easybeans-tests-applications.version>2.0.0-a1-SNAPSHOT</easybeans-tests-applications.version>
+    <junit4osgi.version>1.0.0</junit4osgi.version>
+    <osgi.felix.framework.version>4.0.2</osgi.felix.framework.version> 
+  </properties>
+
+  <!-- Prefered dependencies version -->
+  <dependencyManagement>
+
+    <dependencies>
+      <!-- APIs version -->
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-ejb-3.0-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-ejb-3.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-annotation-1.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-jpa-2.0-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-connector-1.5-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-jsr77-1.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-jacc_1.1_spec</artifactId>
+        <version>1.0-M2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>6.0.13</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-jta-1.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.mail</groupId>
+        <artifactId>mail</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.activation</groupId>
+        <artifactId>activation</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-jms_1.1_spec</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+
+      <dependency>
+        <groupId>org.apache.axis2</groupId>
+        <artifactId>axis2-jaxws-api</artifactId>
+        <version>1.2</version>
+      </dependency>
+
+
+      <!-- Projects -->
+
+      <!-- Use a jarjared version of ASM -->
+      <dependency>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>easybeans-asm</artifactId>
+        <version>3.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>easybeans-asm-commons</artifactId>
+        <version>3.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>easybeans-asm-analysis</artifactId>
+        <version>3.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>easybeans-asm-util</artifactId>
+        <version>3.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.easybeans</groupId>
+        <artifactId>quartz</artifactId>
+        <version>1.6.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.transaction</groupId>
+        <artifactId>jta</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.cmi</groupId>
+        <artifactId>cmi-api-client</artifactId>
+        <version>${cmi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.cmi</groupId>
+        <artifactId>cmi-jgroups</artifactId>
+        <version>${cmi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.cmi</groupId>
+        <artifactId>cmi-jndi</artifactId>
+        <version>${cmi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.cmi</groupId>
+        <artifactId>cmi-lb</artifactId>
+        <version>${cmi.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>jotm</groupId>
+        <artifactId>jotm</artifactId>
+        <version>2.0.10</version>
+        <!-- Exclude the connector as it is a too old version -->
+        <exclusions>
+          <exclusion>
+            <groupId>javax.resource</groupId>
+            <artifactId>connector</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+          <exclusion>
+            <!-- Exclude non POA enabled IIOP Stubs -->
+            <groupId>jotm</groupId>
+            <artifactId>jotm_iiop_stubs</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.objectweb.carol</groupId>
+            <artifactId>carol</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>jotm</groupId>
+        <artifactId>jotm_jrmp_stubs</artifactId>
+        <version>2.0.10</version>
+      </dependency>
+      <dependency>
+        <groupId>howl</groupId>
+        <artifactId>howl-logger</artifactId>
+        <version>0.1.11</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2</version>
+      </dependency>
+
+      <!-- Monolog -->
+      <dependency>
+        <groupId>org.objectweb.monolog</groupId>
+        <artifactId>monolog-api</artifactId>
+        <version>${monolog.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.monolog</groupId>
+        <artifactId>monolog-core</artifactId>
+        <version>${monolog.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.monolog</groupId>
+        <artifactId>monolog</artifactId>
+        <version>${monolog.version}</version>
+      </dependency>
+
+    <!-- Joram -->
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>joram-mom</artifactId>
+        <version>${joram.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>joram-connector</artifactId>
+        <version>${joram.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>joram-client</artifactId>
+        <version>${joram.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>joram-shared</artifactId>
+        <version>${joram.version}</version>
+      </dependency>
+      <!-- Maybe it should work with the latest maven JCup artifact ?-->
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>jcup</artifactId>
+        <version>5.2.4</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta-regexp</groupId>
+        <artifactId>jakarta-regexp</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <!-- OW2 Utils -->
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-log</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-execution</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-xmlconfig</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-i18n</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-marshalling</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-ee-metadata-common-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-metadata-ws-api</artifactId>
+        <version>${ow2-util.version}</version>
+    </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-ee-metadata-war-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-ee-metadata-war-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-ee-metadata-ejbjar-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-archive-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-archive-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-scan-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-scan-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-ee-deploy-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-ee-deploy-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-url</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-file</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-pool-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-pool-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-plan-deploy-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-plan-schemas</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-event-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+       <dependency>
+         <groupId>org.ow2.util</groupId>
+        <artifactId>util-event-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-jmx-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-jmx-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>audit-report-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>audit-report-impl</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-maven-plugin-deployment-api</artifactId>
+        <version>${ow2-util.version}</version>
+      </dependency>
+
+    <!-- HSQLDB -->
+      <dependency>
+        <groupId>hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>1.8.0.10</version>
+      </dependency>
+
+    <!-- Carol -->
+      <dependency>
+        <groupId>org.ow2.carol</groupId>
+        <artifactId>carol</artifactId>
+        <version>${carol.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.ow2.carol.irmi</groupId>
+            <artifactId>irmi</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>ant</groupId>
+            <artifactId>ant</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>ant</groupId>
+            <artifactId>ant-junit</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jacorb</groupId>
+            <artifactId>jacorb</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jacorb</groupId>
+            <artifactId>jacorb-idl</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.ow2.cmi</groupId>
+            <artifactId>cmi-jndi</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.ow2.cmi</groupId>
+            <artifactId>cmi-admin</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+
+      <dependency>
+        <groupId>org.apache.ant</groupId>
+        <artifactId>ant</artifactId>
+        <version>1.7.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-modeler</groupId>
+        <artifactId>commons-modeler</artifactId>
+        <version>2.0.1</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-digester</groupId>
+            <artifactId>commons-digester</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>mx4j</groupId>
+            <artifactId>mx4j-jmx</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging-api</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jcl</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.1</version>
+        <exclusions>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>logkit</groupId>
+            <artifactId>logkit</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>avalon-framework</groupId>
+            <artifactId>avalon-framework</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+
+      <!-- Tests -->
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+
+  <scm>
+    <connection>scm:git:git://gitorious.ow2.org/ow2-easybeans/core.git</connection>
+    <url>http://gitorious.ow2.org/ow2-easybeans/core</url>
+    <developerConnection>scm:git:git@gitorious.ow2.org:ow2-easybeans/core.git</developerConnection>
+  </scm>
+
+  <build>
+
+   <pluginManagement>
+   <plugins>
+   
+           <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>2.1.0</version>
+        </plugin>
+        
+        <plugin>
+          <groupId>org.ow2.util</groupId>
+          <artifactId>util-maven-plugin-antrmic</artifactId>
+          <version>${ow2-util.version}</version>
+        </plugin>
+   </plugins>
+   </pluginManagement>
+
+    <!-- Temporary until the move to src/main/java -->
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+    </resources>
+
+  </build>
+
+
+  <modules>
+
+    <!-- Plugins -->
+    <module>plugins</module>
+
+    <!-- Modules -->
+    <module>modules</module>
+
+    <!-- Tests -->
+    <module>itests</module>
+
+  </modules>
+
+
+  <profiles>
+      <!--  use buildnumber plugin only if GIT metadata is present -->
+      <!-- 
+      <profile>
+         <id>build-number-generation</id>
+         <activation>
+           <file>
+             <exists>.svn</exists>
+           </file>
+         </activation>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>buildnumber-maven-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <phase>validate</phase>
+                        <goals>
+                           <goal>create</goal>
+                        </goals>
+                     </execution>
+                     </executions>
+                     <configuration>
+                       <doCheck>false</doCheck>
+                       <doUpdate>false</doUpdate>
+                  </configuration>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+       -->
+          
+      <!-- If GIT meta data is not configured, set buildNumber to 0 -->
+      <profile>
+         <id>build-number-provided</id>
+         <activation>
+            <file>
+               <missing>.git</missing>
+            </file>
+         </activation>
+
+         <properties>
+            <buildNumber>0</buildNumber>
+         </properties>
+      </profile>
+
+
+  </profiles>
+
+</project>

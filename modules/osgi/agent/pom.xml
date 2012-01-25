@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.osgi</groupId>
+    <artifactId>easybeans-osgi</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans.osgi</groupId>
+  <artifactId>easybeans-agent</artifactId>
+  <packaging>bundle</packaging>
+  <name>EasyBeans/OSGi :: Agent</name>
+  <description>An Agent to load EasyBeans components onto the OSGi runtime</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>org.ow2.easybeans.agent</Bundle-SymbolicName>
+            <Bundle-Activator>org.ow2.easybeans.osgi.agent.Activator</Bundle-Activator>
+            <Private-Package>org.ow2.easybeans.osgi.agent</Private-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+            <Import-Package>net.sf.snowball.ext;resolution:=optional,junit.framework;resolution:=optional,*</Import-Package>
+            <!-- Add version used by some components to know the version -->
+            <Implementation-Version>${project.version}</Implementation-Version>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.easybeans.osgi</groupId>
+      <artifactId>easybeans-modules-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-execution</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.1</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

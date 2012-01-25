@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2007-2009 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 6131 2012-01-18 08:47:31Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans</groupId>
+    <artifactId>easybeans-modules</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans</groupId>
+  <artifactId>easybeans-api</artifactId>
+  <packaging>jar</packaging>
+  <name>EasyBeans: API</name>
+  <description>API used/provided by EasyBeans</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-ejb-3.0-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jpa-2.0-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-deploy-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-connector-1.5-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jsr77-1.1-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jta-1.1-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-metadata-common-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-pool-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-event-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>audit-report-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-jmx-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.ow2.util</groupId>
+        <artifactId>util-maven-plugin-antrmic</artifactId>
+        <executions>
+          <execution>
+            <id>RMIServerRPCImpl</id>
+            <configuration>
+              <iiop>true</iiop>
+              <iiopopts>-always</iiopopts>
+              <classname>
+                org.ow2.easybeans.rpc.api.RMIServerRPC
+              </classname>
+              <compilerarg>-poa</compilerarg>
+            </configuration>
+            <goals>
+              <goal>rmic</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>rmic-iiop-EZBRemoteJNDIResolver</id>
+            <configuration>
+              <iiop>true</iiop>
+              <iiopopts>-always</iiopopts>
+              <classname>org.ow2.easybeans.resolver.api.EZBRemoteJNDIResolver</classname>
+              <compilerarg>-poa</compilerarg>
+            </configuration>
+            <goals>
+              <goal>rmic</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

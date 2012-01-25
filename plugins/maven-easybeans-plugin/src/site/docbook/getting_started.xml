@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2009 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: getting_started.xml 5369 2010-02-24 14:58:19Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+<chapter id="getting_started">
+  <title>Getting Started With the EasyBeans Maven Plugin</title>
+  <section>
+    <title>Getting EasyBeans Maven Plugin From the SVN Repository</title>
+    <para>
+      Anyone can check out source code from the SVN server using the
+      following command or your favourite GUI SVN client:
+    </para>
+
+    <para>
+      <screen>svn checkout svn://svn.forge.objectweb.org/svnroot/easybeans/sandbox/maven-easybeans-plugin</screen>
+    </para>
+  </section>
+  <section>
+    <title>Installing the plugin</title>
+    <para>
+      Once you have checked out the source code from the SVN server, you get at least two directories:
+      <itemizedlist>
+        <listitem>
+          <para>
+            <filename class="folder">plugin</filename>
+          </para>
+          <para>
+            Contains all sources to build the plugin.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <filename class="folder">examples</filename>
+          </para>
+          <para>
+            Contains all sources of the examples to understand how to use the plugin.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        To install the plugin to your Maven local repository, go into the <filename class="folder">plugin</filename> folder and use the following command:
+        <screen>mvn install</screen>
+      </para>
+    </para>
+  </section>
+  <section>
+    <title>Testing the examples</title>
+      <section>
+        <title>Bound to the Maven build lifecycle</title>
+        <para>
+          To test all the bound to the Maven build lifecycle examples (<emphasis>HelloWorld, Calculator, Directory and Directory-exploded</emphasis>), just
+          use the following command in the <filename class="folder">examples</filename> folder:
+          <screen>mvn integration-test</screen>
+        </para>
+      </section>
+      <section>
+        <title>Unbound to the the Maven build lifecycle</title>
+        <para>
+          To test the examples that are not bound to the Maven build lifecycle (contained in the <emphasis>Unbound-project</emphasis> module),
+          use the following instructions:
+        </para>
+        <para>
+          First, install and deploy the examples:
+          <itemizedlist>
+            <listitem>
+              <para>
+                <screen>mvn install</screen>
+              </para>
+              <para>
+                All the unbound examples are installed in the local repository.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <screen>mvn easybeans:run</screen>
+              </para>
+              <para>
+                EasyBeans is started and all the unbound EJB modules examples are deployed.
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+        <para>
+           Now, tests can be launched by using the following command in the <filename class="directory">Client</filename> module into another console:
+           <screen>mvn exec:exec</screen>
+        </para>
+        <para>
+          When tests are done, use the last following command in the directory of your choice:
+          <screen>mvn easybean:stop</screen>
+        </para>
+      </section>
+  </section>
+</chapter>

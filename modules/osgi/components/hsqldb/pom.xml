@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.osgi</groupId>
+    <artifactId>easybeans-components</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.easybeans.osgi</groupId>
+  <artifactId>easybeans-component-hsqldb</artifactId>
+  <packaging>bundle</packaging>
+  <name>EasyBeans/OSGi :: Components :: HSQLDB</name>
+  <description>OSGi Wrapper for the EasyBeans HSQLDB component</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>org.ow2.easybeans.component.hsqldb</Bundle-SymbolicName>
+            <Import-Package><![CDATA[
+            !sun.security.action,
+            !.,
+            !javax.security.*,
+            !javax.swing.*,
+            !javax.net.ssl,
+            !javax.servlet.*,
+            *]]>
+            </Import-Package>
+            <Export-Package>org.ow2.easybeans.component.hsqldb,org.hsqldb.*</Export-Package>
+            <Private-Package />
+            <DynamicImport-Package>*</DynamicImport-Package>
+            <Service-Component><![CDATA[OSGI-INF/hsqldb-component-factory.xml]]></Service-Component>
+            <Embed-StripGroup>true</Embed-StripGroup>
+            <Embed-Directory>dependencies</Embed-Directory>
+            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.easybeans.osgi</groupId>
+      <artifactId>easybeans-modules-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-hsqldb</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jotm</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+    </dependency>
+  </dependencies>
+</project>

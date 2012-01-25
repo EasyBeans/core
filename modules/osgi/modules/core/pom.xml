@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - EasyBeans
+  - Copyright (C) 2010 Bull S.A.S.
+  - Contact: easybeans@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or (at your option) any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 6122 2012-01-17 15:25:22Z benoitf $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.ow2.easybeans.osgi</groupId>
+    <artifactId>easybeans-modules</artifactId>
+    <version>2.0.0-alpha-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>easybeans-modules-core</artifactId>
+  <packaging>bundle</packaging>
+  <name>EasyBeans/OSGi :: Modules :: Core</name>
+  <description>Easybeans OSGi Core</description>
+<build>
+<plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>org.ow2.easybeans.core</Bundle-SymbolicName>
+            <Private-Package><![CDATA[
+              org.ow2.easybeans.asm.*,
+              ]]>
+            </Private-Package>
+            <Embed-StripGroup>true</Embed-StripGroup>
+            <Embed-Directory>dependencies</Embed-Directory>
+            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+            <!-- org.objectweb.transaction.* may be removed if we switch on new jotm -->
+            <Import-Package><![CDATA[
+                org.objectweb.transaction.*;resolution:=optional,
+                oracle.toplink.essentials.*;resolution:=optional,
+                org.apache.openjpa.*;resolution:=optional,
+                javax.persistence.*;version=2.0.0;resolution:=optional,
+                org.apache.tools.ant;resolution:=optional,
+                org.objectweb.joram.*;resolution:=optional,
+                org.hsqldb.*;resolution:=optional,
+                fr.dyade.aaa.*;resolution:=optional,
+                org.osgi.service.component;resolution:=optional,
+                org.objectweb.jotm,
+                org.ow2.cmi.*;resolution:=optional,
+                org.ow2.util.component.*;resolution:=optional,
+                *
+            ]]>
+            </Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+            <Export-Package>org.ow2.easybeans.component.remotejndiresolver,org.ow2.easybeans.component.audit.rmi.interceptor.jrmp</Export-Package>
+            <_exportcontents><![CDATA[
+                     org.ow2.easybeans.container.*,
+                     org.ow2.easybeans.deployer.*,
+                     org.ow2.easybeans.enhancer.*,
+                     org.ow2.easybeans.event.naming,
+                     org.ow2.easybeans.injection.*,
+                     org.ow2.easybeans.jmx.*,
+                     org.ow2.easybeans.jsr77.*,
+                     org.ow2.easybeans.loader.*,
+                     org.ow2.easybeans.management.*,
+                     org.ow2.easybeans.naming.*,
+                     org.ow2.easybeans.osgi.annotation,
+                     org.ow2.easybeans.osgi.core,
+                     org.ow2.easybeans.osgi.ejbjar,
+                     org.ow2.easybeans.osgi.component,
+                     org.ow2.easybeans.osgi.configuration,
+                     org.ow2.easybeans.osgi.extension,
+                     org.ow2.easybeans.osgi.archive,
+                     org.ow2.easybeans.osgi.util,
+                     org.ow2.easybeans.osgi.handler,
+                     org.ow2.easybeans.persistence.*,
+                     org.ow2.easybeans.proxy.*,
+                     org.ow2.easybeans.resolver,
+                     org.ow2.easybeans.rpc,
+                     org.ow2.easybeans.rpc.rmi.*,
+                     org.ow2.easybeans.rpc.util.*,
+                     org.ow2.easybeans.server.*,
+                     org.ow2.easybeans.security.*,
+                     org.ow2.easybeans.statistic.*,
+                     org.ow2.easybeans.transaction.*,
+                     org.ow2.easybeans.util.*,
+                     org.ow2.easybeans.deployment.*]]>
+            </_exportcontents>
+            <Implementation-Version>${project.version}</Implementation-Version>
+            <Service-Component><![CDATA[OSGI-INF/core-service.xml]]></Service-Component>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  
+  <dependencies>
+      <dependency>
+      <groupId>org.ow2.easybeans.osgi</groupId>
+      <artifactId>easybeans-osgi-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-naming</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans.osgi</groupId>
+      <artifactId>easybeans-core-classes</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.dependencymanager</artifactId>
+      <version>${felix.dm.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-audit</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-carol</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-hsqldb</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jdbcpool</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-remotejndiresolver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-depmonitor</artifactId>
+      <version>${project.version}</version>
+    </dependency>    
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jca-workmanager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-joram</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jotm</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-mail</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+       <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-event</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jmx</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-statistic</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-cmi</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.1</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-modeler</groupId>
+      <artifactId>commons-modeler</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-jndi-resolver</artifactId>
+     <version>${project.version}</version>          
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-deployment</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-quartz</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-smartclient</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-security</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-transaction</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-management</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-asm</artifactId>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-asm-commons</artifactId>
+      <version>3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-jacc-provider</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+  </dependencies>
+</project>
