@@ -63,6 +63,7 @@
     <osgi.felix.framework.version>4.0.2</osgi.felix.framework.version> 
   </properties>
 
+
   <!-- Prefered dependencies version -->
   <dependencyManagement>
 
