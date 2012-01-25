@@ -152,12 +152,6 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${ow2-spec.version}</version>
       </bundle>
 
-      <bundle>
-        <groupId>org.ow2.easybeans</groupId>
-        <artifactId>easybeans-plugins-osgi-tester-api</artifactId>
-        <version>${project.version}</version>
-      </bundle>
-
     </bundles>
 
   </test-framework>

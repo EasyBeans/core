@@ -27,7 +27,6 @@
 	<classpathentry kind="src" path="modules/osgi/components/jmx/src/main/resources"/>
 	<classpathentry kind="src" path="modules/osgi/agent/src/main/java"/>
 	<classpathentry kind="src" path="plugins/maven-easybeans-plugin/src/main/java"/>
-	<classpathentry kind="src" path="plugins/maven-easybeans-plugin/src/main/resources"/>
 	<classpathentry kind="src" path="modules/naming/src/test/java"/>
 	<classpathentry kind="src" path="modules/naming/src/main/java"/>
 	<classpathentry kind="src" path="modules/components/component-audit/src/main/java"/>
