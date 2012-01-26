@@ -1,36 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="plugins/artifact-filename/target/classes" path="plugins/artifact-filename/src/main/java"/>
-	<classpathentry kind="src" path="plugins/maven-easybeans-osgi/core/src/main/java"/>
-	<classpathentry kind="src" path="plugins/maven-easybeans-osgi/core/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/statistic/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/event/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/carol/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/smartclient/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/hsqldb/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/quartz/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/cmi/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/annotations/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/jmx/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/modules/core/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/jdbcpool/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/core/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/audit/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/carol/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/statistic/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/joram/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/event/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/audit/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/components/jotm/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/client/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/joram/src/main/java"/>
-	<classpathentry kind="src" path="modules/osgi/components/jmx/src/main/resources"/>
-	<classpathentry kind="src" path="modules/osgi/agent/src/main/java"/>
-	<classpathentry kind="src" path="plugins/maven-easybeans-plugin/src/main/java"/>
-	<classpathentry kind="src" path="modules/naming/src/test/java"/>
-	<classpathentry kind="src" path="modules/naming/src/main/java"/>
-	<classpathentry kind="src" path="modules/components/component-audit/src/main/java"/>
-	<classpathentry kind="src" path="modules/components/component-jca-workmanager/src/main/java"/>
 	<classpathentry kind="src" output="modules/util/target/classes" path="modules/util/src/main/java"/>
 	<classpathentry kind="src" output="modules/api/target/classes" path="modules/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/jacc-provider/target/classes" path="modules/jacc-provider/src/main/java"/>
@@ -39,33 +9,67 @@
 	<classpathentry excluding="**" kind="src" output="modules/deployment/target/classes" path="modules/deployment/src/main/resources"/>
 	<classpathentry kind="src" output="modules/deployment/target/test-classes" path="modules/deployment/src/test/java"/>
 	<classpathentry excluding="**" kind="src" output="modules/deployment/target/test-classes" path="modules/deployment/src/test/resources"/>
+	<classpathentry kind="src" output="modules/naming/target/classes" path="modules/naming/src/main/java"/>
+	<classpathentry kind="src" output="modules/naming/target/test-classes" path="modules/naming/src/test/java"/>
 	<classpathentry kind="src" output="modules/security/target/classes" path="modules/security/src/main/java"/>
 	<classpathentry kind="src" output="modules/transaction/target/classes" path="modules/transaction/src/main/java"/>
 	<classpathentry kind="src" output="modules/core/target/classes" path="modules/core/src/main/java"/>
 	<classpathentry kind="src" output="modules/core/target/test-classes" path="modules/core/src/test/java"/>
 	<classpathentry excluding="**" kind="src" output="modules/core/target/test-classes" path="modules/core/src/test/resources"/>
-	<classpathentry kind="src" output="modules/components/component-statistic/target/classes" path="modules/components/component-statistic/src/main/java"/>
-	<classpathentry kind="src" output="modules/management/target/classes" path="modules/management/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-audit/target/classes" path="modules/components/component-audit/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-carol/target/classes" path="modules/components/component-carol/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-event/target/classes" path="modules/components/component-event/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-cmi/target/classes" path="modules/components/component-cmi/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-depmonitor/target/classes" path="modules/components/component-depmonitor/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-hsqldb/target/classes" path="modules/components/component-hsqldb/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-jca-workmanager/target/classes" path="modules/components/component-jca-workmanager/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-jdbcpool/target/classes" path="modules/components/component-jdbcpool/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-jmx/target/classes" path="modules/components/component-jmx/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-joram/target/classes" path="modules/components/component-joram/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-jotm/target/classes" path="modules/components/component-jotm/src/main/java"/>
-	<classpathentry kind="src" output="modules/components/component-quartz/target/classes" path="modules/components/component-quartz/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-mail/target/classes" path="modules/components/component-mail/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-quartz/target/classes" path="modules/components/component-quartz/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-remotejndiresolver/target/classes" path="modules/components/component-remotejndiresolver/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/target/test-classes" path="modules/components/component-smartclient/src/test/java"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/api/target/classes" path="modules/components/component-smartclient/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/common/target/classes" path="modules/components/component-smartclient/common/src/main/java"/>
-	<classpathentry kind="src" output="modules/components/component-smartclient/client/target/classes" path="modules/components/component-smartclient/client/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/server/target/classes" path="modules/components/component-smartclient/server/src/main/java"/>
-	<classpathentry kind="src" output="modules/components/component-depmonitor/target/classes" path="modules/components/component-depmonitor/src/main/java"/>
-	<classpathentry kind="src" output="modules/components/component-jmx/target/classes" path="modules/components/component-jmx/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-statistic/target/classes" path="modules/components/component-statistic/src/main/java"/>
+	<classpathentry kind="src" output="modules/management/target/classes" path="modules/management/src/main/java"/>
+	<classpathentry kind="src" output="plugins/maven-easybeans-plugin/target/classes" path="plugins/maven-easybeans-plugin/src/main/java"/>
+	<classpathentry kind="src" output="plugins/maven-easybeans-osgi/core/target/classes" path="plugins/maven-easybeans-osgi/core/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="plugins/maven-easybeans-osgi/core/target/classes" path="plugins/maven-easybeans-osgi/core/src/main/resources"/>
 	<classpathentry kind="src" output="modules/injection/api/target/classes" path="modules/injection/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/injection/impl/target/classes" path="modules/injection/impl/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-smartclient/client/target/classes" path="modules/components/component-smartclient/client/src/main/java"/>
+	<classpathentry kind="src" output="modules/osgi/annotations/target/classes" path="modules/osgi/annotations/src/main/java"/>
+	<classpathentry kind="src" output="modules/osgi/core/target/classes" path="modules/osgi/core/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/modules/core/target/classes" path="modules/osgi/modules/core/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/agent/target/classes" path="modules/osgi/agent/src/main/java"/>
+	<classpathentry kind="src" output="modules/osgi/client/target/classes" path="modules/osgi/client/src/main/java"/>
+	<classpathentry kind="src" output="modules/osgi/components/audit/target/classes" path="modules/osgi/components/audit/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/audit/target/classes" path="modules/osgi/components/audit/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/components/carol/target/classes" path="modules/osgi/components/carol/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/carol/target/classes" path="modules/osgi/components/carol/src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/cmi/target/classes" path="modules/osgi/components/cmi/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/components/event/target/classes" path="modules/osgi/components/event/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/event/target/classes" path="modules/osgi/components/event/src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/hsqldb/target/classes" path="modules/osgi/components/hsqldb/src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/jdbcpool/target/classes" path="modules/osgi/components/jdbcpool/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/components/jmx/target/classes" path="modules/osgi/components/jmx/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/jmx/target/classes" path="modules/osgi/components/jmx/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/components/joram/target/classes" path="modules/osgi/components/joram/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/joram/target/classes" path="modules/osgi/components/joram/src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/jotm/target/classes" path="modules/osgi/components/jotm/src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/quartz/target/classes" path="modules/osgi/components/quartz/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/components/statistic/target/classes" path="modules/osgi/components/statistic/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/statistic/target/classes" path="modules/osgi/components/statistic/src/main/resources"/>
+	<classpathentry kind="src" output="modules/osgi/components/work-manager/target/classes" path="modules/osgi/components/work-manager/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/work-manager/target/classes" path="modules/osgi/components/work-manager/src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="modules/osgi/components/smartclient/target/classes" path="modules/osgi/components/smartclient/src/main/resources"/>
+	<classpathentry kind="src" output="itests/basic/target/test-classes" path="itests/basic/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="itests/basic/target/test-classes" path="itests/basic/src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry kind="output" path="output-eclipse"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
