@@ -17,6 +17,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.ow2.easybeans.utils</groupId>
+      <artifactId>easybeans-utils</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.ow2.util</groupId>
       <artifactId>util-xmlconfig</artifactId>
     </dependency>

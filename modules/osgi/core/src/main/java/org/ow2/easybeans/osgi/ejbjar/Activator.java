@@ -40,15 +40,15 @@ import org.ow2.easybeans.api.EZBContainerException;
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.container.JContainer3;
 import org.ow2.easybeans.container.JContainerConfig;
-import org.ow2.easybeans.osgi.util.BCMapper;
 import org.ow2.easybeans.osgi.util.LDAPFilter;
+import org.ow2.easybeans.util.osgi.BCMapper;
 import org.ow2.easybeans.server.Embedded;
 import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.archive.impl.ArchiveManager;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
+import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -97,7 +97,7 @@ public class Activator implements BundleActivator {
         this.listener = new EmbeddedServiceListener(this);
 
         String filter = LDAPFilter.createLDAPFilter(Embedded.class.getName());
-        bc.addServiceListener(listener, filter);
+        bc.addServiceListener(this.listener, filter);
 
         // first init, try to get the Embedded reference
         ServiceReference sr = bc.getServiceReference(Embedded.class.getName());
@@ -113,7 +113,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(final BundleContext bc) throws Exception {
-        bc.removeServiceListener(listener);
+        bc.removeServiceListener(this.listener);
         // Stop the container if any
         stopContainer();
     }
@@ -125,66 +125,66 @@ public class Activator implements BundleActivator {
      *            The Embedded ServiceReference.
      */
     public void startContainer(final ServiceReference sr) {
-        if (container == null) {
+        if (this.container == null) {
             ClassLoader old = Thread.currentThread().getContextClassLoader();
 
             try {
                 // Create the EZBArchive relying on OSGi
                 ArchiveManager am = ArchiveManager.getInstance();
-                IArchive archive = am.getArchive(bc);
+                IArchive archive = am.getArchive(this.bc);
 
-                BCMapper.getInstance().put(bc.getBundle().getEntry(ROOT), bc);
+                BCMapper.getInstance().put(this.bc.getBundle().getEntry(ROOT), this.bc);
 
                 BackedClassLoader backedClassLoader = new BackedClassLoader(new URL[] {archive.getURL()}, this.getClass()
-                        .getClassLoader(), bc);
+                        .getClassLoader(), this.bc);
 
                 Thread.currentThread().setContextClassLoader(backedClassLoader);
 
-                logger.info("Creating Container from the Bundle Archive ''{0}''", archive.getURL());
+                this.logger.info("Creating Container from the Bundle Archive ''{0}''", archive.getURL());
 
                 IDeployable<?> deployable = DeployableHelper.getDeployable(archive);
 
                 // Create and start the container
                 EZBContainerConfig jConfig = new JContainerConfig(deployable);
-                EZBServer server = (EZBServer) bc.getService(sr);
+                EZBServer server = (EZBServer) this.bc.getService(sr);
                 jConfig.setEZBServer(server);
-                container = new JContainer3(jConfig);
+                this.container = new JContainer3(jConfig);
 
                 for (EZBConfigurationExtension extension : server.getServerConfig().getExtensionFactories()) {
                     try {
                         extension.configure(jConfig);
                     } catch (Throwable t) {
                         // prevent malicious code to break everything ...
-                        logger.info("Failed to configure JContainerConfig with {0}", extension.getClass().getName());
+                        this.logger.info("Failed to configure JContainerConfig with {0}", extension.getClass().getName());
                     }
                 }
 
 
-                container.addExtension(BundleContext.class, bc);
+                this.container.addExtension(BundleContext.class, this.bc);
 
-                container.setClassLoader(backedClassLoader);
+                this.container.setClassLoader(backedClassLoader);
 
-                container.start();
+                this.container.start();
 
                 // register the container as a Service
                 Properties props = new Properties();
-                props.setProperty("name", bc.getBundle().getSymbolicName());
-                props.setProperty("last.modified", String.valueOf(bc.getBundle().getLastModified()));
-                props.setProperty("url", String.valueOf(bc.getBundle().getBundleId()));
+                props.setProperty("name", this.bc.getBundle().getSymbolicName());
+                props.setProperty("last.modified", String.valueOf(this.bc.getBundle().getLastModified()));
+                props.setProperty("url", String.valueOf(this.bc.getBundle().getBundleId()));
 
-                serviceReg = bc.registerService(EZBContainer.class.getName(), container, props);
+                this.serviceReg = this.bc.registerService(EZBContainer.class.getName(), this.container, props);
 
             } catch (EZBContainerException e) {
-                if (container != null) {
-                    container.stop();
+                if (this.container != null) {
+                    this.container.stop();
                 }
-                BCMapper.getInstance().remove(bc.getBundle().getEntry(ROOT));
+                BCMapper.getInstance().remove(this.bc.getBundle().getEntry(ROOT));
                 throw new RuntimeException(e);
             } catch (ArchiveException e) {
-                if (container != null) {
-                    container.stop();
+                if (this.container != null) {
+                    this.container.stop();
                 }
-                BCMapper.getInstance().remove(bc.getBundle().getEntry(ROOT));
+                BCMapper.getInstance().remove(this.bc.getBundle().getEntry(ROOT));
                 throw new RuntimeException(e);
             } catch (DeployableHelperException e) {
                 throw new RuntimeException(e);
@@ -199,7 +199,7 @@ public class Activator implements BundleActivator {
      */
     public void stopContainer() {
         // Remove the container
-        if (container != null) {
+        if (this.container != null) {
 
             ClassLoader old = Thread.currentThread().getContextClassLoader();
 
@@ -207,18 +207,18 @@ public class Activator implements BundleActivator {
                 Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
                 // Stop
-                container.stop();
+                this.container.stop();
 
-                container.removeExtension(BundleContext.class);
+                this.container.removeExtension(BundleContext.class);
 
                 // unregister if started
-                if (serviceReg != null) {
-                    serviceReg.unregister();
+                if (this.serviceReg != null) {
+                    this.serviceReg.unregister();
                 }
 
-                BCMapper.getInstance().remove(bc.getBundle().getEntry(ROOT));
+                BCMapper.getInstance().remove(this.bc.getBundle().getEntry(ROOT));
 
-                container = null;
+                this.container = null;
 
             } finally {
                 Thread.currentThread().setContextClassLoader(old);

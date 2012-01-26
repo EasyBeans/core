@@ -49,7 +49,7 @@
     <monolog.version>2.1.12</monolog.version>
     <slf4j.version>1.5.8</slf4j.version>
     <testng.version>6.3.1</testng.version>
-    
+    <easybeans-utils.version>0.0.1-SNAPSHOT</easybeans-utils.version>
 
     <!-- OSGi -->
     <ow2-bundle.version>1.0.33-SNAPSHOT</ow2-bundle.version>
@@ -189,6 +189,13 @@
         <artifactId>quartz</artifactId>
         <version>1.6.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.ow2.easybeans.utils</groupId>
+        <artifactId>easybeans-utils</artifactId>
+        <version>${easybeans-utils.version}</version>
+      </dependency>
+
 
       <dependency>
         <groupId>javax.transaction</groupId>
