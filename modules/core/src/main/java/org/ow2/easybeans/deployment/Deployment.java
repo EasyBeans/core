@@ -34,17 +34,19 @@ import org.ow2.easybeans.deployment.annotations.helper.ResolverHelper;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarDeployableFactory;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
+import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
 import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
+import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.IClassesLocator;
 import org.ow2.util.scan.api.ScanException;
 import org.ow2.util.scan.api.classlocator.ArchiveClassesLocator;
 import org.ow2.util.scan.api.classlocator.ClassLoaderClassesLocator;
+import org.ow2.util.url.URLUtils;
 
 /**
  * This class will parse given ejb-jar file and completes metadata by using
@@ -76,6 +78,11 @@ public class Deployment {
     private EjbJarArchiveMetadata ejbJarArchiveMetadata;
 
     /**
+     * Module name.
+     */
+    private String moduleName = null;
+
+    /**
      * EasyBeans deployment configuration.
      */
     private EZBContainerConfig configuration;
@@ -87,6 +94,17 @@ public class Deployment {
      */
     public Deployment(final IArchive archive) {
         this.archive = archive;
+        //TODO: could be configured through XML
+        try {
+            String shortName = URLUtils.shorterName(archive.getURL());
+            int dotPos = shortName.lastIndexOf('.');
+            if (dotPos != -1) {
+                shortName = shortName.substring(0, dotPos);
+            }
+            this.moduleName = shortName;
+        } catch (ArchiveException e) {
+            throw new IllegalArgumentException("Unable to shorter URL '" + archive.getName() + "'.", e);
+        }
         reset();
     }
 
@@ -227,4 +245,13 @@ public class Deployment {
     protected List<IArchive> getExtraArchives() {
         return this.extraArchives;
     }
+
+    /**
+     * @return the name of the module
+     */
+    public String getModuleName() {
+        return this.moduleName;
+    }
+
+
 }

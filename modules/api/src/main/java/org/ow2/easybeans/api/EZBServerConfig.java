@@ -223,4 +223,16 @@ public interface EZBServerConfig {
      */
     void setConfigurationMap(final Map<String, Object> configurationMap);
 
+
+    /**
+     * Use or not the EasyBeans v1 legacy naming strategy.
+     * @return true if this is the case.
+     */
+    boolean isUsingLegacyNamingStrategy();
+
+    /**
+     * Sets the value for EasyBeans v1 legacy naming strategy.
+     * @param useLegacyNamingStrategy the boolean value.
+     */
+    void setUseLegacyNamingStrategy(final boolean useLegacyNamingStrategy);
 }

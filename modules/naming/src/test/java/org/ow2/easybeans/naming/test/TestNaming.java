@@ -33,6 +33,7 @@ import javax.transaction.UserTransaction;
 
 import org.objectweb.jotm.Current;
 import org.ow2.easybeans.naming.NamingManager;
+import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.testng.Assert;
@@ -73,7 +74,7 @@ public class TestNaming {
         // fake bind
         this.initialContext.bind("javax.transaction.UserTransaction", new Current());
 
-        Context context = this.namingManager.createEnvironmentContext("test");
+        Context context = this.namingManager.createEnvironmentContext("test", null, null);
         this.namingManager.setComponentContext(context);
     }
 
@@ -102,13 +103,17 @@ public class TestNaming {
     public void testOnlyOneGlobal() throws NamingException {
         String key = "comp/env/myValue";
 
+        Context appContext = new ContextImpl("app");
+        Context module1Context = new ContextImpl("module1");
+        Context module2Context = new ContextImpl("module2");
+
         // Value1 for the first component
-        Context context1 = this.namingManager.createEnvironmentContext("component1");
+        Context context1 = this.namingManager.createEnvironmentContext("component1", module1Context, appContext);
         String value1 = "Value1";
         context1.bind(key, value1);
 
         // Value2 for other component
-        Context context2 = this.namingManager.createEnvironmentContext("component1");
+        Context context2 = this.namingManager.createEnvironmentContext("component2", module2Context, appContext);
         String value2 = "Value2";
         context2.bind(key, value2);
 
@@ -149,25 +154,31 @@ public class TestNaming {
      * @throws NamingException if lookup fails
      */
     @Test
-    public void testCompEqualsModule() throws NamingException {
+    public void testCompNotEqualsModule() throws NamingException {
         Context compContext = (Context) this.initialContext.lookup("java:comp");
         this.logger.debug("compContext = ''{0}''.", compContext);
         Context moduleContext = (Context) this.initialContext.lookup("java:module");
         this.logger.debug("moduleContext = ''{0}''.", moduleContext);
 
-        Assert.assertEquals(compContext, moduleContext);
+        Assert.assertNotSame(compContext, moduleContext);
     }
 
     /**
-     * Test Equals java:comp and java:module.
+     * Test java:comp and java:module.
      * @throws NamingException if lookup fails
      */
-    @Test(dependsOnMethods = "testCompEqualsModule")
+    @Test(dependsOnMethods = "testCompNotEqualsModule")
     public void testCompModuleContent() throws NamingException {
         UserTransaction userTransactionComp = (UserTransaction) this.initialContext.lookup("java:comp/UserTransaction");
-        UserTransaction userTransactionModule = (UserTransaction) this.initialContext.lookup("java:module/UserTransaction");
+        Assert.assertNotNull(userTransactionComp);
 
-        Assert.assertEquals(userTransactionComp, userTransactionModule);
+        // Nothing in java:module
+        try {
+            this.initialContext.lookup("java:module/UserTransaction");
+            Assert.fail("Should not be found");
+        } catch (NameNotFoundException e) {
+            // expected not found
+        }
     }
 
     /**
@@ -215,8 +226,7 @@ public class TestNaming {
         } catch (NameNotFoundException e) {
             Assert.assertNotNull(e);
         }
-
-
     }
+
 
 }

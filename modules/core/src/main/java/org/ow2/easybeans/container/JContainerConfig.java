@@ -32,7 +32,6 @@ import org.ow2.easybeans.api.EZBContainerLifeCycleCallback;
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.api.injection.ResourceInjector;
 import org.ow2.easybeans.api.naming.EZBNamingStrategy;
-import org.ow2.easybeans.naming.strategy.DefaultNamingStrategy;
 import org.ow2.easybeans.resolver.ContainerJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.util.archive.api.IArchive;
@@ -49,7 +48,7 @@ public class JContainerConfig implements EZBContainerConfig {
     /**
      * EjbJar deployable.
      */
-    private IDeployable deployable;
+    private IDeployable<?> deployable;
 
     /**
      * Embedded server.
@@ -69,7 +68,7 @@ public class JContainerConfig implements EZBContainerConfig {
     /**
      * JNDI naming strategy.
      */
-    private EZBNamingStrategy namingStrategy;
+    private List<EZBNamingStrategy> namingStrategies;
 
     /**
      * Link to Container JNDI Resolver.
@@ -79,10 +78,10 @@ public class JContainerConfig implements EZBContainerConfig {
 
     /**
      * Constructor.
-     * @param archive the deployable to process.
+     * @param deployable the deployable to process.
      */
-    public JContainerConfig(final IDeployable deployable) {
-        this.namingStrategy = new DefaultNamingStrategy();
+    public JContainerConfig(final IDeployable<?> deployable) {
+        this.namingStrategies = new ArrayList<EZBNamingStrategy>();
         this.deployable = deployable;
         this.containerJNDIResolver = new ContainerJNDIResolver(deployable.getArchive());
         this.callbacks = new ArrayList<EZBContainerLifeCycleCallback>();
@@ -102,11 +101,11 @@ public class JContainerConfig implements EZBContainerConfig {
     public void addCallback(final EZBContainerLifeCycleCallback callback) {
         this.callbacks.add(callback);
     }
-    
+
     /**
      * @return the deployable
      */
-    public IDeployable getDeployable() {
+    public IDeployable<?> getDeployable() {
         return this.deployable;
     }
 
@@ -149,16 +148,18 @@ public class JContainerConfig implements EZBContainerConfig {
     /**
      * @return JNDI naming strategy in use.
      */
-    public EZBNamingStrategy getNamingStrategy() {
-        return this.namingStrategy;
+    public List<EZBNamingStrategy> getNamingStrategies() {
+        return this.namingStrategies;
     }
 
     /**
-     * @param strategy JNDI naming strategy to use.
+     * Define naming strategies to use.
+     * @param namingStrategies the given strategies
      */
-    public void setNamingStrategy(final EZBNamingStrategy strategy) {
-        this.namingStrategy = strategy;
+    public void setNamingStrategies(final List<EZBNamingStrategy> namingStrategies) {
+        this.namingStrategies = namingStrategies;
     }
+
 
     /**
      * @return the JNDI Resolver.

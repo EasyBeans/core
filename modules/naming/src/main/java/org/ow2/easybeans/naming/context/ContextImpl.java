@@ -62,7 +62,7 @@ public class ContextImpl implements Context {
     /**
      * Environment.
      */
-    private Hashtable environment = null;
+    private Hashtable<Object, Object> environment = null;
 
     /**
      * Bindings (Name <--> Object).
@@ -80,60 +80,19 @@ public class ContextImpl implements Context {
     private String compId;
 
     /**
-     * Static global context for all components.
-     */
-    private static Context globalContext = null;
-
-
-    /**
      * Constructor.
      * @param id id of the context.
      * @param env initial environment.
      */
+    @SuppressWarnings("unchecked")
     public ContextImpl(final String id, final Hashtable<Object, Object> env) {
         if (env != null) {
             // clone env to be able to change it.
-            this.environment = (Hashtable) (env.clone());
+            this.environment = (Hashtable<Object, Object>) (env.clone());
         } else {
             this.environment = new Hashtable<Object, Object>();
         }
         this.compId = id;
-    }
-
-    /**
-     * Constructor.
-     * @param id id of the context.
-     * @param javaContext true if Context needs to be a java: context
-     * @param appContext if the java EE module is part of an application
-     * @throws NamingException if creation of context fails
-     */
-    public ContextImpl(final String id, final boolean javaContext, final Context appContext) throws NamingException {
-        this(id);
-
-        if (javaContext) {
-            // Add global context
-            if (globalContext == null) {
-                globalContext = new ContextImpl("global");
-            }
-            this.bindings.put("global", globalContext);
-
-            // Add comp
-            Context compContext = createSubcontext("comp");
-
-            // Add comp/env
-            compContext.createSubcontext("env");
-
-            // module is the same than comp
-            this.bindings.put("module", compContext);
-
-            // App context
-            if (appContext == null) {
-                createSubcontext("app");
-            } else {
-                this.bindings.put("app", compContext);
-            }
-        }
-
     }
 
     /**
@@ -505,7 +464,6 @@ public class ContextImpl implements Context {
      * @throws NamingException if a naming exception is encountered
      * @see javax.naming.NameAlreadyBoundException
      */
-    @SuppressWarnings("unchecked")
     public Context createSubcontext(final String name) throws NamingException {
         logger.debug("createSubcontext {0}", name);
 
@@ -627,7 +585,6 @@ public class ContextImpl implements Context {
      *         not in the environment before
      * @throws NamingException if a naming exception is encountered
      */
-    @SuppressWarnings("unchecked")
     public Object addToEnvironment(final String propName, final Object propVal) throws NamingException {
         return this.environment.put(propName, propVal);
     }
@@ -681,6 +638,18 @@ public class ContextImpl implements Context {
     // ------------------------------------------------------------------
 
     /**
+     * Allow to add a binding in order to enhance the current context.
+     * @param bindingName the name of the binding
+     * @param context the context to add for this binding
+     */
+    public void addBinding(final String bindingName, final Context context) {
+        if (this.bindings.get(bindingName) != null) {
+            throw new IllegalStateException("Binding named '" + bindingName + "' already exists.");
+        }
+        this.bindings.put(bindingName, context);
+    }
+
+    /**
      * Find if this name is a sub context.
      * @param name the sub context name
      * @return the named Context
@@ -693,18 +662,10 @@ public class ContextImpl implements Context {
         if (obj == null) {
             throw new NameNotFoundException();
         }
-        if (obj instanceof ContextImpl) {
+        if (obj instanceof Context) {
             return (Context) obj;
         }
         throw new NameAlreadyBoundException(name);
-    }
-
-    /**
-     * Allows to store the global context to use.
-     * @param globalContext the global java: context
-     */
-    public static void setGlobalContext(final Context globalContext) {
-        ContextImpl.globalContext = globalContext;
     }
 
 

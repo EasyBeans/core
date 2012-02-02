@@ -112,6 +112,10 @@ import org.ow2.easybeans.jmx.MBeansHelper;
 import org.ow2.easybeans.loader.EasyBeansClassLoader;
 import org.ow2.easybeans.naming.BeanNamingInfoHelper;
 import org.ow2.easybeans.naming.J2EEManagedObjectNamingHelper;
+import org.ow2.easybeans.naming.JNDINamingInfoHelper;
+import org.ow2.easybeans.naming.context.ContextImpl;
+import org.ow2.easybeans.naming.strategy.EasyBeansV1NamingStrategy;
+import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
 import org.ow2.easybeans.persistence.PersistenceUnitManager;
 import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
 import org.ow2.easybeans.persistence.api.PersistenceXmlFileAnalyzerException;
@@ -240,6 +244,17 @@ public class JContainer3 implements EZBContainer {
     private String j2eeManagedObjectId = null;
 
     /**
+     * JNDI module context of this module.
+     */
+    private Context moduleContext = null;
+
+    /**
+     * JNDI App context of this module.
+     */
+    private Context appContext = null;
+
+
+    /**
      * Build a new container on the given archive.
      * @param config The JContainer configuration storing the archive (jar file
      *        or exploded).
@@ -247,6 +262,7 @@ public class JContainer3 implements EZBContainer {
     public JContainer3(final EZBContainerConfig config) {
         setContainerConfig(config);
         this.bindingReferences = new ArrayList<EZBRef>();
+        this.moduleContext = new ContextImpl("module");
     }
 
     /**
@@ -300,6 +316,15 @@ public class JContainer3 implements EZBContainer {
         } catch (DeployableMetadataException e) {
             throw new EZBContainerException("Cannot create deployable metadata '" + getName()
                     + "'.", e);
+        }
+
+        // Naming strategies ?
+        if (getConfiguration().getNamingStrategies().size() == 0) {
+            // Add a default strategy
+            getConfiguration().getNamingStrategies().add(new JavaEE6NamingStrategy());
+        }
+        if (getConfiguration().getEZBServer().getServerConfig().isUsingLegacyNamingStrategy()) {
+            getConfiguration().getNamingStrategies().add(new EasyBeansV1NamingStrategy());
         }
 
         // Build JNDI resolver
@@ -571,7 +596,7 @@ public class JContainer3 implements EZBContainer {
                             // Build java: Context
                             Context javaContext;
                             try {
-                                javaContext = JavaContextHelper.build(classAnnotationMetadata, factory, eventDispatcher);
+                                javaContext = JavaContextHelper.build(classAnnotationMetadata, factory, eventDispatcher, this.moduleContext, this.appContext);
                             } catch (JavaContextHelperException e) {
                                 throw new EZBContainerException("Cannot build environment", e);
                             }
@@ -1189,9 +1214,9 @@ public class JContainer3 implements EZBContainer {
         // Assign the factory
         ejbHomeCallRef.setFactory(factory);
 
-        // Set the JNDI name
-        ejbHomeCallRef.setJNDIName(this.configuration.getNamingStrategy().getJNDIName(
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "RemoteHome", this.applicationName)));
+        // Set the JNDI naming infos
+        ejbHomeCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "RemoteHome", getModuleName(), this.applicationName)));
 
         return ejbHomeCallRef;
 
@@ -1230,9 +1255,9 @@ public class JContainer3 implements EZBContainer {
         // Assign to factory to it
         ejbLocalHomeCallRef.setFactory(factory);
 
-        // Set the JNDI name
-        ejbLocalHomeCallRef.setJNDIName(this.configuration.getNamingStrategy().getJNDIName(
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "LocalHome", this.applicationName)));
+        // Set the JNDI naming infos
+        ejbLocalHomeCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "LocalHome", getModuleName(), this.applicationName)));
 
         return ejbLocalHomeCallRef;
     }
@@ -1269,9 +1294,9 @@ public class JContainer3 implements EZBContainer {
         // Assign it to the factory
         localCallRef.setFactory(factory);
 
-        // Set the JNDI name
-        localCallRef.setJNDIName(this.configuration.getNamingStrategy().getJNDIName(
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Local", this.applicationName)));
+        // Set the JNDI naming infos
+        localCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Local", getModuleName(), this.applicationName)));
 
         return localCallRef;
     }
@@ -1306,9 +1331,9 @@ public class JContainer3 implements EZBContainer {
         // Assign the factory
         remoteCallRef.setFactory(factory);
 
-        // Set the JNDI name
-        remoteCallRef.setJNDIName(this.configuration.getNamingStrategy().getJNDIName(
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Remote", this.applicationName)));
+        // Set the JNDI naming infos
+        remoteCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Remote", getModuleName(), this.applicationName)));
 
         return remoteCallRef;
     }
@@ -1335,6 +1360,14 @@ public class JContainer3 implements EZBContainer {
      */
     public String getName() {
         return getArchive().getName();
+    }
+
+    /**
+     * Gets the module name of this container.
+     * @return the module name.
+     */
+    public String getModuleName() {
+        return this.deployment.getModuleName();
     }
 
     /**
@@ -1454,6 +1487,14 @@ public class JContainer3 implements EZBContainer {
      */
     public String getApplicationName() {
         return this.applicationName;
+    }
+
+    /**
+     * Sets the Application context of this container (EAR case).
+     * @param appContext the context of the application of this container.
+     */
+    public void setApplicationContext(final Context appContext) {
+        this.appContext  = appContext;
     }
 
     /**

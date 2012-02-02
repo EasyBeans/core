@@ -88,8 +88,8 @@ public class CmiEventListener implements EZBEventListener {
                         if (cluster != null || beanClass.isAnnotationPresent(Cluster.class)) {
                             if (EZBClusteredBeanEvent.STARTING.equals(clusterEvent.getState())) {
                                 String itfClassname = reference.getItfClassName();
-                                logger.info("The bean with the jndi name {0} and the interface name {1} is clustered.",
-                                        reference.getJNDIName(), itfClassname);
+                                logger.info("The bean with the name {0} and the interface name {1} is clustered.",
+                                        reference.getFactory().getBeanInfo().getName(), itfClassname);
                                 for (Class<?> klass : beanClass.getInterfaces()) {
                                     if (klass.getName().equals(itfClassname)) {
                                         itfClass = klass;
@@ -112,11 +112,11 @@ public class CmiEventListener implements EZBEventListener {
                                                 applicationExceptionNames);
                                     } else {
                                         infos = CMIInfoExtractor.extractClusteringInfoFromAnnotatedPOJO(
-                                                reference.getJNDIName(), itfClass, beanClass,
+                                                reference.getJNDINamingInfos().get(0).jndiName(), itfClass, beanClass,
                                                 factory instanceof StatefulSessionFactory, applicationExceptionNames);
 
                                     }
-                                    CMIInfoRepository.addClusteredObjectInfo(reference.getJNDIName(), infos);
+                                    CMIInfoRepository.addClusteredObjectInfo(reference.getJNDINamingInfos().get(0).jndiName(), infos);
                                 } catch (CMIInfoExtractorException e) {
                                     logger.error("Cannot extract infos for the class with name {0}", beanClass.getName(), e);
                                     /*
@@ -127,7 +127,7 @@ public class CmiEventListener implements EZBEventListener {
                                 }
                             } else {
                                 // Unbind reference.
-                                CMIInfoRepository.removeClusteredObjectInfo(reference.getJNDIName());
+                                CMIInfoRepository.removeClusteredObjectInfo(reference.getJNDINamingInfos().get(0).jndiName());
                             }
 
                         }

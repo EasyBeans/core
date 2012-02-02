@@ -41,6 +41,32 @@ import org.ow2.util.log.LogFactory;
 public final class NamingManager {
 
     /**
+     * Sub context name.
+     */
+    private static final String COMP_SUBCONTEXT = "comp";
+
+    /**
+     * Sub context name.
+     */
+    private static final String ENV_SUBCONTEXT = "env";
+
+    /**
+     * app sub context name.
+     */
+    private static final String APP_SUBCONTEXT = "app";
+
+    /**
+     * module sub context name.
+     */
+    private static final String MODULE_SUBCONTEXT = "module";
+
+
+    /**
+     * Sub context name.
+     */
+    private static final String GLOBAL_SUBCONTEXT = "global";
+
+    /**
      * Logger.
      */
     private static Log logger = LogFactory.getLog(NamingManager.class);
@@ -104,16 +130,43 @@ public final class NamingManager {
      * Create Context for application and component environments. (formally
      * known as createComponentContext)
      * @param namespace namespace to used for the Context
+     * @param moduleContext the module context
+     * @param appContext the application context
      * @return a java: context with comp/ subcontext
      * @throws NamingException if the creation of the java: context failed.
      */
-    public Context createEnvironmentContext(final String namespace) throws NamingException {
+    public Context createEnvironmentContext(final String namespace, final Context moduleContext, final Context appContext)
+            throws NamingException {
 
         // Create a new environment
-        ContextImpl ctx = new ContextImpl(namespace, true, null);
+        ContextImpl ctx = new ContextImpl(namespace);
 
         // Create subContext
-        Context compCtx = (Context) ctx.lookup("comp");
+        ContextImpl compCtx = (ContextImpl) ctx.createSubcontext(COMP_SUBCONTEXT);
+
+        // Create comp/env context
+        compCtx.createSubcontext(ENV_SUBCONTEXT);
+
+        // Add global
+        ctx.addBinding(GLOBAL_SUBCONTEXT, this.ictx);
+
+        // For EJB3, module subcontext is not comp context
+        if (moduleContext != null) {
+            ctx.addBinding(MODULE_SUBCONTEXT, moduleContext);
+        } else {
+            ctx.addBinding(MODULE_SUBCONTEXT, new ContextImpl("empty"));
+        }
+
+
+        // App context (if not defined, reuse module context)
+        Context appCtx = null;
+        if (appContext == null) {
+            appCtx = new ContextImpl("empty");
+        } else {
+            appCtx = appContext;
+        }
+
+        ctx.addBinding(APP_SUBCONTEXT, appCtx);
 
         // Bind java:comp/UserTransaction
         if (this.userTransaction == null) {

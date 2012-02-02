@@ -25,11 +25,14 @@
 
 package org.ow2.easybeans.api.binding;
 
+import java.util.List;
+
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.Referenceable;
 
 import org.ow2.easybeans.api.Factory;
+import org.ow2.easybeans.api.naming.EZBJNDINamingInfo;
 
 /**
  * EasyBeans reference used for each factory that produces EJB proxies.
@@ -47,10 +50,10 @@ public interface EZBRef extends Referenceable {
     String getItfClassName();
 
     /**
-     * Gets the JNDI name of this reference.
-     * @return JNDI name of this reference.
+     * Gets the JNDI naming info of this reference.
+     * @return the JNDI naming informations.
      */
-    String getJNDIName();
+    List<EZBJNDINamingInfo> getJNDINamingInfos();
 
     /**
      * Gets the factory of this reference.

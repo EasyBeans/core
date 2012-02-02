@@ -27,6 +27,8 @@ package org.ow2.easybeans.naming;
 
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJCommonBean;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 
 /**
  * Helper class that build a BeanNamingInfo object.
@@ -46,21 +48,45 @@ public final class BeanNamingInfoHelper {
      * @param beanClassMetadata the metadata of the bean
      * @param interfaceName Name of the interface.
      * @param mode local/remote/...
+     * @param moduleName the name of the module
      * @param javaEEApplicationName Java EE application name (if bean is in an
      *        EAR).
      * @return a BeanNamingInfo instance
      */
     public static BeanNamingInfo buildInfo(final EasyBeansEjbJarClassMetadata beanClassMetadata, final String interfaceName,
-            final String mode, final String javaEEApplicationName) {
+            final String mode, final String moduleName, final String javaEEApplicationName) {
         IJCommonBean commonBean = beanClassMetadata.getJCommonBean();
+
+        // Compute interface numbers
+        int interfaceNumbers = 0;
+        IJLocal localItfs = beanClassMetadata.getLocalInterfaces();
+        IJRemote remoteItfs = beanClassMetadata.getRemoteInterfaces();
+        String remoteHome = beanClassMetadata.getRemoteHome();
+        String localHome = beanClassMetadata.getLocalHome();
+        if (localItfs != null) {
+            interfaceNumbers += localItfs.getInterfaces().size();
+        }
+        if (remoteItfs != null) {
+            interfaceNumbers += remoteItfs.getInterfaces().size();
+        }
+        if (remoteHome != null) {
+            interfaceNumbers++;
+        }
+        if (localHome != null) {
+            interfaceNumbers++;
+        }
 
         BeanNamingInfo beanNamingInfo = new BeanNamingInfo();
         beanNamingInfo.setName(commonBean.getName());
         beanNamingInfo.setBeanClassName(beanClassMetadata.getClassName());
         beanNamingInfo.setInterfaceName(interfaceName);
         beanNamingInfo.setMode(mode);
+        beanNamingInfo.setModuleName(moduleName);
         beanNamingInfo.setMappedName(commonBean.getMappedName());
         beanNamingInfo.setJavaEEApplicationName(javaEEApplicationName);
+
+        // Single interface
+        beanNamingInfo.setSingleInterface(1 == interfaceNumbers);
 
         return beanNamingInfo;
 

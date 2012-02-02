@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2008 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,39 +19,45 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: DefaultNamingStrategy.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id: BeanNamingInfoHelper.java 5733 2011-02-21 12:54:34Z benoitf $
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.naming.strategy;
+package org.ow2.easybeans.naming;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ow2.easybeans.api.bean.info.EZBBeanNamingInfo;
+import org.ow2.easybeans.api.naming.EZBJNDINamingInfo;
 import org.ow2.easybeans.api.naming.EZBNamingStrategy;
 
 /**
- * Default naming strategy.
+ * Helper class that build a JNDINamingInfo object.
  * @author Florent Benoit
  */
-public class DefaultNamingStrategy implements EZBNamingStrategy {
+public final class JNDINamingInfoHelper {
 
     /**
-     * Gets the JNDI name for a given bean.
-     * @param beanInfo Bean information.
-     * @return JNDI name for this beanInfo.
+     * Utility class.
      */
-    public String getJNDIName(final EZBBeanNamingInfo beanInfo) {
-        String jndiName;
-        if (beanInfo.getMappedName() == null) {
-            String mode = beanInfo.getMode();
-            jndiName = beanInfo.getBeanClassName() + "_" + beanInfo.getInterfaceName();
-            // Append @Local or @Remote
-            if (mode != null && ("Local".equals(mode) || "Remote".equals(mode))) {
-                jndiName += "@" + mode;
-            }
-        } else {
-            jndiName = beanInfo.getMappedName();
-        }
-        return jndiName;
+    private JNDINamingInfoHelper() {
+
     }
 
+    /**
+     * Compute list of naming infos for each strategy.
+     * @param strategies the list of strategies
+     * @param namingInfo the naming info
+     * @return list of naming infos
+     */
+    public static List<EZBJNDINamingInfo> buildInfo(final List<EZBNamingStrategy> strategies,
+            final EZBBeanNamingInfo namingInfo) {
+        List<EZBJNDINamingInfo> jndiNamingInfos = new ArrayList<EZBJNDINamingInfo>();
+        for (EZBNamingStrategy strategy : strategies) {
+            jndiNamingInfos.add(strategy.getJNDINaming(namingInfo));
+        }
+        return jndiNamingInfos;
+
+    }
 }

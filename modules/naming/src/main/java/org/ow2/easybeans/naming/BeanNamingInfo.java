@@ -39,6 +39,11 @@ public class BeanNamingInfo implements EZBBeanNamingInfo {
     private String name;
 
     /**
+     * The module name.
+     */
+    private String moduleName;
+
+    /**
      * Name of the bean class.
      */
     private String beanClassName;
@@ -62,6 +67,11 @@ public class BeanNamingInfo implements EZBBeanNamingInfo {
      * Java EE application name (if bean is in an EAR).
      */
     private String javaEEApplicationName;
+
+    /**
+     * True if bean has only one interface view.
+     */
+    private boolean isSingleInterface = true;
 
     /**
      * Default Constructor.
@@ -131,6 +141,22 @@ public class BeanNamingInfo implements EZBBeanNamingInfo {
     }
 
     /**
+     * @return the name of the module.
+     */
+    public String getModuleName() {
+        return this.moduleName;
+    }
+
+    /**
+     * Sets the module name.
+     * @param moduleName the given module name
+     */
+    public void setModuleName(final String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+
+    /**
      * Sets the bean class name.
      * @param beanClassName the classname of the bean
      */
@@ -174,5 +200,20 @@ public class BeanNamingInfo implements EZBBeanNamingInfo {
      */
     public void setJavaEEApplicationName(final String javaEEApplicationName) {
         this.javaEEApplicationName = checkEmpty(javaEEApplicationName);
+    }
+
+    /**
+     * @return true if there is only one single interface for the bean
+     */
+    public boolean isSingleInterface() {
+        return this.isSingleInterface;
+    }
+
+    /**
+     * Defines single interface mode.
+     * @param isSingleInterface true if there is only one single interface for the bean
+     */
+    public void setSingleInterface(final boolean isSingleInterface) {
+        this.isSingleInterface = isSingleInterface;
     }
 }

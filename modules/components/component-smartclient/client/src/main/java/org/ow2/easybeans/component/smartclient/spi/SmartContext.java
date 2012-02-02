@@ -29,6 +29,7 @@ import java.util.Hashtable;
 
 import javax.naming.Binding;
 import javax.naming.Context;
+import javax.naming.LinkRef;
 import javax.naming.Name;
 import javax.naming.NameClassPair;
 import javax.naming.NameParser;
@@ -40,6 +41,17 @@ import javax.naming.NamingException;
  * @author Florent Benoit
  */
 public class SmartContext implements Context {
+
+    /**
+     * java:global/ context.
+     */
+    private static final String JAVA_GLOBAL_PREFIX = "java:global/";
+
+    /**
+     * java:global/ length.
+     */
+    private static final int JAVA_GLOBAL_PREFIX_LENGTH = JAVA_GLOBAL_PREFIX.length();
+
 
     /**
      * Context that is wrapped.
@@ -74,9 +86,9 @@ public class SmartContext implements Context {
      */
     public Object addToEnvironment(final String propName, final Object propVal) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.addToEnvironment(propName, propVal);
+            return this.wrapped.addToEnvironment(propName, propVal);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -91,9 +103,9 @@ public class SmartContext implements Context {
      */
     public void bind(final Name name, final Object obj) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.bind(name, obj);
+            this.wrapped.bind(name, obj);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -108,9 +120,9 @@ public class SmartContext implements Context {
      */
     public void bind(final String name, final Object obj) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.bind(name, obj);
+            this.wrapped.bind(name, obj);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -122,9 +134,9 @@ public class SmartContext implements Context {
      */
     public void close() throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.close();
+            this.wrapped.close();
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -139,9 +151,9 @@ public class SmartContext implements Context {
      */
     public Name composeName(final Name name, final Name prefix) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.composeName(name, prefix);
+            return this.wrapped.composeName(name, prefix);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -157,9 +169,9 @@ public class SmartContext implements Context {
      */
     public String composeName(final String name, final String prefix) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.composeName(name, prefix);
+            return this.wrapped.composeName(name, prefix);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -175,9 +187,9 @@ public class SmartContext implements Context {
      */
     public Context createSubcontext(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.createSubcontext(name);
+            return this.wrapped.createSubcontext(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -192,9 +204,9 @@ public class SmartContext implements Context {
      */
     public Context createSubcontext(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.createSubcontext(name);
+            return this.wrapped.createSubcontext(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -209,9 +221,9 @@ public class SmartContext implements Context {
      */
     public void destroySubcontext(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.destroySubcontext(name);
+            this.wrapped.destroySubcontext(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -225,9 +237,9 @@ public class SmartContext implements Context {
      */
     public void destroySubcontext(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.destroySubcontext(name);
+            this.wrapped.destroySubcontext(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -240,9 +252,9 @@ public class SmartContext implements Context {
      */
     public Hashtable<?, ?> getEnvironment() throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.getEnvironment();
+            return this.wrapped.getEnvironment();
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -255,9 +267,9 @@ public class SmartContext implements Context {
      */
     public String getNameInNamespace() throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.getNameInNamespace();
+            return this.wrapped.getNameInNamespace();
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -272,9 +284,9 @@ public class SmartContext implements Context {
      */
     public NameParser getNameParser(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.getNameParser(name);
+            return this.wrapped.getNameParser(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -289,9 +301,9 @@ public class SmartContext implements Context {
      */
     public NameParser getNameParser(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.getNameParser(name);
+            return this.wrapped.getNameParser(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -310,9 +322,9 @@ public class SmartContext implements Context {
      */
     public NamingEnumeration<NameClassPair> list(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.list(name);
+            return this.wrapped.list(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -330,9 +342,9 @@ public class SmartContext implements Context {
      */
     public NamingEnumeration<NameClassPair> list(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.list(name);
+            return this.wrapped.list(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -350,9 +362,9 @@ public class SmartContext implements Context {
      */
     public NamingEnumeration<Binding> listBindings(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.listBindings(name);
+            return this.wrapped.listBindings(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -368,9 +380,9 @@ public class SmartContext implements Context {
      */
     public NamingEnumeration<Binding> listBindings(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.listBindings(name);
+            return this.wrapped.listBindings(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -384,9 +396,9 @@ public class SmartContext implements Context {
      */
     public Object lookup(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.lookup(name);
+            return this.wrapped.lookup(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -399,10 +411,21 @@ public class SmartContext implements Context {
      * @throws NamingException if a naming exception is encountered
      */
     public Object lookup(final String name) throws NamingException {
+
+        // Handle redirect to global JNDI
+        if (name.startsWith(JAVA_GLOBAL_PREFIX)) {
+            return lookup(name.substring(JAVA_GLOBAL_PREFIX_LENGTH));
+        }
+
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.lookup(name);
+            Object o = this.wrapped.lookup(name);
+            if (o instanceof LinkRef) {
+                LinkRef linkRef = (LinkRef) o;
+                return lookup(linkRef.getLinkName());
+            }
+            return o;
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -419,9 +442,9 @@ public class SmartContext implements Context {
      */
     public Object lookupLink(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.lookupLink(name);
+            return this.wrapped.lookupLink(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -438,9 +461,9 @@ public class SmartContext implements Context {
      */
     public Object lookupLink(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.lookupLink(name);
+            return this.wrapped.lookupLink(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -454,9 +477,9 @@ public class SmartContext implements Context {
      */
     public void rebind(final Name name, final Object obj) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.rebind(name, obj);
+            this.wrapped.rebind(name, obj);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -472,9 +495,9 @@ public class SmartContext implements Context {
      */
     public void rebind(final String name, final Object obj) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.rebind(name, obj);
+            this.wrapped.rebind(name, obj);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -490,9 +513,9 @@ public class SmartContext implements Context {
      */
     public Object removeFromEnvironment(final String propName) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            return wrapped.removeFromEnvironment(propName);
+            return this.wrapped.removeFromEnvironment(propName);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -508,9 +531,9 @@ public class SmartContext implements Context {
      */
     public void rename(final Name oldName, final Name newName) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.rename(oldName, newName);
+            this.wrapped.rename(oldName, newName);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -525,9 +548,9 @@ public class SmartContext implements Context {
      */
     public void rename(final String oldName, final String newName) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.rename(oldName, newName);
+            this.wrapped.rename(oldName, newName);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -541,9 +564,9 @@ public class SmartContext implements Context {
      */
     public void unbind(final Name name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.unbind(name);
+            this.wrapped.unbind(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -559,9 +582,9 @@ public class SmartContext implements Context {
      */
     public void unbind(final String name) throws NamingException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
-            wrapped.unbind(name);
+            this.wrapped.unbind(name);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }

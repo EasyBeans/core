@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2011 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,44 +19,29 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: TestEnvEntries.java 5743 2011-02-28 16:02:42Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.itests.tests;
+package org.ow2.easybeans.api.naming;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import org.ow2.easybeans.application.enventry.IEnvEntry;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import java.util.List;
 
 /**
- * Test the Env-Entries.
+ * Provides JNDI name and list of aliases for this JNDI name.
  * @author Florent Benoit
  */
-public class TestEnvEntries {
+public interface EZBJNDINamingInfo {
 
     /**
-     * Bean.
+     * @return the JNDI name.
      */
-    private IEnvEntry envEntryBean = null;
+    String jndiName();
 
-    @BeforeClass
-    public void getBean() throws NamingException {
-        this.envEntryBean = (IEnvEntry) new InitialContext().lookup("EnvEntryBean@Remote");
-    }
-
-    @Test
-    public void testInjectedFields() {
-        this.envEntryBean.checkInjectedFields();
-    }
-
-    @Test
-    public void checkCompNotEqualsModule() throws NamingException {
-        this.envEntryBean.checkCompNotEqualsModule();
-    }
+    /**
+     * @return the JNDI name aliases (LinkRef).
+     */
+    List<String> aliases();
 
 
 }

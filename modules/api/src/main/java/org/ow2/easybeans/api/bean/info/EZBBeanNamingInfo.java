@@ -42,6 +42,11 @@ public interface EZBBeanNamingInfo {
     String getJavaEEApplicationName();
 
     /**
+     * @return the module name.
+     */
+    String getModuleName();
+
+    /**
      * @return Name of the bean class.
      */
     String getBeanClassName();
@@ -60,4 +65,10 @@ public interface EZBBeanNamingInfo {
      * @return The MappedName attribute, may be null.
      */
     String getMappedName();
+
+    /**
+     * @return true if there is only one single interface for the bean
+     */
+    boolean isSingleInterface();
+
 }

@@ -25,12 +25,15 @@
 
 package org.ow2.easybeans.proxy.reference;
 
+import java.util.List;
+
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.binding.EZBRef;
+import org.ow2.easybeans.api.naming.EZBJNDINamingInfo;
 
 /**
  * Define a common Referenceable object used by local or remote EJB.
@@ -81,9 +84,10 @@ public abstract class AbsCallRef implements EZBRef {
     private boolean useID;
 
     /**
-     * JNDI name used for this reference.
+     * JNDI naming used for this reference.
      */
-    private String jndiName = null;
+    private List<EZBJNDINamingInfo> jndiNamingInfos = null;
+
 
     /**
      * Factory of this reference. (Transient value)
@@ -135,19 +139,19 @@ public abstract class AbsCallRef implements EZBRef {
     }
 
     /**
-     * Sets the JNDI name of this reference.
-     * @param jndiName the JNDI name value.
+     * Sets the JNDI naming info of this reference.
+     * @param jndiNamingInfos the JNDI naming informations.
      */
-    public void setJNDIName(final String jndiName) {
-        this.jndiName = jndiName;
+    public void setJNDINamingInfos(final List<EZBJNDINamingInfo> jndiNamingInfos) {
+         this.jndiNamingInfos = jndiNamingInfos;
     }
 
     /**
-     * Gets the JNDI name of this reference.
-     * @return JNDI name of this reference.
+     * Gets the JNDI naming info of this reference.
+     * @return the JNDI naming informations.
      */
-    public String getJNDIName() {
-        return this.jndiName;
+    public List<EZBJNDINamingInfo> getJNDINamingInfos() {
+        return this.jndiNamingInfos;
     }
 
     /**

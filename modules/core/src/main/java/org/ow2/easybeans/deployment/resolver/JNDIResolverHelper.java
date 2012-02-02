@@ -28,13 +28,13 @@ import java.net.URL;
 import java.util.List;
 
 import org.ow2.easybeans.api.EZBContainer;
+import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.api.bean.info.EZBBeanNamingInfo;
 import org.ow2.easybeans.api.naming.EZBNamingStrategy;
 import org.ow2.easybeans.deployment.Deployment;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.easybeans.naming.BeanNamingInfoHelper;
-import org.ow2.easybeans.naming.strategy.DefaultNamingStrategy;
 import org.ow2.easybeans.resolver.JNDIBeanData;
 import org.ow2.easybeans.resolver.JNDIData;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
@@ -103,24 +103,36 @@ public class JNDIResolverHelper {
         }
 
         EZBNamingStrategy namingStrategy = null;
-        if (deployment.getConfiguration() != null) {
-            namingStrategy = deployment.getConfiguration().getNamingStrategy();
-        } else {
-            namingStrategy = new DefaultNamingStrategy();
+        EZBContainerConfig config = deployment.getConfiguration();
+        if (config != null) {
+            List<EZBNamingStrategy> strategies = deployment.getConfiguration().getNamingStrategies();
+            if (strategies.size() == 1) {
+                namingStrategy = strategies.get(0);
+            } else if (strategies.size() > 0) {
+                this.logger.warn("Using first strategy in the list '" + strategies + "'.");
+                namingStrategy = strategies.get(0);
+            }
+        }
+
+        // Takes the first naming strategy
+        if (namingStrategy == null) {
+            throw new IllegalStateException("Cannot have empty strategy for deployment " + deployment.getArchive().getName());
+
         }
 
         // Add info extracted from metadata
-        analyzeMetadata(ejbJarAnnotationMetadata, namingStrategy, url);
+        analyzeMetadata(ejbJarAnnotationMetadata, deployment.getModuleName(), namingStrategy, url);
     }
 
     /**
      * Adds the given metadata to the resolver.
      * @param ejbJarArchiveMetadata the metadata for a given jar file
+     * @param moduleName the module name
      * @param namingStrategy JNDI naming strategy.
      * @param url the url of the archive
      */
-    private void analyzeMetadata(final EjbJarArchiveMetadata ejbJarArchiveMetadata, final EZBNamingStrategy namingStrategy,
-            final URL url) {
+    private void analyzeMetadata(final EjbJarArchiveMetadata ejbJarArchiveMetadata, final String moduleName,
+            final EZBNamingStrategy namingStrategy, final URL url) {
 
         // For each bean, get the interfaces and add the jndiName mapping.
         List<String> beanNames = ejbJarArchiveMetadata.getBeanNames();
@@ -136,7 +148,7 @@ public class JNDIResolverHelper {
                     if (localItfs != null) {
                         for (String itf : localItfs.getInterfaces()) {
                             EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, itf, "Local",
-                                    this.applicationName);
+                                    moduleName, this.applicationName);
                             addInterface(namingInfo, namingStrategy, url);
                         }
                     }
@@ -145,7 +157,7 @@ public class JNDIResolverHelper {
                     if (remoteItfs != null) {
                         for (String itf : remoteItfs.getInterfaces()) {
                             EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, itf, "Remote",
-                                    this.applicationName);
+                                    moduleName, this.applicationName);
                             addInterface(namingInfo, namingStrategy, url);
                         }
                     }
@@ -154,7 +166,7 @@ public class JNDIResolverHelper {
                     String remoteHome = classAnnotationMetadata.getRemoteHome();
                     if (remoteHome != null) {
                         EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, remoteHome,
-                                "RemoteHome", this.applicationName);
+                                "RemoteHome", moduleName, this.applicationName);
                         addInterface(namingInfo, namingStrategy, url);
                     }
 
@@ -162,7 +174,7 @@ public class JNDIResolverHelper {
                     String localHome = classAnnotationMetadata.getLocalHome();
                     if (localHome != null) {
                         EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, localHome,
-                                "LocalHome", this.applicationName);
+                                "LocalHome", moduleName, this.applicationName);
                         addInterface(namingInfo, namingStrategy, url);
                     }
                 }
@@ -202,7 +214,7 @@ public class JNDIResolverHelper {
     private void addInterface(final EZBBeanNamingInfo beanNamingInfo, final EZBNamingStrategy namingStrategy,
             final URL containerURL) {
         // Get the JNDI name
-        String jndiName = namingStrategy.getJNDIName(beanNamingInfo);
+        String jndiName = namingStrategy.getJNDINaming(beanNamingInfo).jndiName();
 
         // interface name
         String interfaceName = beanNamingInfo.getInterfaceName();

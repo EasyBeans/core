@@ -64,12 +64,13 @@ public interface EZBContainerConfig {
     /**
      * @return JNDI naming strategy in use.
      */
-    EZBNamingStrategy getNamingStrategy();
+    List<EZBNamingStrategy> getNamingStrategies();
 
     /**
-     * @param strategy JNDI naming strategy to use.
+     * Define naming strategies to use.
+     * @param strategies
      */
-    void setNamingStrategy(EZBNamingStrategy strategy);
+    void setNamingStrategies(List<EZBNamingStrategy> strategies);
 
     /**
      * @return the injectors

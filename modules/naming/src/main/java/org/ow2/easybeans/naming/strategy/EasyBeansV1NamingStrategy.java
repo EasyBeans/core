@@ -19,24 +19,45 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: EZBNamingStrategy.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id: DefaultNamingStrategy.java 5369 2010-02-24 14:58:19Z benoitf $
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.api.naming;
+package org.ow2.easybeans.naming.strategy;
 
 import org.ow2.easybeans.api.bean.info.EZBBeanNamingInfo;
+import org.ow2.easybeans.api.naming.EZBJNDINamingInfo;
+import org.ow2.easybeans.api.naming.EZBNamingStrategy;
 
 /**
- * This interface defines a JNDI naming strategy.
- * @author S. Ali Tokmen
+ * EasyBeans v1 naming strategy.
+ * @author Florent Benoit
  */
-public interface EZBNamingStrategy {
+public class EasyBeansV1NamingStrategy implements EZBNamingStrategy {
 
     /**
-     * Gets the JNDI information for a given bean.
+     * Gets the JNDI name for a given bean.
      * @param beanInfo Bean information.
      * @return JNDI name for this beanInfo.
      */
-    EZBJNDINamingInfo getJNDINaming(EZBBeanNamingInfo beanInfo);
+    public EZBJNDINamingInfo getJNDINaming(final EZBBeanNamingInfo beanInfo) {
+
+        String jndiName;
+        if (beanInfo.getMappedName() == null) {
+            String mode = beanInfo.getMode();
+            jndiName = beanInfo.getBeanClassName() + "_" + beanInfo.getInterfaceName();
+            // Append @Local or @Remote
+            if (mode != null && ("Local".equals(mode) || "Remote".equals(mode))) {
+                jndiName += "@" + mode;
+            }
+        } else {
+            jndiName = beanInfo.getMappedName();
+        }
+
+        JNDINamingInfo jndiNamingInfo = new JNDINamingInfo(jndiName);
+
+        // No aliases
+        return jndiNamingInfo;
+    }
+
 }

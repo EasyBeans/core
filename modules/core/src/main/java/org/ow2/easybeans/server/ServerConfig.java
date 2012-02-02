@@ -124,6 +124,12 @@ public class ServerConfig implements EZBServerConfig {
     private Map<String, Object> configurationMap = null;
 
     /**
+     * Use or not the EasyBeans v1 legacy naming strategy.
+     * @return true if this is the case.
+     */
+    private boolean useLegacyNamingStrategy = false;
+
+    /**
      * Constructor.
      */
     public ServerConfig() {
@@ -382,6 +388,22 @@ public class ServerConfig implements EZBServerConfig {
      */
     public void setConfigurationMap(final Map<String, Object> configurationMap) {
         this.configurationMap = configurationMap;
+    }
+
+    /**
+     * Use or not the EasyBeans v1 legacy naming strategy.
+     * @return true if this is the case.
+     */
+    public boolean isUsingLegacyNamingStrategy() {
+        return this.useLegacyNamingStrategy;
+    }
+
+    /**
+     * Sets the value for EasyBeans v1 legacy naming strategy.
+     * @param useLegacyNamingStrategy the boolean value.
+     */
+    public void setUseLegacyNamingStrategy(final boolean useLegacyNamingStrategy) {
+        this.useLegacyNamingStrategy = useLegacyNamingStrategy;
     }
 
 

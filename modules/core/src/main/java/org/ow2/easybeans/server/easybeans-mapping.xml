@@ -40,6 +40,7 @@
         <attribute name="registerDeployerMBean" alias="deployer" />
         <attribute name="registerJ2EEServerMBean" alias="j2eeserver" />
         <attribute name="description" />
+        <attribute name="useLegacyNamingStrategy" />
     </class>
 
     <class name="org.ow2.easybeans.component.Components"

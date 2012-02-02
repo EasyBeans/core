@@ -71,17 +71,21 @@ public final class JavaContextHelper {
      * @param bean the bean for which there is a need to build a context.
      * @param easyBeansFactory the factory to build EJBContext
      * @param dispatcher the dispatcher for naming events
+     * @param moduleContext the module context
+     * @param appContext the application context
      * @return a java: context.
      * @throws JavaContextHelperException if environment cannot be built
      */
     public static Context build(final EasyBeansEjbJarClassMetadata bean,
                                 final Factory<?, ?> easyBeansFactory,
-                                final IEventDispatcher dispatcher)
+                                final IEventDispatcher dispatcher,
+                                final Context moduleContext,
+                                final Context appContext)
             throws JavaContextHelperException {
 
         Context javaCtx = null;
         try {
-            javaCtx = NamingManager.getInstance().createEnvironmentContext(bean.getClassName());
+            javaCtx = NamingManager.getInstance().createEnvironmentContext(bean.getClassName(), moduleContext, appContext);
         } catch (NamingException e) {
             throw new IllegalStateException("Cannot build a new environment", e);
         }

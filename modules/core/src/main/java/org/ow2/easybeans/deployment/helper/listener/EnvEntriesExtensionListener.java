@@ -125,9 +125,9 @@ public class EnvEntriesExtensionListener extends AbstractExtensionListener {
                     } else if (name.startsWith("java:global/")) {
                         bindContext = javaGlobalCtx;
                         name = name.substring("java:global/".length());
-                    } else if (name.startsWith("java:comp/")) {
+                    } else if (name.startsWith("java:comp/env/")) {
                         bindContext = javaCompEnvCtx;
-                        name = name.substring("java:comp/".length());
+                        name = name.substring("java:comp/env/".length());
                     } else {
                         throwException(javaContextNamingEvent, new IllegalStateException("Invalid Env Entry name '" + name
                                 + "' for bean '" + beanName + "'."));

@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007-2008 Bull S.A.S.
+ * Copyright (C) 2007-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -25,12 +25,18 @@
 
 package org.ow2.easybeans.proxy.binding;
 
+import java.util.List;
+
+import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.LinkRef;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.ow2.easybeans.api.binding.BindingException;
 import org.ow2.easybeans.api.binding.EZBBindingFactory;
 import org.ow2.easybeans.api.binding.EZBRef;
+import org.ow2.easybeans.api.naming.EZBJNDINamingInfo;
 
 /**
  * Binding of the reference in the JNDI/Registry.
@@ -47,11 +53,22 @@ public class JNDIBindingFactory implements EZBBindingFactory {
      * @throws BindingException if the bind fails.
      */
     public void bind(final EZBRef ref) throws BindingException {
-        try {
-            new InitialContext().rebind(ref.getJNDIName(), ref);
-        } catch (NamingException e) {
-            throw new BindingException(
-                    "Cannot bind the object with JNDI name '" + ref.getJNDIName() + "' and reference '" + ref + "'.", e);
+        // Bind all JNDI names and create linkref for aliases
+        List<EZBJNDINamingInfo> jndiInfos = ref.getJNDINamingInfos();
+        if (jndiInfos != null) {
+            for (EZBJNDINamingInfo jndiNamingInfo : jndiInfos) {
+
+                Context javaContext = ref.getFactory().getJavaContext();
+                String jndiName = jndiNamingInfo.jndiName();
+                List<String> aliases = jndiNamingInfo.aliases();
+                bind(jndiName, javaContext, ref);
+
+                if (aliases != null) {
+                    for (String alias : aliases) {
+                        bind(alias, javaContext, new LinkRef(jndiName));
+                    }
+                }
+            }
         }
     }
 
@@ -61,19 +78,73 @@ public class JNDIBindingFactory implements EZBBindingFactory {
      * @throws BindingException if any unbind fails.
      */
     public void unbind(final EZBRef ref) throws BindingException {
-        Object toUnbind;
-        try {
-            toUnbind = new InitialContext().lookupLink(ref.getJNDIName());
-        } catch (NamingException e) {
-            toUnbind = null;
-        }
-        if (toUnbind != null) {
-            try {
-                new InitialContext().unbind(ref.getJNDIName());
-            } catch (NamingException e) {
-                throw new BindingException("Cannot unbind the object with JNDI name '" + ref.getJNDIName() + "'.", e);
+        // Unbind all JNDI names and the aliases
+        List<EZBJNDINamingInfo> jndiInfos = ref.getJNDINamingInfos();
+        if (jndiInfos != null) {
+            for (EZBJNDINamingInfo jndiNamingInfo : jndiInfos) {
+
+                String jndiName = jndiNamingInfo.jndiName();
+                List<String> aliases = jndiNamingInfo.aliases();
+
+                unbind(jndiName, ref.getFactory().getJavaContext());
+
+                if (aliases != null) {
+                    for (String alias : aliases) {
+                        unbind(alias, ref.getFactory().getJavaContext());
+                    }
+                }
+
             }
         }
+
     }
 
+
+    /**
+     * Unbind the given JNDI name.
+     * @param jndiName the name to unbind
+     * @param javaContext the javaContext if parameters have to be added
+     * @param toBind the object to bind
+     * @throws BindingException if unbind fails
+     */
+    protected void bind(final String jndiName, final Context javaContext, final Object toBind) throws BindingException {
+
+        try {
+            //java prefix ?
+            if (jndiName.startsWith("java:")) {
+                javaContext.rebind(jndiName.substring("java:".length()), toBind);
+            } else {
+                new InitialContext().rebind(jndiName, toBind);
+            }
+        } catch (NamingException e) {
+            throw new BindingException("Cannot bind the object with JNDI name '" + jndiName + "'", e);
+        }
+
+    }
+
+
+
+    /**
+     * Unbind the given JNDI name.
+     * @param jndiName the name to unbind
+     * @param javaContext the java: context
+     * @throws BindingException if unbind fails
+     */
+    protected void unbind(final String jndiName, final Context javaContext) throws BindingException {
+        try {
+            if (jndiName.startsWith("java:")) {
+                javaContext.unbind(jndiName.substring("java:".length()));
+            } else {
+                try {
+                    new InitialContext().lookupLink(jndiName);
+                } catch (NameNotFoundException e) {
+                    // NA, do not unbind
+                    return;
+                }
+                new InitialContext().unbind(jndiName);
+            }
+        } catch (NamingException e) {
+            throw new BindingException("Cannot unbind the object with JNDI name '" + jndiName + "'.", e);
+        }
+    }
 }
