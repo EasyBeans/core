@@ -26,7 +26,7 @@
 package org.ow2.easybeans.resolver.api;
 
 /**
- * JNDI Data for a given bean
+ * JNDI Data for a given bean.
  * @author Florent Benoit
  */
 public interface EZBJNDIBeanData extends EZBJNDIData {
