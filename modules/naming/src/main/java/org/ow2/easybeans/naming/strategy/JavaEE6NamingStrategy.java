@@ -103,7 +103,7 @@ public class JavaEE6NamingStrategy implements EZBNamingStrategy {
                 jndiNamingInfo.aliases().add(beanInfo.getMappedName());
             } else {
                 // Use only the mappedName for the remote interface
-                if ("Remote".equals(beanInfo.getMode())) {
+                if ("Remote".equals(beanInfo.getMode()) || "RemoteHome".equals(beanInfo.getMode())) {
                     jndiNamingInfo.aliases().add(beanInfo.getMappedName());
                 } else {
                     // use a prefix
