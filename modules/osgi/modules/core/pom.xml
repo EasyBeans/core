@@ -80,6 +80,7 @@
                      org.ow2.easybeans.loader.*,
                      org.ow2.easybeans.management.*,
                      org.ow2.easybeans.naming.*,
+                     org.ow2.easybeans.ejbinwar.*,
                      org.ow2.easybeans.osgi.annotation,
                      org.ow2.easybeans.osgi.core,
                      org.ow2.easybeans.osgi.ejbjar,
@@ -127,6 +128,12 @@
     <dependency>
       <groupId>org.ow2.easybeans.utils</groupId>
       <artifactId>easybeans-utils</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-ejbinwar</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>

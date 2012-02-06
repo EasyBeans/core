@@ -2,7 +2,7 @@
 <!--
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   - EasyBeans
-  - Copyright (C) 2007-2009 Bull S.A.S.
+  - Copyright (C) 2012 Bull S.A.S.
   - Contact: easybeans@ow2.org
   -
   - This library is free software; you can redistribute it and/or
@@ -27,38 +27,58 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.ow2.easybeans</groupId>
-    <artifactId>easybeans</artifactId>
+    <artifactId>easybeans-modules</artifactId>
     <version>2.0.0-alpha-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ow2.easybeans</groupId>
-  <artifactId>easybeans-modules</artifactId>
-  <packaging>pom</packaging>
-  <name>EasyBeans: Modules</name>
-  <description>Modules of EasyBeans</description>
+  <artifactId>easybeans-ejbinwar</artifactId>
+  <packaging>jar</packaging>
+  <name>EasyBeans: EJBs in War</name>
+  <description>Manage the EJB in WAr</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-deployment</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-log</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-deploy-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-deploy-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-  <modules>
-    <!-- Modules -->
-    <module>api</module>
-    <module>core</module>
-    <module>deployment</module>
-    <module>injection</module>
-    <module>naming</module>
-    <module>jacc-provider</module>
-    <module>jndi-resolver</module>
-    <module>management</module>
-    <module>security</module>
-    <module>transaction</module>
-    <module>util</module>
-    <module>ejbinwar</module>
 
+  <!-- TODO: Remove it when mavenization will be finished -->
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
 
-    <!-- Components -->
-    <module>components</module>
-
-    <!-- OSGi -->
-    <module>osgi</module>
-
-  </modules>
-
+  </build>
 </project>
