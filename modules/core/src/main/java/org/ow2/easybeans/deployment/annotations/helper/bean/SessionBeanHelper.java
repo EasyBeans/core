@@ -27,6 +27,7 @@ package org.ow2.easybeans.deployment.annotations.helper.bean;
 
 import org.ow2.easybeans.deployment.annotations.exceptions.ResolverException;
 import org.ow2.easybeans.deployment.annotations.helper.bean.session.JWSWebMethodFinder;
+import org.ow2.easybeans.deployment.annotations.helper.bean.session.LocalBeanBusinessMethodHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.session.SessionBeanInterface;
 import org.ow2.easybeans.deployment.annotations.helper.bean.session.SessionBusinessInterfaceFinder;
 import org.ow2.easybeans.deployment.annotations.helper.bean.session.checks.SessionBeanValidator;
@@ -65,6 +66,11 @@ public final class SessionBeanHelper {
 
         // Find annotated interfaces
         SessionBusinessInterfaceFinder.resolve(sessionBean);
+
+        // Local Bean ?
+        if (sessionBean.isLocalBean()) {
+            LocalBeanBusinessMethodHelper.resolve(sessionBean);
+        }
 
         if (validating) {
             SessionBeanValidator.validate(sessionBean);

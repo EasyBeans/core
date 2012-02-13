@@ -25,6 +25,9 @@
 
 package org.ow2.easybeans.enhancer.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.transaction.xa.XAResource;
 
 import org.ow2.easybeans.api.Factory;
@@ -45,8 +48,11 @@ import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.enhancer.CommonClassGenerator;
+import org.ow2.easybeans.enhancer.DefinedClass;
 import org.ow2.easybeans.enhancer.interceptors.EasyBeansInvocationContextGenerator;
 import org.ow2.easybeans.enhancer.lib.MethodRenamer;
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
 
 /**
@@ -56,6 +62,11 @@ import org.ow2.util.scan.api.metadata.structures.JMethod;
  * @author Florent Benoit
  */
 public class BeanClassAdapter extends ClassAdapter implements Opcodes {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOGGER = LogFactory.getLog(BeanClassAdapter.class);
 
     /**
      * Metadata available by this adapter for a class.
@@ -79,14 +90,28 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
             "(Ljavax/ejb/Timer;)V", null, null);
 
     /**
+     * Mappping between className and the bytecode.
+     */
+    private List<DefinedClass> definedClasses = null;
+
+    /**
+     * Classloader used to load classes.
+     */
+    private ClassLoader readLoader = null;
+
+    /**
      * Constructor.
      * @param classAnnotationMetadata object containing all attributes of the
      *        class
      * @param cv the class visitor to which this adapter must delegate calls.
+     * @param readLoader the classloader used to read classes
      */
-    public BeanClassAdapter(final EasyBeansEjbJarClassMetadata classAnnotationMetadata, final ClassVisitor cv) {
+    public BeanClassAdapter(final EasyBeansEjbJarClassMetadata classAnnotationMetadata, final ClassVisitor cv,
+            final ClassLoader readLoader) {
         super(cv);
         this.classAnnotationMetadata = classAnnotationMetadata;
+        this.readLoader = readLoader;
+        this.definedClasses = new ArrayList<DefinedClass>();
     }
 
     /**
@@ -231,6 +256,16 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
             // Add the cleanup method
             addCleanupMethod(this.cv);
 
+            // Needs to add class for Proxy on the beans
+            NoInterfaceViewClassGenerator noInterfaceViewClassGenerator = new NoInterfaceViewClassGenerator(
+                    this.classAnnotationMetadata, this.readLoader);
+            noInterfaceViewClassGenerator.generate();
+
+            DefinedClass dc = new DefinedClass(noInterfaceViewClassGenerator.getGeneratedClassName().replace("/", "."),
+                    noInterfaceViewClassGenerator.getBytes());
+            // this class will be defined later on the classloader
+            this.definedClasses.add(dc);
+
         }
 
     }
@@ -352,12 +387,19 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
             this.mv.visitTypeInsn(NEW, clManager);
             this.mv.visitInsn(DUP);
             this.mv.visitMethodInsn(INVOKESPECIAL, clManager, "<init>", "()V");
-            this.mv.visitFieldInsn(PUTFIELD, BeanClassAdapter.this.classAnnotationMetadata.getClassName(), "easyBeansInterceptorManager", "L"
-                    + clManager + ";");
+            this.mv.visitFieldInsn(PUTFIELD, BeanClassAdapter.this.classAnnotationMetadata.getClassName(),
+                    "easyBeansInterceptorManager", "L" + clManager + ";");
 
         }
 
     }
 
+    /**
+     * @return list of classes generated and that need to be defined in a
+     *         classloader
+     */
+    public List<DefinedClass> getDefinedClasses() {
+        return this.definedClasses;
+    }
 }
 

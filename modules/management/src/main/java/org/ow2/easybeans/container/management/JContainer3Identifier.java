@@ -60,7 +60,7 @@ public class JContainer3Identifier extends
 
             // Append the Application
             sb.append(",J2EEApplication=");
-            sb.append(instance.getApplicationName());
+            sb.append(instance.getConfiguration().getApplicationName());
 
         } catch (MBeansException e) {
             getLogger().warn("Cannot retrieve parent ObjectName for ''{0}''", sb);

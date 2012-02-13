@@ -179,6 +179,37 @@ public abstract class CommonClassGenerator implements Opcodes {
         }
     }
 
+
+
+
+    public void putConstNumber(final int val, final MethodVisitor mv) {
+        switch (val) {
+            case 0:
+                mv.visitInsn(ICONST_0);
+                break;
+            case 1:
+                mv.visitInsn(ICONST_1);
+                break;
+            case 2:
+                mv.visitInsn(ICONST_2);
+                break;
+            case 3:
+                mv.visitInsn(ICONST_3);
+                break;
+            case 4:
+                mv.visitInsn(ICONST_4);
+                break;
+            case 5:
+                mv.visitInsn(ICONST_5);
+                break;
+            default:
+                mv.visitIntInsn(BIPUSH, val);
+                break;
+        }
+    }
+
+
+
     /**
      * If a type is one of the primitive object : boolean, int, long, etc, adds an instruction to transform type into an object.
      * ie : from int to Integer by calling Integer.valueOf(i);

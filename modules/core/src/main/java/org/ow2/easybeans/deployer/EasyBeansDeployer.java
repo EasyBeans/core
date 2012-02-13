@@ -61,6 +61,7 @@ public class EasyBeansDeployer extends AbsDeployer implements IDeployer {
      * @param deployable a given deployable
      * @throws DeployerException if the deployment is not done.
      */
+    @Override
     public void deploy(final IDeployable deployable) throws DeployerException {
         checkSupportedDeployable(deployable);
         if (deployable instanceof EJBDeployable) {
@@ -77,6 +78,7 @@ public class EasyBeansDeployer extends AbsDeployer implements IDeployer {
      * @param deployable a given deployable to undeploy
      * @throws DeployerException if the undeploy operation fails.
      */
+    @Override
     public void undeploy(final IDeployable deployable) throws DeployerException {
         checkSupportedDeployable(deployable);
         if (deployable instanceof EJBDeployable) {
@@ -133,7 +135,7 @@ public class EasyBeansDeployer extends AbsDeployer implements IDeployer {
             container.setClassLoader(appClassLoader);
 
             // Set application name
-            container.setApplicationName(earDeployable.getModuleName());
+            container.getConfiguration().setApplicationName(earDeployable.getModuleName());
 
             // Add persistence context found
             container.setPersistenceUnitManager(persistenceUnitManager);

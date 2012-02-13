@@ -69,9 +69,10 @@ public class JNDIResolverHelper {
     private EZBContainerJNDIResolver containerJNDIResolver = null;
 
     /**
-     * Application name to use.
+     * Container configuration.
      */
-    private String applicationName = null;
+    private EZBContainerConfig containerConfiguration = null;
+
 
     /**
      * Constructor (to be used for specifying the application name).
@@ -79,7 +80,7 @@ public class JNDIResolverHelper {
      */
     public JNDIResolverHelper(final EZBContainer container) {
         this.containerJNDIResolver = container.getConfiguration().getContainerJNDIResolver();
-        this.applicationName = container.getApplicationName();
+        this.containerConfiguration = container.getConfiguration();
     }
 
     /**
@@ -121,18 +122,17 @@ public class JNDIResolverHelper {
         }
 
         // Add info extracted from metadata
-        analyzeMetadata(ejbJarAnnotationMetadata, deployment.getModuleName(), namingStrategy, url);
+        analyzeMetadata(ejbJarAnnotationMetadata, namingStrategy, url);
     }
 
     /**
      * Adds the given metadata to the resolver.
      * @param ejbJarArchiveMetadata the metadata for a given jar file
-     * @param moduleName the module name
      * @param namingStrategy JNDI naming strategy.
      * @param url the url of the archive
      */
-    private void analyzeMetadata(final EjbJarArchiveMetadata ejbJarArchiveMetadata, final String moduleName,
-            final EZBNamingStrategy namingStrategy, final URL url) {
+    private void analyzeMetadata(final EjbJarArchiveMetadata ejbJarArchiveMetadata, final EZBNamingStrategy namingStrategy,
+            final URL url) {
 
         // For each bean, get the interfaces and add the jndiName mapping.
         List<String> beanNames = ejbJarArchiveMetadata.getBeanNames();
@@ -148,7 +148,7 @@ public class JNDIResolverHelper {
                     if (localItfs != null) {
                         for (String itf : localItfs.getInterfaces()) {
                             EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, itf, "Local",
-                                    moduleName, this.applicationName);
+                                    this.containerConfiguration);
                             addInterface(namingInfo, namingStrategy, url);
                         }
                     }
@@ -157,7 +157,7 @@ public class JNDIResolverHelper {
                     if (remoteItfs != null) {
                         for (String itf : remoteItfs.getInterfaces()) {
                             EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, itf, "Remote",
-                                    moduleName, this.applicationName);
+                                    this.containerConfiguration);
                             addInterface(namingInfo, namingStrategy, url);
                         }
                     }
@@ -166,7 +166,7 @@ public class JNDIResolverHelper {
                     String remoteHome = classAnnotationMetadata.getRemoteHome();
                     if (remoteHome != null) {
                         EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, remoteHome,
-                                "RemoteHome", moduleName, this.applicationName);
+                                "RemoteHome", this.containerConfiguration);
                         addInterface(namingInfo, namingStrategy, url);
                     }
 
@@ -174,9 +174,19 @@ public class JNDIResolverHelper {
                     String localHome = classAnnotationMetadata.getLocalHome();
                     if (localHome != null) {
                         EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata, localHome,
-                                "LocalHome", moduleName, this.applicationName);
+                                "LocalHome", this.containerConfiguration);
                         addInterface(namingInfo, namingStrategy, url);
                     }
+
+
+                    // No Interface Local view
+                    if (classAnnotationMetadata.isLocalBean()) {
+                        EZBBeanNamingInfo namingInfo = BeanNamingInfoHelper.buildInfo(classAnnotationMetadata,
+                                classAnnotationMetadata.getClassName().replace("/", "."), "NoInterfaceLocalView",
+                                this.containerConfiguration);
+                        addInterface(namingInfo, namingStrategy, url);
+                    }
+
                 }
             }
         }

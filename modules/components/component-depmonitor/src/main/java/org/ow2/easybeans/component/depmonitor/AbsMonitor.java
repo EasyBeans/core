@@ -50,8 +50,8 @@ import org.ow2.util.archive.impl.ArchiveManager;
 import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
 import org.ow2.util.ee.deploy.api.deployer.IDeployerManager;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
+import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -181,7 +181,7 @@ public abstract class AbsMonitor implements EZBMonitor, Runnable {
             // Check if existing EJB3 container have not been modified ?
             for (EZBContainer container : getEmbedded().getContainers().values()) {
                 // Look only single EJB-JAR
-                if (container.isAvailable() && container.getApplicationName() == null) {
+                if (container.isAvailable() && container.getConfiguration().getApplicationName() == null) {
                     checkContainer(container);
                 }
             }

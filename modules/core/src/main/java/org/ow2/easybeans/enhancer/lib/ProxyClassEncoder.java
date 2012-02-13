@@ -23,39 +23,44 @@
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.deployment.api;
-
-import org.ow2.easybeans.api.EZBContainerConfig;
-import org.ow2.easybeans.resolver.api.EZBApplicationJNDIResolver;
-import org.ow2.util.ee.deploy.api.deployable.IDeployableInfo;
+package org.ow2.easybeans.enhancer.lib;
 
 /**
- * Deployable info or the deployable.
+ * Allows to create a proxified name for the class.
  * @author Florent Benoit
  */
-public interface EZBDeployableInfo extends IDeployableInfo {
+public final class ProxyClassEncoder {
 
     /**
-     * ClassLoader to use for the container.
-     * @return the classloader to use for the container
+     * Proxified package name.
      */
-    ClassLoader getClassLoader();
+    private static final String PREFIX_CLASSNAME = "EasyBeansProxy";
 
     /**
-     * @return true if deployable needs to be unpacked
-     * May return null if nothing is specified
+     * Package name.
      */
-    Boolean hasToBeUnpacked();
+    private static final String PACKAGE_NAME = "org.ow2.easybeans.gen.proxy";
 
     /**
-     * @return the Application JNDI Resolver
+     * Static class.
      */
-    EZBApplicationJNDIResolver getApplicationJNDIResolver();
+    private ProxyClassEncoder() {
 
+    }
 
     /**
-     * @return container Configuration.
+     * Get a proxy class name for the given class.
+     * @param fullClassName the name of the class
+     * @return the name of the proxy class
      */
-    EZBContainerConfig getContainerConfiguration();
+    public static String getProxyClassName(final String fullClassName) {
+        // Extract package and class name
+        int slashPos = fullClassName.lastIndexOf("/");
+        String packageName = fullClassName.substring(0, slashPos);
+        String className = fullClassName.substring(slashPos + 1);
 
+        return PACKAGE_NAME.concat(".").concat(packageName).concat(".").concat(PREFIX_CLASSNAME).concat(className).replace(".",
+                "/");
+
+    }
 }

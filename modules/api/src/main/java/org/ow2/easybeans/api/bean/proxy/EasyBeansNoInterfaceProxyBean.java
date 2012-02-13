@@ -23,39 +23,25 @@
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.deployment.api;
+package org.ow2.easybeans.api.bean.proxy;
 
-import org.ow2.easybeans.api.EZBContainerConfig;
-import org.ow2.easybeans.resolver.api.EZBApplicationJNDIResolver;
-import org.ow2.util.ee.deploy.api.deployable.IDeployableInfo;
+import java.lang.reflect.InvocationHandler;
 
 /**
- * Deployable info or the deployable.
+ * Defines the No interface proxy bean interface.
  * @author Florent Benoit
  */
-public interface EZBDeployableInfo extends IDeployableInfo {
+public interface EasyBeansNoInterfaceProxyBean {
 
     /**
-     * ClassLoader to use for the container.
-     * @return the classloader to use for the container
+     * @return invocation handler
      */
-    ClassLoader getClassLoader();
+    InvocationHandler getInvocationHandler();
 
     /**
-     * @return true if deployable needs to be unpacked
-     * May return null if nothing is specified
+     * Defines invocation handler.
+     * @param invocationHandler the given handler
      */
-    Boolean hasToBeUnpacked();
-
-    /**
-     * @return the Application JNDI Resolver
-     */
-    EZBApplicationJNDIResolver getApplicationJNDIResolver();
-
-
-    /**
-     * @return container Configuration.
-     */
-    EZBContainerConfig getContainerConfiguration();
+    void setInvocationHandler(InvocationHandler invocationHandler);
 
 }

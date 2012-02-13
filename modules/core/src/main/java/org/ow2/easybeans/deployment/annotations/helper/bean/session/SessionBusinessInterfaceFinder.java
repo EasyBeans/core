@@ -25,14 +25,14 @@
 
 package org.ow2.easybeans.deployment.annotations.helper.bean.session;
 
+import java.util.List;
+
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JLocal;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-
-import java.util.List;
 
 /**
  * This class finds the business interface if there are no business interfaces
@@ -62,43 +62,44 @@ public final class SessionBusinessInterfaceFinder {
         IJLocal jLocal = sessionBean.getLocalInterfaces();
         IJRemote jRemote = sessionBean.getRemoteInterfaces();
 
+        // The following interfaces are excluded when determining whether
+        // the bean class has
+        // more than one interface: java.io.Serializable;
+        // java.io.Externalizable;
+        // any of the interfaces defined by the javax.ejb package.
+        String[] interfaces = sessionBean.getInterfaces();
+        List<String> inheritedInterfaces = sessionBean.getInheritedInterfaces();
+
+        int numberItfFound = 0;
+        String itfFound = null;
+        for (String itf : interfaces) {
+            if (!itf.equals(java.io.Serializable.class.getName().replace(".", "/"))
+                    && !itf.equals(java.io.Externalizable.class.getName().replace(".", "/")) && !itf.startsWith("javax/ejb")
+                    // Should not be inherited
+                    && !inheritedInterfaces.contains(itf)) {
+                itfFound = itf;
+                numberItfFound++;
+            }
+        }
+
+        // No direct Business interface, flag it as a local bean
+        if (numberItfFound == 0) {
+            sessionBean.setLocalBean(true);
+        }
+
         // No business interface or empty annotation (@Remote or @Local)
         if ((jLocal == null && jRemote == null) || (jLocal == null && jRemote != null && jRemote.getInterfaces().isEmpty())
                 || (jRemote == null && jLocal != null && jLocal.getInterfaces().isEmpty())) {
-
-            // The following interfaces are excluded when determining whether
-            // the bean class has
-            // more than one interface: java.io.Serializable;
-            // java.io.Externalizable;
-            // any of the interfaces defined by the javax.ejb package.
-            String[] interfaces = sessionBean.getInterfaces();
-            List<String> inheritedInterfaces = sessionBean.getInheritedInterfaces();
-
-            int numberItfFound = 0;
-            String itfFound = null;
-            for (String itf : interfaces) {
-                if (!itf.equals(java.io.Serializable.class.getName().replace(".", "/"))
-                        && !itf.equals(java.io.Externalizable.class.getName().replace(".", "/"))
-                        && !itf.startsWith("javax/ejb")
-                        // Should not be inherited
-                        && !inheritedInterfaces.contains(itf)
-                        ) {
-                    itfFound = itf;
-                    numberItfFound++;
-                }
-            }
-
-            // No business interface found but there is only one inherited interface, use it.
-            if (numberItfFound == 0 && inheritedInterfaces != null && inheritedInterfaces.size() == 1) {
-                itfFound = inheritedInterfaces.get(0);
-                numberItfFound = 1;
-            }
-
 
             // No business interface found
             if (numberItfFound == 0) {
                 // if this is a 2.1 bean, it could be normal
                 if (sessionBean.getRemoteHome() != null || sessionBean.getLocalHome() != null) {
+                    return;
+                }
+
+                // Local Bean (may have no interfaces)
+                if (sessionBean.isLocalBean()) {
                     return;
                 }
 
@@ -109,16 +110,20 @@ public final class SessionBusinessInterfaceFinder {
                     throw new IllegalStateException("More than 1 itf on class '" + sessionBean.getClassName() + "'.");
                 }
 
-                // If bean class implements a single interface, that interface is
+                // If bean class implements a single interface, that interface
+                // is
                 // assumed to be the business
-                // interface of the bean. This business interface will be a local
+                // interface of the bean. This business interface will be a
+                // local
                 // interface unless the
-                // interface is designated as a remote business interface by use of
+                // interface is designated as a remote business interface by use
+                // of
                 // the Remote annotation
                 // on the bean class or interface or by means of the deployment
                 // descriptor.
 
-                // Build a local interface if no @Remote annotation, else add interface in the existing object
+                // Build a local interface if no @Remote annotation, else add
+                // interface in the existing object
                 if (jRemote == null) {
                     JLocal addedJLocal = new JLocal();
                     addedJLocal.addInterface(itfFound);

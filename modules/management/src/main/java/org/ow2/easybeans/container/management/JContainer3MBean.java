@@ -115,7 +115,7 @@ public class JContainer3MBean extends EJBModuleMBean {
         // Get container/classloader
         JContainer3 container = getManagedComponent();
         ClassLoader ejbClassLoader = container.getClassLoader();
-        boolean inEAR = container.getApplicationName() != null;
+        boolean inEAR = container.getConfiguration().getApplicationName() != null;
 
         // Create XML document...
 

@@ -98,6 +98,7 @@ import org.ow2.easybeans.deployment.resolver.JNDIResolverHelper;
 import org.ow2.easybeans.enhancer.Enhancer;
 import org.ow2.easybeans.enhancer.EnhancerException;
 import org.ow2.easybeans.enhancer.interceptors.EasyBeansInvocationContextFactory;
+import org.ow2.easybeans.enhancer.lib.ProxyClassEncoder;
 import org.ow2.easybeans.event.container.EventContainerStarted;
 import org.ow2.easybeans.event.container.EventContainerStarting;
 import org.ow2.easybeans.event.container.EventContainerStopped;
@@ -113,7 +114,6 @@ import org.ow2.easybeans.loader.EasyBeansClassLoader;
 import org.ow2.easybeans.naming.BeanNamingInfoHelper;
 import org.ow2.easybeans.naming.J2EEManagedObjectNamingHelper;
 import org.ow2.easybeans.naming.JNDINamingInfoHelper;
-import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.easybeans.naming.strategy.EasyBeansV1NamingStrategy;
 import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
 import org.ow2.easybeans.persistence.PersistenceUnitManager;
@@ -125,6 +125,7 @@ import org.ow2.easybeans.proxy.binding.BindingManager;
 import org.ow2.easybeans.proxy.reference.EJBHomeCallRef;
 import org.ow2.easybeans.proxy.reference.EJBLocalHomeCallRef;
 import org.ow2.easybeans.proxy.reference.LocalCallRef;
+import org.ow2.easybeans.proxy.reference.NoInterfaceLocalCallRef;
 import org.ow2.easybeans.proxy.reference.RemoteCallRef;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.easybeans.security.permissions.PermissionManager;
@@ -219,11 +220,6 @@ public class JContainer3 implements EZBContainer {
     private List<EZBRef> bindingReferences = null;
 
     /**
-     * Name of the application (EAR case).
-     */
-    private String applicationName = null;
-
-    /**
      * {@link org.ow2.easybeans.api.EZBExtensor} implementation.
      */
     private ExtensorSupport extensor = new ExtensorSupport();
@@ -244,17 +240,6 @@ public class JContainer3 implements EZBContainer {
     private String j2eeManagedObjectId = null;
 
     /**
-     * JNDI module context of this module.
-     */
-    private Context moduleContext = null;
-
-    /**
-     * JNDI App context of this module.
-     */
-    private Context appContext = null;
-
-
-    /**
      * Build a new container on the given archive.
      * @param config The JContainer configuration storing the archive (jar file
      *        or exploded).
@@ -262,7 +247,6 @@ public class JContainer3 implements EZBContainer {
     public JContainer3(final EZBContainerConfig config) {
         setContainerConfig(config);
         this.bindingReferences = new ArrayList<EZBRef>();
-        this.moduleContext = new ContextImpl("module");
     }
 
     /**
@@ -596,7 +580,8 @@ public class JContainer3 implements EZBContainer {
                             // Build java: Context
                             Context javaContext;
                             try {
-                                javaContext = JavaContextHelper.build(classAnnotationMetadata, factory, eventDispatcher, this.moduleContext, this.appContext);
+                                javaContext = JavaContextHelper.build(classAnnotationMetadata, factory, eventDispatcher,
+                                        getConfiguration().getModuleContext(), getConfiguration().getAppContext());
                             } catch (JavaContextHelperException e) {
                                 throw new EZBContainerException("Cannot build environment", e);
                             }
@@ -901,6 +886,17 @@ public class JContainer3 implements EZBContainer {
             IWebServiceInfo info = createWebServiceInfo(sessionBean, factoryName);
             sessionBeanInfo.setWebServiceInfo(info);
         } // else this bean is not webservices annotated
+
+        // No interface local view
+        if (sessionBean.isLocalBean()) {
+            this.bindingReferences.add(createNoInterfaceViewRef(sessionBean.getClassName(),
+                                                             getEmbedded().getID(),
+                                                             getId(),
+                                                             factoryName,
+                                                             sessionBean,
+                                                             sessionFactory));
+        }
+
 
         // get interfaces of bean
         IJLocal localItfs = sessionBean.getLocalInterfaces();
@@ -1216,7 +1212,7 @@ public class JContainer3 implements EZBContainer {
 
         // Set the JNDI naming infos
         ejbHomeCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "RemoteHome", getModuleName(), this.applicationName)));
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "RemoteHome", getConfiguration())));
 
         return ejbHomeCallRef;
 
@@ -1257,9 +1253,46 @@ public class JContainer3 implements EZBContainer {
 
         // Set the JNDI naming infos
         ejbLocalHomeCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "LocalHome", getModuleName(), this.applicationName)));
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "LocalHome", getConfiguration())));
 
         return ejbLocalHomeCallRef;
+    }
+
+    /**
+     * Creates a no-interface local view reference and return it.
+     * @param itf the name of the interface that object will have.
+     * @param embeddedId the ID of the embedded server.
+     * @param containerID the ID of the container.
+     * @param factoryName the name of the factory.
+     * @param bean the bean class associated to given interface.
+     * @param factory this EJB Factory
+     * @return the reference.
+     * @throws EZBContainerException if interface cannot be loaded or if the
+     *         bind fails
+     */
+    protected LocalCallRef createNoInterfaceViewRef(final String itf,
+                                           final Integer embeddedId,
+                                           final String containerID,
+                                           final String factoryName,
+                                           final EasyBeansEjbJarClassMetadata bean,
+                                           final SessionFactory<?> factory) throws EZBContainerException {
+        // Name of the interface is the name of the bean class
+        String beanClassName = itf.replace('/', '.');
+        String beanProxyClassName = ProxyClassEncoder.getProxyClassName(itf).replace('/', '.');
+
+
+        // Build a reference
+        NoInterfaceLocalCallRef localCallRef = new NoInterfaceLocalCallRef(beanClassName, embeddedId, containerID,
+                factoryName, bean.isStateful(), beanProxyClassName);
+
+        // Assign it to the factory
+        localCallRef.setFactory(factory);
+
+        // Set the JNDI naming infos
+        localCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
+                BeanNamingInfoHelper.buildInfo(bean, beanClassName, "NoInterfaceLocalView", getConfiguration())));
+
+        return localCallRef;
     }
 
     /**
@@ -1296,7 +1329,7 @@ public class JContainer3 implements EZBContainer {
 
         // Set the JNDI naming infos
         localCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Local", getModuleName(), this.applicationName)));
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Local", getConfiguration())));
 
         return localCallRef;
     }
@@ -1333,7 +1366,7 @@ public class JContainer3 implements EZBContainer {
 
         // Set the JNDI naming infos
         remoteCallRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(this.configuration.getNamingStrategies(),
-                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Remote", getModuleName(), this.applicationName)));
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Remote", getConfiguration())));
 
         return remoteCallRef;
     }
@@ -1360,14 +1393,6 @@ public class JContainer3 implements EZBContainer {
      */
     public String getName() {
         return getArchive().getName();
-    }
-
-    /**
-     * Gets the module name of this container.
-     * @return the module name.
-     */
-    public String getModuleName() {
-        return this.deployment.getModuleName();
     }
 
     /**
@@ -1473,29 +1498,6 @@ public class JContainer3 implements EZBContainer {
         this.permissionManager = ezbPermissionManager;
     }
 
-    /**
-     * Sets the Application Name of this container (EAR case).
-     * @param applicationName the name of the application of this container.
-     */
-    public void setApplicationName(final String applicationName) {
-        this.applicationName  = applicationName;
-    }
-
-    /**
-     * Gets the Application Name of this container (EAR case).
-     * @return the name of the application of this container.
-     */
-    public String getApplicationName() {
-        return this.applicationName;
-    }
-
-    /**
-     * Sets the Application context of this container (EAR case).
-     * @param appContext the context of the application of this container.
-     */
-    public void setApplicationContext(final Context appContext) {
-        this.appContext  = appContext;
-    }
 
     /**
      * Add extra archives for finding classes.

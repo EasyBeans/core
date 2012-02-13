@@ -79,7 +79,7 @@ public final class J2EEManagedObjectNamingHelper {
             String archiveName = container.getName().replaceAll("(.*[/\\\\])", "");
 
             // Compute the application id.
-            return EASYBEANS_ROOT + "/" + container.getApplicationName() + "/" + archiveName;
+            return EASYBEANS_ROOT + "/" + container.getConfiguration().getApplicationName() + "/" + archiveName;
         } else if (Factory.class.isAssignableFrom(clazz)) {
             // The object is a bean factory.
 
@@ -93,7 +93,8 @@ public final class J2EEManagedObjectNamingHelper {
             String factoryName = factory.getClassName().replaceAll("(.*\\.)", "");
 
             // Compute the bean id.
-            return EASYBEANS_ROOT + "/" + container.getApplicationName() + "/" + archiveName + "/" + factoryName;
+            return EASYBEANS_ROOT + "/" + container.getConfiguration().getApplicationName() + "/" + archiveName + "/"
+                    + factoryName;
         } else {
             throw new java.lang.IllegalArgumentException("Name is not define for argument of type " + instance.getClass());
         }

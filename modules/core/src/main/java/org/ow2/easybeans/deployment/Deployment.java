@@ -78,11 +78,6 @@ public class Deployment {
     private EjbJarArchiveMetadata ejbJarArchiveMetadata;
 
     /**
-     * Module name.
-     */
-    private String moduleName = null;
-
-    /**
      * EasyBeans deployment configuration.
      */
     private EZBContainerConfig configuration;
@@ -94,17 +89,6 @@ public class Deployment {
      */
     public Deployment(final IArchive archive) {
         this.archive = archive;
-        //TODO: could be configured through XML
-        try {
-            String shortName = URLUtils.shorterName(archive.getURL());
-            int dotPos = shortName.lastIndexOf('.');
-            if (dotPos != -1) {
-                shortName = shortName.substring(0, dotPos);
-            }
-            this.moduleName = shortName;
-        } catch (ArchiveException e) {
-            throw new IllegalArgumentException("Unable to shorter URL '" + archive.getName() + "'.", e);
-        }
         reset();
     }
 
@@ -148,6 +132,21 @@ public class Deployment {
     @SuppressWarnings("boxing")
     public void analyze(final ClassLoader classLoader) throws ScanException, ResolverException,
             DeployableHelperException, DeployableMetadataException {
+
+
+        if (this.configuration.getModuleName() == null) {
+            //TODO: could be configured through XML
+            try {
+                String shortName = URLUtils.shorterName(this.archive.getURL());
+                int dotPos = shortName.lastIndexOf('.');
+                if (dotPos != -1) {
+                    shortName = shortName.substring(0, dotPos);
+                }
+                this.configuration.setModuleName(shortName);
+            } catch (ArchiveException e) {
+                throw new IllegalArgumentException("Unable to shorter URL '" + this.archive.getName() + "'.", e);
+            }
+        }
 
         // Create metadata
         EasyBeansEjbJarDeployableFactory deployableFactory = getDeployableFactory();
@@ -244,13 +243,6 @@ public class Deployment {
      */
     protected List<IArchive> getExtraArchives() {
         return this.extraArchives;
-    }
-
-    /**
-     * @return the name of the module
-     */
-    public String getModuleName() {
-        return this.moduleName;
     }
 
 

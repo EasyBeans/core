@@ -87,18 +87,6 @@ public interface EZBContainer extends EZBManageableContainer, EZBExtensor, EZBJ2
     void setPermissionManager(EZBPermissionManager ezbPermissionManager);
 
     /**
-     * Sets the Application Name of this container (EAR case).
-     * @param applicationName the name of the application of this container.
-     */
-    void setApplicationName(final String applicationName);
-
-    /**
-     * Gets the Application Name of this container (EAR case).
-     * @return the name of the application of this container.
-     */
-    String getApplicationName();
-
-    /**
      * Add extra archives for finding classes.
      * @param extraArchives the given archives.
      */

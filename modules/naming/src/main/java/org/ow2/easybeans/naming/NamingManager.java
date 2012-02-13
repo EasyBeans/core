@@ -154,14 +154,14 @@ public final class NamingManager {
         if (moduleContext != null) {
             ctx.addBinding(MODULE_SUBCONTEXT, moduleContext);
         } else {
-            ctx.addBinding(MODULE_SUBCONTEXT, new ContextImpl("empty"));
+            ctx.addBinding(MODULE_SUBCONTEXT, new ContextImpl("moduleContext"));
         }
 
 
         // App context (if not defined, reuse module context)
         Context appCtx = null;
         if (appContext == null) {
-            appCtx = new ContextImpl("empty");
+            appCtx = new ContextImpl("appContext");
         } else {
             appCtx = appContext;
         }

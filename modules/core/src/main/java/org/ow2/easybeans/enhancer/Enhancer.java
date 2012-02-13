@@ -144,7 +144,7 @@ public class Enhancer {
                     // Create ClassReader/Writer
                     ClassReader cr = getClassReader(classAnnotationMetadata);
                     ClassWriter cw = new EasyBeansClassWriter(this.readLoader);
-                    BeanClassAdapter cv = new BeanClassAdapter(classAnnotationMetadata, cw);
+                    BeanClassAdapter cv = new BeanClassAdapter(classAnnotationMetadata, cw, this.readLoader);
                     InterceptorClassAdapter itcpClassAdapter = new InterceptorClassAdapter(classAnnotationMetadata, cv, this.readLoader);
                     InjectionClassAdapter cv2 = new InjectionClassAdapter(classAnnotationMetadata, itcpClassAdapter, this.map,
                             classAnnotationMetadata, false);
@@ -163,6 +163,10 @@ public class Enhancer {
                     loadDefinedClasses(this.writeLoader, itcpClassAdapter.getDefinedClasses());
 
                     defineClass(this.writeLoader, classAnnotationMetadata.getClassName().replace("/", "."), cw.toByteArray());
+
+                    // Define proxy class
+                    loadDefinedClasses(this.writeLoader, cv.getDefinedClasses());
+
 
                 }
             }

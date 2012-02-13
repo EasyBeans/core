@@ -184,7 +184,7 @@ public abstract class AbsWebContainerDeployer<T extends IDeployable<T>> extends 
             container.setClassLoader(ejbClassLoader);
 
             // Set application name
-            container.setApplicationName(earDeployable.getModuleName());
+            container.getConfiguration().setApplicationName(earDeployable.getModuleName());
 
             // Add persistence context found
             container.setPersistenceUnitManager(persistenceUnitManager);

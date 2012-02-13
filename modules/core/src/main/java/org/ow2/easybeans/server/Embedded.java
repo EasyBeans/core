@@ -59,6 +59,8 @@ import org.ow2.easybeans.container.JContainerConfig;
 import org.ow2.easybeans.deployer.EasyBeansDeployer;
 import org.ow2.easybeans.deployer.IRemoteDeployer;
 import org.ow2.easybeans.deployer.RemoteDeployer;
+import org.ow2.easybeans.deployment.EasyBeansDeployableInfo;
+import org.ow2.easybeans.deployment.api.EZBDeployableInfo;
 import org.ow2.easybeans.deployment.helper.listener.EnvEntriesExtensionListener;
 import org.ow2.easybeans.deployment.helper.listener.JavaCompExtensionListener;
 import org.ow2.easybeans.event.lifecycle.EventLifeCycleStarted;
@@ -649,7 +651,20 @@ public class Embedded implements EZBServer {
      * @return the created container.
      */
     public EZBContainer createContainer(final IDeployable<?> deployable) {
-        EZBContainerConfig jConfig = new JContainerConfig(deployable);
+        EZBContainerConfig jConfig = null;
+
+        // Existing configuration ?
+        EZBDeployableInfo deployableInfo = (EZBDeployableInfo) deployable.getExtension(EasyBeansDeployableInfo.class);
+        if (deployableInfo != null) {
+            EZBContainerConfig readContainerConfig = deployableInfo.getContainerConfiguration();
+            if (readContainerConfig != null) {
+                jConfig = readContainerConfig;
+            }
+        }
+
+        if (jConfig == null) {
+            jConfig = new JContainerConfig(deployable);
+        }
         jConfig.setEZBServer(this);
         EZBContainer container = new JContainer3(jConfig);
         addContainer(container);

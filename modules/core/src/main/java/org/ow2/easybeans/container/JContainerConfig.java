@@ -27,6 +27,8 @@ package org.ow2.easybeans.container;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.Context;
+
 import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.api.EZBContainerLifeCycleCallback;
 import org.ow2.easybeans.api.EZBServer;
@@ -75,6 +77,25 @@ public class JContainerConfig implements EZBContainerConfig {
      */
     private EZBContainerJNDIResolver containerJNDIResolver = null;
 
+    /**
+     * Module name.
+     */
+    private String moduleName = null;
+
+    /**
+     * Name of the application (EAR case).
+     */
+    private String applicationName = null;
+
+    /**
+     * JNDI module context of this module.
+     */
+    private Context moduleContext = null;
+
+    /**
+     * JNDI App context of this module.
+     */
+    private Context appContext = null;
 
     /**
      * Constructor.
@@ -174,5 +195,67 @@ public class JContainerConfig implements EZBContainerConfig {
      */
     public void setContainerJNDIResolver(final EZBContainerJNDIResolver containerJNDIResolver) {
         this.containerJNDIResolver = containerJNDIResolver;
+    }
+
+    /**
+     * Sets the Module Name of this container.
+     * @param moduleName the name of this container.
+     */
+    public void setModuleName(final String moduleName) {
+        this.moduleName  = moduleName;
+    }
+
+    /**
+     * Gets the module name of this container.
+     * @return the module name.
+     */
+    public String getModuleName() {
+        return this.moduleName;
+    }
+
+    /**
+     * @return the java:module context.
+     */
+    public Context getModuleContext() {
+        return this.moduleContext;
+    }
+
+    /**
+     * Sets the module context.
+     * @param moduleContext the java:module context.
+     */
+    public void setModuleContext(final Context moduleContext) {
+        this.moduleContext = moduleContext;
+    }
+
+    /**
+     * @return the java:app context.
+     */
+    public Context getAppContext() {
+        return this.appContext;
+    }
+
+    /**
+     * Sets the app context.
+     * @param appContext the java:module context.
+     */
+    public void setAppContext(final Context appContext) {
+        this.appContext = appContext;
+    }
+
+    /**
+     * Sets the Application Name of this container (EAR case).
+     * @param applicationName the name of the application of this container.
+     */
+    public void setApplicationName(final String applicationName) {
+        this.applicationName  = applicationName;
+    }
+
+    /**
+     * Gets the Application Name of this container (EAR case).
+     * @return the name of the application of this container.
+     */
+    public String getApplicationName() {
+        return this.applicationName;
     }
 }

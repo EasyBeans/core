@@ -27,6 +27,8 @@ package org.ow2.easybeans.api;
 
 import java.util.List;
 
+import javax.naming.Context;
+
 import org.ow2.easybeans.api.injection.ResourceInjector;
 import org.ow2.easybeans.api.naming.EZBNamingStrategy;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
@@ -68,7 +70,7 @@ public interface EZBContainerConfig {
 
     /**
      * Define naming strategies to use.
-     * @param strategies
+     * @param strategies the naming strategies
      */
     void setNamingStrategies(List<EZBNamingStrategy> strategies);
 
@@ -103,4 +105,38 @@ public interface EZBContainerConfig {
      * @param containerJNDIResolver the given resolver.
      */
     void setContainerJNDIResolver(final EZBContainerJNDIResolver containerJNDIResolver);
+
+    /**
+     * Sets the Module Name of this container.
+     * @param moduleName the name of this container.
+     */
+    void setModuleName(final String moduleName);
+
+    /**
+     * Gets the module name of this container.
+     * @return the module name.
+     */
+    String getModuleName();
+
+    /**
+     * Gets the application name of this container.
+     * @return the application name.
+     */
+    String getApplicationName();
+
+    /**
+     * Sets the Application Name of this container (EAR case).
+     * @param applicationName the name of the application of this container.
+     */
+    void setApplicationName(final String applicationName);
+
+    /**
+     * @return the java:module context.
+     */
+    Context getModuleContext();
+
+    /**
+     * @return the java:app context.
+     */
+    Context getAppContext();
 }

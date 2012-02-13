@@ -57,9 +57,10 @@ public final class InterfaceAnnotatedHelper {
         IJLocal currentLocalInterfaces = sessionBean.getLocalInterfaces();
         IJRemote currentRemoteInterfaces = sessionBean.getRemoteInterfaces();
 
-        // Get all interfaces of the bean
+        // Get all direct interfaces of the bean
         String[] interfaces = sessionBean.getInterfaces();
         for (String itf : interfaces) {
+
             EasyBeansEjbJarClassMetadata itfAnnotationMetadata = sessionBean.getLinkedClassMetadata(itf);
 
             // Interface was analyzed, try to see the type of the interface

@@ -88,7 +88,7 @@ public final class BusinessMethodResolver {
         // first, need to analyze all methods of interfaces used by this class
         // then, set them as business method
 
-        // As the Bean class may not implement the interface, ads also the local and remote business interfaces
+        // As the Bean class may not implement the interface, adds also the local and remote business interfaces
         List<String> businessInterfaces = new ArrayList<String>();
         // Add implemented interfaces
         businessInterfaces.addAll(Arrays.asList(visitingclassAnnotationMetadata.getInterfaces()));

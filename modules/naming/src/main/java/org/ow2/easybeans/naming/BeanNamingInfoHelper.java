@@ -25,6 +25,7 @@
 
 package org.ow2.easybeans.naming;
 
+import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJCommonBean;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
@@ -48,14 +49,15 @@ public final class BeanNamingInfoHelper {
      * @param beanClassMetadata the metadata of the bean
      * @param interfaceName Name of the interface.
      * @param mode local/remote/...
-     * @param moduleName the name of the module
-     * @param javaEEApplicationName Java EE application name (if bean is in an
-     *        EAR).
+     * @param containerConfig the container configuration
      * @return a BeanNamingInfo instance
      */
     public static BeanNamingInfo buildInfo(final EasyBeansEjbJarClassMetadata beanClassMetadata, final String interfaceName,
-            final String mode, final String moduleName, final String javaEEApplicationName) {
+            final String mode, final EZBContainerConfig containerConfig) {
         IJCommonBean commonBean = beanClassMetadata.getJCommonBean();
+
+        String moduleName = containerConfig.getModuleName();
+        String javaEEApplicationName = containerConfig.getApplicationName();
 
         // Compute interface numbers
         int interfaceNumbers = 0;
@@ -73,6 +75,10 @@ public final class BeanNamingInfoHelper {
             interfaceNumbers++;
         }
         if (localHome != null) {
+            interfaceNumbers++;
+        }
+
+        if (beanClassMetadata.isLocalBean()) {
             interfaceNumbers++;
         }
 

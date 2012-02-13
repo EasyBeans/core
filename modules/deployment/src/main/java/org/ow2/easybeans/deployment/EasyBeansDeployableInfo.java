@@ -25,6 +25,7 @@
 
 package org.ow2.easybeans.deployment;
 
+import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.deployment.api.EZBDeployableInfo;
 import org.ow2.easybeans.resolver.api.EZBApplicationJNDIResolver;
 
@@ -40,6 +41,12 @@ public class EasyBeansDeployableInfo implements EZBDeployableInfo {
     private Boolean hasToBeUnpacked = null;
 
     private EZBApplicationJNDIResolver applicationJNDIResolver = null;
+
+    /**
+     * Container configuration.
+     */
+    private EZBContainerConfig containerConfiguration = null;
+
 
     public EZBApplicationJNDIResolver getApplicationJNDIResolver() {
         return this.applicationJNDIResolver;
@@ -70,5 +77,21 @@ public class EasyBeansDeployableInfo implements EZBDeployableInfo {
 
     public void setHasToBeUnpacked(final Boolean hasToBeUnpacked) {
         this.hasToBeUnpacked = hasToBeUnpacked;
+    }
+
+    /**
+     * Defines the configuration for this container.
+     * @param containerConfiguration the container Configuration.
+     */
+    public void setContainerConfiguration(final EZBContainerConfig containerConfiguration) {
+        this.containerConfiguration = containerConfiguration;
+    }
+
+
+    /**
+     * @return container Configuration.
+     */
+    public EZBContainerConfig getContainerConfiguration() {
+        return this.containerConfiguration;
     }
 }
