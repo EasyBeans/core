@@ -44,7 +44,7 @@
         connector="true"
         deployer="true"
         j2eeserver="true"
-        useLegacyNamingStrategy="true"
+        useLegacyNamingStrategy="false"
          />
 
     <!-- Define components that will be started at runtime -->
