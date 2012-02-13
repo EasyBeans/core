@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.naming.strategy;
 
+import java.util.List;
+
 import org.ow2.easybeans.api.bean.info.EZBBeanNamingInfo;
 import org.ow2.easybeans.api.naming.EZBJNDINamingInfo;
 import org.ow2.easybeans.api.naming.EZBNamingStrategy;
@@ -57,6 +59,7 @@ public class JavaEE6NamingStrategy implements EZBNamingStrategy {
         String interfaceSuffix =  "!".concat(interfaceName);
 
 
+
         // Compute global JNDI name (java:global[/app-name]/<module-name>/<bean-name>
         String jndiName = "java:global/";
 
@@ -71,29 +74,35 @@ public class JavaEE6NamingStrategy implements EZBNamingStrategy {
         // Bean name
         jndiName = jndiName.concat(beanName);
 
-        // Interface name (optional if single interface)
-        if (!beanInfo.isSingleInterface()) {
-            jndiName = jndiName.concat(interfaceSuffix);
-        }
+        String suffixedJNDIName = jndiName.concat(interfaceSuffix);
 
         // Create info
-        JNDINamingInfo jndiNamingInfo = new JNDINamingInfo(jndiName);
+        JNDINamingInfo jndiNamingInfo = new JNDINamingInfo(suffixedJNDIName);
+        // Aliases to add
+        List<String> aliases = jndiNamingInfo.aliases();
+
+        // Add alias if there is a single interface
+        if (beanInfo.isSingleInterface()) {
+            aliases.add(jndiName);
+        }
+
 
         // Aliases
         // java:app prefix
         String javaAppAlias = "java:app/".concat(moduleName).concat("/").concat(beanName);
-        if (!beanInfo.isSingleInterface()) {
-            javaAppAlias = javaAppAlias.concat(interfaceSuffix);
+        aliases.add(javaAppAlias.concat(interfaceSuffix));
+        // simplified alias
+        if (beanInfo.isSingleInterface()) {
+            aliases.add(javaAppAlias);
         }
-        jndiNamingInfo.aliases().add(javaAppAlias);
-
 
         // java:module
         String javaModuleAlias = "java:module/".concat(beanName);
-        if (!beanInfo.isSingleInterface()) {
-            javaModuleAlias = javaModuleAlias.concat(interfaceSuffix);
+        aliases.add(javaModuleAlias.concat(interfaceSuffix));
+        // simplified alias
+        if (beanInfo.isSingleInterface()) {
+            aliases.add(javaModuleAlias);
         }
-        jndiNamingInfo.aliases().add(javaModuleAlias);
 
 
         // mapeddName alias
