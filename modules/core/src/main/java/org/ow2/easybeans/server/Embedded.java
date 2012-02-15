@@ -232,6 +232,8 @@ public class Embedded implements EZBServer {
      */
     public static final String NAMING_EXTENSION_POINT = "/easybeans/container/factory/context";
 
+    private InitialContext context = null;
+
     /**
      * Creates a new Embedded server.<br>
      * It will take default values of configuration.
@@ -421,8 +423,15 @@ public class Embedded implements EZBServer {
         } catch (RemoteException e) {
             throw new EmbeddedException("Cannot build RPC invoker", e);
         }
+
         try {
-            new InitialContext().rebind(RMIServerRPC.RPC_JNDI_NAME, this.invoker);
+            this.context = new InitialContext();
+        } catch (NamingException e) {
+            throw new EmbeddedException("Cannot make initial context", e);
+        }
+
+        try {
+            this.context.rebind(RMIServerRPC.RPC_JNDI_NAME, this.invoker);
         } catch (NamingException e) {
             throw new EmbeddedException("Cannot bind the RPC invoker", e);
         }
@@ -877,6 +886,13 @@ public class Embedded implements EZBServer {
      */
     public boolean isStopping() {
         return this.stopping;
+    }
+
+    /**
+     * @return context
+     */
+    public Context getContext() {
+        return this.context;
     }
 
 }
