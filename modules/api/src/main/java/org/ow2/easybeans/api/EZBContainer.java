@@ -92,4 +92,10 @@ public interface EZBContainer extends EZBManageableContainer, EZBExtensor, EZBJ2
      */
     void setExtraArchives(final List<IArchive> extraArchives);
 
+    /**
+     * Run the enhancer on the selected container.
+     * @throws EZBContainerException if enhancement fails
+     */
+    void enhance(boolean createBeanFactories) throws EZBContainerException;
+
 }

@@ -189,6 +189,11 @@ public class JContainer3 implements EZBContainer {
     private boolean resolved = false;
 
     /**
+     * Enhancement done ?
+     */
+    private boolean enhanced = false;
+
+    /**
      * Map of managed ejb3 factories.
      */
     private Map<String, Factory<?, ?>> factories = null;
@@ -392,62 +397,11 @@ public class JContainer3 implements EZBContainer {
             resolve();
         }
 
-        try {
-            Thread.currentThread().setContextClassLoader(this.classLoader);
-            Enhancer enhancer = new Enhancer(this.classLoader, this.deployment.getEjbJarArchiveMetadata(), this.enhancerMap);
-
-            long tStartEnhancing = System.currentTimeMillis();
-            try {
-                enhancer.enhance();
-            } catch (EnhancerException ee) {
-                throw new EZBContainerException("Cannot run enhancer on archive '" + getName() + "'.", ee);
-            } catch (RuntimeException e) {
-                // Catch Exception as some exceptions can be runtime exception
-                throw new EZBContainerException("Cannot run enhancer on archive '" + getName() + "'.", e);
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Enhancement elapsed during : " + (System.currentTimeMillis() - tStartEnhancing) + " ms");
-            }
-
-            // Check if there is META-INF/persistence.xml file
-            PersistenceUnitManager analyzedPersistenceUnitManager = null;
-            try {
-                JPersistenceUnitInfo[] persistenceUnitInfos =
-                        PersistenceXmlFileAnalyzer.analyzePersistenceXmlFile(getArchive());
-
-                // Dispatch life cycle event.
-                this.dispatcher.dispatch(new EventContainerStarting(this.j2eeManagedObjectId, getArchive(),
-                                                                    persistenceUnitInfos, this.configuration));
-
-                if (persistenceUnitInfos != null) {
-                    analyzedPersistenceUnitManager =
-                            PersistenceXmlFileAnalyzer.loadPersistenceProvider(persistenceUnitInfos, getClassLoader());
-                }
-            } catch (PersistenceXmlFileAnalyzerException e) {
-                throw new EZBContainerException("Cannot analyze the persistence.xml file in the archive", e);
-            }
-
-            // No previous manager
-            if (this.persistenceUnitManager == null) {
-                this.persistenceUnitManager = analyzedPersistenceUnitManager;
-            } else {
-                // merge old and new.
-                if (analyzedPersistenceUnitManager != null) {
-                    analyzedPersistenceUnitManager.merge(this.persistenceUnitManager);
-                    // update persistence manager with the merged one.
-                    this.persistenceUnitManager = analyzedPersistenceUnitManager;
-                }
-            }
-
-            // Create Beans Factories
-            createBeanFactories();
-
-            // cleanup
-            this.deployment.reset();
-            enhancer = null;
-        } finally {
-            Thread.currentThread().setContextClassLoader(old);
+        // Run enhancer
+        if (!this.enhanced) {
+            enhance(true);
         }
+
 
         // Send notification to callbacks
         if (getCallbacksLifeCycle().size() > 0) {
@@ -510,6 +464,85 @@ public class JContainer3 implements EZBContainer {
 
 
     }
+
+    /**
+     * Run the enhancer on the container.
+     * @throws EZBContainerException if enhancement fails
+     */
+    public void enhance(final boolean createBeanFactories) throws EZBContainerException {
+        if (!this.resolved) {
+            throw new EZBContainerException("Cannot run enhancer without resolving classes");
+        }
+
+        if (this.enhanced) {
+            return;
+        }
+
+        ClassLoader old = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(this.classLoader);
+            Enhancer enhancer = new Enhancer(this.classLoader, this.deployment.getEjbJarArchiveMetadata(), this.enhancerMap);
+
+            long tStartEnhancing = System.currentTimeMillis();
+            try {
+                enhancer.enhance();
+            } catch (EnhancerException ee) {
+                throw new EZBContainerException("Cannot run enhancer on archive '" + getName() + "'.", ee);
+            } catch (RuntimeException e) {
+                // Catch Exception as some exceptions can be runtime exception
+                throw new EZBContainerException("Cannot run enhancer on archive '" + getName() + "'.", e);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Enhancement elapsed during : " + (System.currentTimeMillis() - tStartEnhancing) + " ms");
+            }
+
+            // Check if there is META-INF/persistence.xml file
+            PersistenceUnitManager analyzedPersistenceUnitManager = null;
+            try {
+                JPersistenceUnitInfo[] persistenceUnitInfos =
+                        PersistenceXmlFileAnalyzer.analyzePersistenceXmlFile(getArchive());
+
+                // Dispatch life cycle event.
+                if (this.dispatcher != null) {
+                    this.dispatcher.dispatch(new EventContainerStarting(this.j2eeManagedObjectId, getArchive(),
+                            persistenceUnitInfos, this.configuration));
+                }
+
+                if (persistenceUnitInfos != null) {
+                    analyzedPersistenceUnitManager =
+                            PersistenceXmlFileAnalyzer.loadPersistenceProvider(persistenceUnitInfos, getClassLoader());
+                }
+            } catch (PersistenceXmlFileAnalyzerException e) {
+                throw new EZBContainerException("Cannot analyze the persistence.xml file in the archive", e);
+            }
+
+            // No previous manager
+            if (this.persistenceUnitManager == null) {
+                this.persistenceUnitManager = analyzedPersistenceUnitManager;
+            } else {
+                // merge old and new.
+                if (analyzedPersistenceUnitManager != null) {
+                    analyzedPersistenceUnitManager.merge(this.persistenceUnitManager);
+                    // update persistence manager with the merged one.
+                    this.persistenceUnitManager = analyzedPersistenceUnitManager;
+                }
+            }
+
+            // Create Beans Factories
+            if (createBeanFactories) {
+                createBeanFactories();
+            }
+
+            // cleanup
+            this.deployment.reset();
+            enhancer = null;
+        } finally {
+            Thread.currentThread().setContextClassLoader(old);
+            this.enhanced = true;
+        }
+
+    }
+
 
     /**
      * Create the factories of the beans (session and MDB).
