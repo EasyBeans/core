@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2006-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -105,6 +105,11 @@ public final class SessionBusinessInterfaceFinder {
 
                 logger.warn("No business interface found on bean class {0}.", sessionBean.getClassName());
             } else {
+
+                // Already flagged as a local bean.
+                if (sessionBean.isLocalBean()) {
+                    return;
+                }
 
                 if (numberItfFound > 1) {
                     throw new IllegalStateException("More than 1 itf on class '" + sessionBean.getClassName() + "'.");
