@@ -42,6 +42,7 @@
     <module>api</module>
     <module>core</module>
     <module>deployment</module>
+    <module>embeddable</module>
     <module>injection</module>
     <module>naming</module>
     <module>jacc-provider</module>

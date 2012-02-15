@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - EasyBeans
+ - Copyright (C) 2012 Bull S.A.S.
+ - Contact: easybeans@ow2.org
+ -
+ - This library is free software; you can redistribute it and/or
+ - modify it under the terms of the GNU Lesser General Public
+ - License as published by the Free Software Foundation; either
+ - version 2.1 of the License, or any later version.
+ -
+ - This library is distributed in the hope that it will be useful,
+ - but WITHOUT ANY WARRANTY; without even the implied warranty of
+ - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ - Lesser General Public License for more details.
+ -
+ - You should have received a copy of the GNU Lesser General Public
+ - License along with this library; if not, write to the Free Software
+ - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ - USA
+ -
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - $Id: easybeans-default.xml 5369 2010-02-24 14:58:19Z benoitf $
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -->
+<easybeans xmlns="http://org.ow2.easybeans.server">
+
+    <!-- No infinite loop (daemon managed by Easybeans): wait="false"
+         Disable MBeans: mbeans="false"
+         Enable the naming: naming="true"
+         Use EasyBeans JACC: jacc="false"
+         Disable old way to use file monitoring to detect archives: scanning="false"
+         (it has been replaced by the new depmonitor component)
+         Not Using JMX Connector: connector="false"
+         Disable Deployer and J2EEServer MBeans: deployer="false" & j2eeserver="false"
+    -->
+    <config
+        wait="false"
+        mbeans="false"
+        naming="true"
+        jacc="true"
+        scanning="false"
+        connector="false"
+        deployer="false"
+        j2eeserver="false"
+        useLegacyNamingStrategy="false"
+         />
+
+    <!-- Define components that will be started at runtime -->
+    <components>
+        <!-- LMI protocol will be used as protocol layer -->
+        <rmi>
+           <protocol name="lmi" />
+        </rmi>
+
+        <!-- Start a transaction service -->
+        <tm />
+        
+    </components>
+</easybeans>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="plugins/artifact-filename/target/classes" path="plugins/artifact-filename/src/main/java"/>
+	<classpathentry kind="src" path="modules/embeddable/src/test/java"/>
+	<classpathentry kind="src" path="modules/embeddable/src/main/resources"/>
+	<classpathentry kind="src" path="modules/embeddable/src/main/java"/>
 	<classpathentry kind="src" path="modules/ejbinwar/src/test/resources"/>
 	<classpathentry kind="src" path="modules/ejbinwar/src/test/java"/>
 	<classpathentry kind="src" path="modules/ejbinwar/src/main/java"/>
