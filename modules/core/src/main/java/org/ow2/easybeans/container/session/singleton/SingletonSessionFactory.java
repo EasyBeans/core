@@ -34,7 +34,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.ejb.ApplicationException;
-import javax.ejb.EJBException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
 
@@ -54,6 +53,8 @@ import org.ow2.easybeans.rpc.api.EJBLocalRequest;
 import org.ow2.easybeans.rpc.api.EJBResponse;
 import org.ow2.easybeans.rpc.api.RPCException;
 import org.ow2.util.auditreport.api.IAuditID;
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
 import org.ow2.util.pool.api.PoolException;
 import org.ow2.util.pool.impl.JPool;
 import org.ow2.util.pool.impl.enhanced.EnhancedPool;
@@ -68,9 +69,19 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
         IPoolItemRemoveManager<EasyBeansSingletonSB> {
 
     /**
+     * Logger.
+     */
+    private static final Log LOGGER = LogFactory.getLog(SingletonSessionFactory.class);
+
+    /**
      * Lock used by this factory.
      */
     private ReadWriteLock lock = null;
+
+    /**
+     * Singleton Bean Instance.
+     */
+    private EasyBeansSingletonSB singletonBean = null;
 
 
     /**
@@ -132,16 +143,20 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
         // build EJB Response and set the id
         EJBResponse ejbResponse = new JEJBResponse();
 
-        EasyBeansSingletonSB bean = null;
-        try {
-            bean = getBean(null);
-        } catch (IllegalArgumentException e) {
-            ejbResponse.setRPCException(new RPCException("Cannot get element in the pool", e));
-            return ejbResponse;
-        } catch (NoSuchEJBException e) {
-            ejbResponse.setRPCException(new RPCException("Bean has been removed", e));
-            return ejbResponse;
+        Lock writeLock = this.lock.writeLock();
+        writeLock.lock();
+        if (this.singletonBean == null) {
+            try {
+                this.singletonBean = getBean(null);
+            } catch (IllegalArgumentException e) {
+                ejbResponse.setRPCException(new RPCException("Cannot get element in the pool", e));
+                return ejbResponse;
+            } catch (NoSuchEJBException e) {
+                ejbResponse.setRPCException(new RPCException("Bean has been removed", e));
+                return ejbResponse;
+            }
         }
+        writeLock.unlock();
 
         Method m = getHashes().get(localCallRequest.getMethodHash());
 
@@ -190,11 +205,10 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
         // for now, use only write lock
 
         // acquire lock
-        Lock writeLock = this.lock.writeLock();
         writeLock.lock();
 
         try {
-            value = m.invoke(bean, localCallRequest.getMethodArgs());
+            value = m.invoke(this.singletonBean, localCallRequest.getMethodArgs());
         } catch (IllegalArgumentException e) {
             ejbResponse.setRPCException(new RPCException(e));
             if (enabledEvent) {
@@ -230,12 +244,6 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
             getInvokedBusinessInterfaceNameThreadLocal().set(oldInvokedBusinessInterface);
             getOperationStateThreadLocal().set(oldState);
 
-            // push back into the pool
-            try {
-                getPool().release(bean);
-            } catch (PoolException e) {
-                ejbResponse.setRPCException(new RPCException("cannot release bean", e));
-            }
             // release lock
             writeLock.unlock();
         }
@@ -252,22 +260,12 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
     public void start() throws FactoryException {
         super.start();
 
-        EasyBeansSingletonSB bean = null;
         if (getSessionBeanInfo().isStartup()) {
             try {
-                bean = getBean(null);
+                this.singletonBean = getBean(null);
             } catch (RuntimeException e) {
                 throw new FactoryException("Cannot initialize Singleton bean", e);
-            } finally {
-                if (bean != null) {
-                    try {
-                        getPool().release(bean);
-                    } catch (PoolException e) {
-                        throw new FactoryException("Cannot release bean", e);
-                    }
-                }
             }
-
         }
     }
 
@@ -280,8 +278,9 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
      */
     public void notifyTimeout(final Timer timer) {
         // Call the EasyBeans timer method on a given bean instance
-        EasyBeansSingletonSB bean = null;
-        bean = getBean(null);
+        if (this.singletonBean == null) {
+            this.singletonBean = getBean(null);
+        }
 
         //set ClassLoader
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -289,18 +288,29 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
 
         // Call the timer method on the bean
         try {
-            bean.timeoutCallByEasyBeans(timer);
+            this.singletonBean.timeoutCallByEasyBeans(timer);
         } finally {
             // Reset classloader
             Thread.currentThread().setContextClassLoader(oldClassLoader);
+        }
+    }
 
-            // push back into the pool
+
+    /**
+     * Stops the factory.
+     */
+    @Override
+    public void stop() {
+
+        // push back into the pool
+        if (this.singletonBean != null) {
             try {
-                getPool().release(bean);
+                getPool().release(this.singletonBean);
             } catch (PoolException e) {
-                throw new EJBException("cannot release bean", e);
+                LOGGER.error("Unable to release singleton bean", e);
             }
         }
+        super.stop();
     }
 
 }
