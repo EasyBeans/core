@@ -195,8 +195,9 @@ public class Enhancer {
                         beanClassMetadata, false);
                 cr.accept(cv, 0);
                 superMetaData.setModified();
-                defineClass(this.writeLoader, superMetaData.getClassName().replace("/", "."), cw.toByteArray());
                 enhanceSuperClass(superMetaData, beanClassMetadata);
+                defineClass(this.writeLoader, superMetaData.getClassName().replace("/", "."), cw.toByteArray());
+
             }
         }
 
