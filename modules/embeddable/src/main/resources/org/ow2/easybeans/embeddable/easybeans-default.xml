@@ -57,5 +57,8 @@
         <!-- Start a transaction service -->
         <tm />
         
+        <!-- Work Manager -->
+        <work-manager min="5" max="50" tm="#tm"/>
+        
     </components>
 </easybeans>
