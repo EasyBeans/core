@@ -139,4 +139,17 @@ public interface EZBContainerConfig {
      * @return the java:app context.
      */
     Context getAppContext();
+
+    /**
+     * Sets the module context.
+     * @param moduleContext the java:module context.
+     */
+    void setModuleContext(final Context moduleContext);
+
+    /**
+     * Sets the app context.
+     * @param appContext the java:module context.
+     */
+    void setAppContext(final Context appContext);
+
 }

@@ -114,6 +114,7 @@ import org.ow2.easybeans.loader.EasyBeansClassLoader;
 import org.ow2.easybeans.naming.BeanNamingInfoHelper;
 import org.ow2.easybeans.naming.J2EEManagedObjectNamingHelper;
 import org.ow2.easybeans.naming.JNDINamingInfoHelper;
+import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.easybeans.naming.strategy.EasyBeansV1NamingStrategy;
 import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
 import org.ow2.easybeans.persistence.PersistenceUnitManager;
@@ -549,6 +550,20 @@ public class JContainer3 implements EZBContainer {
      * @throws EZBContainerException if binding fails.
      */
     protected void createBeanFactories() throws EZBContainerException {
+
+        // Create context if not yet done
+        Context moduleContext = getConfiguration().getModuleContext();
+        if (moduleContext == null) {
+            // Create a new module context shared by all this container
+            getConfiguration().setModuleContext(new ContextImpl("module"));
+        }
+
+        Context appContext = getConfiguration().getAppContext();
+        if (appContext == null) {
+            // Create a new app context shared by all this container
+            getConfiguration().setAppContext(new ContextImpl("app"));
+        }
+
 
         // Check that the event component is here
         EZBEventComponent eventComponent = getComponent(EZBEventComponent.class);
