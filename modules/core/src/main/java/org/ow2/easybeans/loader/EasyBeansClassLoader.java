@@ -135,7 +135,7 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
      */
     private Class<?> defineInternalClass(final String className, final byte[] bytecode) {
 
-        if (logger.isDebugEnabled()) {
+       /* if (logger.isDebugEnabled()) {*/
             String fName = System.getProperty("java.io.tmpdir") + File.separator + className + ".class";
             FileOutputStream fos = null;
             try {
@@ -152,7 +152,7 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
                     }
                 }
             }
-        }
+        /*}*/
 
         checkAndDefinePackage(className);
         try {

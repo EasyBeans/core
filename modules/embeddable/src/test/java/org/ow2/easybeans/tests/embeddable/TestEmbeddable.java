@@ -101,6 +101,20 @@ public class TestEmbeddable {
         }
     }
 
+    /**
+     * Test to call beans that have used EJB lookup.
+     * @throws Exception if it fails
+     */
+    @Test
+    public void testLookupBean() throws Exception {
+        SingletonLookupBean bean = (SingletonLookupBean) this.context.lookup("java:global/test-classes/SingletonLookupBean");
+        Assert.assertNotNull(bean.getCalculatorBean1(), "Bean has not be injected");
+        Assert.assertNotNull(bean.getCalculatorBean2(), "Bean has not be injected");
+
+        Assert.assertEquals(bean.calcWithBean1(-1, 2), 1);
+        Assert.assertEquals(bean.calcWithBean2(2, -1), 1);
+
+    }
 
     /**
      * Stop the container after all the tests.

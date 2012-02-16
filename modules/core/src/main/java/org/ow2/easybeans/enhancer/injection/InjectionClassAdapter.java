@@ -189,6 +189,21 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
     private EZBContainerJNDIResolver containerJNDIResolver = null;
 
     /**
+     * Defered methods lookup.
+     */
+    private List<EasyBeansEjbJarMethodMetadata> deferedMethods = null;
+
+    /**
+     * Defered fields lookup.
+     */
+    private List<EasyBeansEjbJarFieldMetadata> deferedFields = null;
+
+    /**
+     * Defered Class lookup.
+     */
+    private List<LookupEncEntry> deferedEntries = null;
+
+    /**
      * Constructor.
      * @param classAnnotationMetadata object containing all attributes of the
      *        class
@@ -205,6 +220,9 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         this.beanChildClassAnnotationMetadata = beanChildClassAnnotationMetadata;
         this.staticMode = staticMode;
         this.containerJNDIResolver = (EZBContainerJNDIResolver) this.map.get(EZBContainerJNDIResolver.class.getName());
+        this.deferedMethods = new ArrayList<EasyBeansEjbJarMethodMetadata>();
+        this.deferedFields = new ArrayList<EasyBeansEjbJarFieldMetadata>();
+        this.deferedEntries = new ArrayList<LookupEncEntry>();
 
         // Ensure it's there
         if (this.containerJNDIResolver == null) {
@@ -380,11 +398,14 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         // generates injection for annotations on the class itself
         generateClassInjection(mv);
 
+        // Generates injection for setters methods
+        generateSettersInjection(mv);
+
         // Generates injection for attributes
         generateAttributesInjection(mv);
 
-        // Generates injection for setters methods
-        generateSettersInjection(mv);
+        // Generate all lookup stuff at the end as it may reference previous entries
+        generateDeferedInjection(mv);
 
     }
 
@@ -539,6 +560,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                 // validate
                 validateAccessFieldAnnotation(fieldMetaData);
 
+                String lookup = jEjb.getLookup();
+                if (lookup != null && !lookup.equals("")) {
+                    // Not done right now
+                    this.deferedFields.add(fieldMetaData);
+                    continue;
+                }
+
                 logger.debug("Add injection for EJB on attribute {0} of class {1}", fieldMetaData.getFieldName(),
                         this.classAnnotationMetadata.getClassName());
 
@@ -557,6 +585,8 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                 if (mappedName != null && !mappedName.equals("")) {
                     jndiName = mappedName;
                 }
+
+
 
                 // JNDI name still null, ask the JNDI resolver
                 if (jndiName == null) {
@@ -718,6 +748,25 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
             }
         }
     }
+
+
+    /**
+     * Generates the calls to methods that will lookup entries.
+     * @param mv the method visitor used to inject bytecode.
+     */
+    protected void generateDeferedInjection(final MethodVisitor mv) {
+
+        // Generate class calls.
+        bindLookupClass(mv);
+
+        // Generate setters calls.
+        bindLookupMethods(mv);
+
+        // Generate fields calls.
+        bindLookupFields(mv);
+
+    }
+
 
     /**
      * Update the given resource with given encname with data set on the class.
@@ -912,6 +961,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                 Type typeInterface = validateSetterMethod(methodMetaData);
                 String itfName = typeInterface.getClassName();
 
+                String lookup = jEjb.getLookup();
+                if (lookup != null && !lookup.equals("")) {
+                    // Not done right now
+                    this.deferedMethods.add(methodMetaData);
+                    continue;
+                }
+
                 // ejbName ?
                 String beanName = jEjb.getBeanName();
 
@@ -924,12 +980,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                     jndiName = mappedName;
                 }
 
+
                 // JNDI name still null, ask the JNDI resolver
                 if (jndiName == null) {
                     try {
                         jndiName = this.containerJNDIResolver.getEJBJNDIUniqueName(itfName, beanName);
                     } catch (EZBJNDIResolverException e) {
-                        logger.error("Cannot find JNDI Name on class {0} for interface {1} and beanName {2}. Result = {3}",
+                        logger.error("Cannot find JNDI Name on class {0} for interface {1} and beanName {2}",
                             this.classAnnotationMetadata.getClassName(), itfName, beanName);
                     }
                 }
@@ -1035,6 +1092,79 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
 
         }
     }
+
+
+    /**
+     * Generate all lookup calls.
+     * @param mv the method visitors
+     * @param methodMetadatas the metadata to use
+     */
+    protected void bindLookupClass(final MethodVisitor mv) {
+        for (LookupEncEntry lookupEncEntry : this.deferedEntries) {
+            callBindLookupJndiRef(lookupEncEntry.getEncName(), lookupEncEntry.getLookupName(), mv);
+        }
+
+    }
+
+    /**
+     * Generate all lookup calls.
+     * @param mv the method visitors
+     * @param methodMetadatas the metadata to use
+     */
+    protected void bindLookupMethods(final MethodVisitor mv) {
+        for (EasyBeansEjbJarMethodMetadata methodMetaData : this.deferedMethods) {
+            // &#64;EJB annotation
+            IJEjbEJB jEjb = methodMetaData.getJEjbEJB();
+            if (jEjb != null) {
+                logger.debug("Add injection for EJB on method {0} of class {1}", methodMetaData.getMethodName(),
+                        this.classAnnotationMetadata.getClassName());
+
+                Type typeInterface = validateSetterMethod(methodMetaData);
+
+                // Lookup is not null else we're not here
+                String lookup = jEjb.getLookup();
+                logger.debug("Asking lookup name on class {0} with lookupName {1}",
+                            this.classAnnotationMetadata.getClassName(), lookup);
+
+                    callMethodJndiEnv(lookup, typeInterface, mv, methodMetaData, this.classAnnotationMetadata
+                            .getClassName(), REGISTRY);
+
+                    // get enc name (or the default name) and bind result
+                    String encName = getJndiName(jEjb.getName(), methodMetaData);
+                    callBindLookupJndiRef(encName, lookup, mv);
+            }
+        }
+    }
+
+    /**
+     * Generate all lookup calls.
+     * @param mv the method visitors
+     * @param fieldMetadatas the metadata to use
+     */
+    protected void bindLookupFields(final MethodVisitor mv) {
+        for (EasyBeansEjbJarFieldMetadata fieldMetaData : this.deferedFields) {
+
+            Type typeInterface = Type.getType(fieldMetaData.getJField().getDescriptor());
+
+            // &#64;EJB annotation
+            IJEjbEJB jEjb = fieldMetaData.getJEjbEJB();
+            if (jEjb != null) {
+                // validate
+                validateAccessFieldAnnotation(fieldMetaData);
+
+                // Lookup is not null else we're not here
+                String lookup = jEjb.getLookup();
+                logger.debug("Asking lookup name on class {0} with lookupName {1}",
+                        this.classAnnotationMetadata.getClassName(), lookup);
+                callAttributeJndi(lookup, typeInterface, mv, fieldMetaData, this.classAnnotationMetadata
+                        .getClassName(), REGISTRY);
+                callBindAttributeJndi(jEjb.getName(), lookup, mv, fieldMetaData);
+            }
+
+
+        }
+    }
+
 
 
     /**
@@ -1337,6 +1467,14 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         // ejbName ?
         String beanName = jEJB.getBeanName();
         String jndiName = null;
+
+        String lookupName = jEJB.getLookup();
+        if (lookupName != null) {
+            this.deferedEntries.add(new LookupEncEntry(encName, lookupName));
+            return;
+        }
+
+
         if (jEJB.getMappedName() != null && jEJB.getMappedName().length() > 0) {
             jndiName = jEJB.getMappedName();
         } else {
