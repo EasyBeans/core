@@ -61,6 +61,13 @@
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
+      <scope>test</scope>
+    </dependency>    
 
   </dependencies>
 
@@ -131,6 +138,11 @@
                     <artifactId>easybeans-tests-applications-ejbjars-enventry</artifactId>
                     <version>${easybeans-tests-applications.version}</version>
                   </artifact>
+                  <artifact>
+                    <groupId>org.ow2.easybeans.tests</groupId>
+                    <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
+                    <version>${easybeans-tests-applications.version}</version>
+                  </artifact>                  
                 </artifacts>
               </deployables>
 
