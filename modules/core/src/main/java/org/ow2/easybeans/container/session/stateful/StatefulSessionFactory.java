@@ -30,7 +30,6 @@ import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import javax.ejb.ApplicationException;
 import javax.ejb.EJBException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
@@ -39,6 +38,7 @@ import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.OperationState;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
+import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocation;
 import org.ow2.easybeans.container.session.JPoolWrapperFactory;
 import org.ow2.easybeans.container.session.SessionFactory;
@@ -232,8 +232,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                 Throwable cause = e.getCause();
                 RPCException rpcException = new RPCException(cause);
                 // ApplicationException ?
-                ApplicationException applicationException = getBeanInfo().getApplicationExceptions().get(
-                        cause.getClass().getName());
+                IApplicationExceptionInfo applicationException = getBeanInfo().getApplicationException(cause);
                 if (applicationException != null) {
                     rpcException.setApplicationException();
                 }

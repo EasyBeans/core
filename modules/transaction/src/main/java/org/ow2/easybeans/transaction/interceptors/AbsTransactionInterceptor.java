@@ -28,9 +28,7 @@ package org.ow2.easybeans.transaction.interceptors;
 import static javax.transaction.Status.STATUS_MARKED_ROLLBACK;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import javax.ejb.ApplicationException;
 import javax.ejb.EJBException;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.transaction.HeuristicMixedException;
@@ -44,6 +42,8 @@ import org.ow2.easybeans.api.EasyBeansInterceptor;
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
+import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
+import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.transaction.JTransactionManager;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -89,7 +89,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      * @return TM.
      */
     public TransactionManager getTransactionManager() {
-        return transactionManager;
+        return this.transactionManager;
     }
 
     /**
@@ -101,14 +101,17 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      * @param e the exception to check
      * @return the application exception object, else null.
      */
-    protected ApplicationException getApplicationException(final EasyBeansInvocationContext invocationContext,
+    protected IApplicationExceptionInfo getApplicationException(final EasyBeansInvocationContext invocationContext,
             final Exception e) {
-        Map<String, ApplicationException> applicationExceptions = invocationContext.getFactory().getBeanInfo()
-                .getApplicationExceptions();
-        ApplicationException appException = applicationExceptions.get(e.getClass().getName());
-        if (appException != null) {
-            return appException;
+
+        IBeanInfo beanInfo = invocationContext.getFactory().getBeanInfo();
+
+        // Application exception ?
+        IApplicationExceptionInfo applicationExceptionInfo = beanInfo.getApplicationException(e);
+        if (applicationExceptionInfo != null) {
+            return applicationExceptionInfo;
         }
+
         // If runtime exception, not an application by default
         if (e instanceof RuntimeException) {
             return null;
@@ -123,7 +126,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
                     if (clazz.isInstance(e) && !(e instanceof RuntimeException)) {
                         // Checked exception, so application exception with
                         // rollback = false (default)
-                        return applicationExceptions.get("DEFAULT");
+                        return beanInfo.getDefaultCheckedException();
                     }
                 }
             }
@@ -132,6 +135,9 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
         return null;
 
     }
+
+
+
 
     /**
      * Remove from the factory's pool the bean found in the current invocation
@@ -158,7 +164,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
             // discard instance
             pool.discard(bean);
         } else {
-            logger.debug("Instance not discarded as it is not a stateful bean");
+            this.logger.debug("Instance not discarded as it is not a stateful bean");
         }
 
     }
@@ -176,11 +182,11 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
         }
         if (transaction != null) {
             try {
-                transactionManager.setRollbackOnly();
+                this.transactionManager.setRollbackOnly();
             } catch (IllegalStateException e) {
-                logger.warn("Cannot mark transaction as rollbackOnly", e);
+                this.logger.warn("Cannot mark transaction as rollbackOnly", e);
             } catch (SystemException e) {
-                logger.warn("Cannot mark transaction as rollbackOnly", e);
+                this.logger.warn("Cannot mark transaction as rollbackOnly", e);
             }
         }
     }
@@ -191,9 +197,9 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      */
     protected boolean isMarkedRollbackOnly() {
         try {
-            return (STATUS_MARKED_ROLLBACK == transactionManager.getStatus());
+            return (STATUS_MARKED_ROLLBACK == this.transactionManager.getStatus());
         } catch (SystemException e) {
-            logger.warn("Cannot get transaction status", e);
+            this.logger.warn("Cannot get transaction status", e);
             return false;
         }
     }
@@ -203,13 +209,13 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      */
     protected void rollback() {
         try {
-            transactionManager.rollback();
+            this.transactionManager.rollback();
         } catch (IllegalStateException e) {
-            logger.warn("Cannot rollback the transaction", e);
+            this.logger.warn("Cannot rollback the transaction", e);
         } catch (SecurityException e) {
-            logger.warn("Cannot rollback the transaction", e);
+            this.logger.warn("Cannot rollback the transaction", e);
         } catch (SystemException e) {
-            logger.warn("Cannot rollback the transaction", e);
+            this.logger.warn("Cannot rollback the transaction", e);
         }
     }
 
@@ -218,19 +224,19 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      */
     protected void commit() {
         try {
-            transactionManager.commit();
+            this.transactionManager.commit();
         } catch (IllegalStateException e) {
-            logger.warn("Cannot commit the transaction", e);
+            this.logger.warn("Cannot commit the transaction", e);
         } catch (SecurityException e) {
-            logger.warn("Cannot commit the transaction", e);
+            this.logger.warn("Cannot commit the transaction", e);
         } catch (HeuristicMixedException e) {
-            logger.warn("Cannot commit the transaction", e);
+            this.logger.warn("Cannot commit the transaction", e);
         } catch (HeuristicRollbackException e) {
-            logger.warn("Cannot commit the transaction", e);
+            this.logger.warn("Cannot commit the transaction", e);
         } catch (RollbackException e) {
-            logger.warn("Cannot commit the transaction", e);
+            this.logger.warn("Cannot commit the transaction", e);
         } catch (SystemException e) {
-            logger.warn("Cannot commit the transaction", e);
+            this.logger.warn("Cannot commit the transaction", e);
         }
     }
 
@@ -243,7 +249,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      */
     protected void handleBeanManagedException(final EasyBeansInvocationContext invocationContext, final Exception e)
             throws Exception {
-        ApplicationException applicationException = getApplicationException(invocationContext, e);
+        IApplicationExceptionInfo applicationException = getApplicationException(invocationContext, e);
 
         // it is an application exception
         if (applicationException != null) {
@@ -254,7 +260,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
         // else, not an application exception :
 
         // Log the exception or error.
-        logger.error("Bean Managed Transaction : Exception (not application exception) in business method", e);
+        this.logger.error("Bean Managed Transaction : Exception (not application exception) in business method", e);
 
         // Mark for rollback a transaction that has been
         // started, but not yet completed, by the instance.
@@ -281,7 +287,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
     protected void handleUnspecifiedTransactionContext(final EasyBeansInvocationContext invocationContext,
             final Exception e) throws Exception {
 
-        ApplicationException applicationException = getApplicationException(invocationContext, e);
+        IApplicationExceptionInfo applicationException = getApplicationException(invocationContext, e);
 
         // it is an application exception
         if (applicationException != null) {
@@ -292,7 +298,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
         // else, not an application exception :
 
         // Log the exception or error.
-        logger.error("Exception (not application exception) in business method", e);
+        this.logger.error("Exception (not application exception) in business method", e);
 
         // Discard instance.
         try {
@@ -315,7 +321,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
      */
     protected void handleContextClientTransaction(final EasyBeansInvocationContext invocationContext, final Exception e)
             throws Exception {
-        ApplicationException applicationException = getApplicationException(invocationContext, e);
+        IApplicationExceptionInfo applicationException = getApplicationException(invocationContext, e);
 
         // An application exception ?
         if (applicationException != null) {
@@ -336,7 +342,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
         // else, not an application exception :
 
         // Log the exception or error.
-        logger.error("Exception (not application exception) in business method", e);
+        this.logger.error("Exception (not application exception) in business method", e);
 
         // Mark the transaction for rollback.
         markTransactionRollback();
@@ -368,7 +374,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
     protected void handleContextContainerTransaction(final EasyBeansInvocationContext invocationContext,
             final Exception e) throws Exception {
 
-        ApplicationException applicationException = getApplicationException(invocationContext, e);
+        IApplicationExceptionInfo applicationException = getApplicationException(invocationContext, e);
 
         // An application exception ?
         if (applicationException != null) {
@@ -397,7 +403,7 @@ public abstract class AbsTransactionInterceptor implements EasyBeansInterceptor 
         }
         // else, not an application exception :
         // Log the exception or error.
-        logger.error("Exception (not application exception) in business method", e);
+        this.logger.error("Exception (not application exception) in business method", e);
 
         // Rollback the container-started transaction.
         rollback();

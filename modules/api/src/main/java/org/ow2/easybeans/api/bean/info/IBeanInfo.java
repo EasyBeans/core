@@ -29,7 +29,6 @@ package org.ow2.easybeans.api.bean.info;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.ApplicationException;
 import javax.ejb.TransactionManagementType;
 
 /**
@@ -43,13 +42,27 @@ public interface IBeanInfo {
      * Gets the list of application exceptions defined on this ejb jar metadata.
      * @return the list of application exceptions defined on this ejb jar metadata.
      */
-    Map<String, ApplicationException> getApplicationExceptions();
+    Map<String, IApplicationExceptionInfo> getApplicationExceptions();
 
     /**
      * Sets the list of application exceptions defined on this ejb jar metadata.
      * @param applicationExceptions the list of application exceptions defined on this ejb jar metadata.
      */
-    void setApplicationExceptions(final Map<String, ApplicationException> applicationExceptions);
+    void setApplicationExceptions(final Map<String, IApplicationExceptionInfo> applicationExceptions);
+
+    /**
+     * Try to see if we've an application exception object for the given exception.
+     * @param throwable the given throwable
+     * @return the object if found
+     */
+    IApplicationExceptionInfo getApplicationException(final Throwable throwable);
+
+    /**
+     * Gets a default checked exception attribute with rollback = false for checkedException.
+     * @return an application exception
+     */
+    IApplicationExceptionInfo getDefaultCheckedException();
+
 
     /**
      * Gets the type of transaction for the given bean.

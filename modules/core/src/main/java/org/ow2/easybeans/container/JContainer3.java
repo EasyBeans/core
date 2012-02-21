@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -60,6 +62,7 @@ import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.LifeCycleCallbackException;
 import org.ow2.easybeans.api.PermissionManagerException;
 import org.ow2.easybeans.api.audit.EZBAuditComponent;
+import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.api.bean.info.IEJBJarInfo;
 import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
@@ -71,6 +74,7 @@ import org.ow2.easybeans.component.api.EZBComponent;
 import org.ow2.easybeans.component.itf.EZBEventComponent;
 import org.ow2.easybeans.component.itf.EZBStatisticComponent;
 import org.ow2.easybeans.component.itf.JMSComponent;
+import org.ow2.easybeans.container.info.ApplicationExceptionInfo;
 import org.ow2.easybeans.container.info.BusinessMethodsInfoHelper;
 import org.ow2.easybeans.container.info.EJBJarInfo;
 import org.ow2.easybeans.container.info.MessageDrivenInfo;
@@ -137,6 +141,7 @@ import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
 import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IApplicationException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JActivationConfigProperty;
@@ -859,7 +864,7 @@ public class JContainer3 implements EZBContainer {
 
         // build runtime information
         MessageDrivenInfo messageDrivenInfo = new MessageDrivenInfo();
-        messageDrivenInfo.setApplicationExceptions(messageDrivenBean.getEjbJarDeployableMetadata().getApplicationExceptions());
+        messageDrivenInfo.setApplicationExceptions(convertApplicationExceptionInfo(messageDrivenBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
         messageDrivenInfo.setTransactionManagementType(messageDrivenBean.getTransactionManagementType());
         messageDrivenInfo.setMessageListenerInterface(messageDrivenBean.getJMessageDriven()
                 .getMessageListenerInterface());
@@ -920,7 +925,7 @@ public class JContainer3 implements EZBContainer {
         // Build runtime information
         SessionBeanInfo sessionBeanInfo = new SessionBeanInfo();
         sessionBeanInfo.setTransactionManagementType(sessionBean.getTransactionManagementType());
-        sessionBeanInfo.setApplicationExceptions(sessionBean.getEjbJarDeployableMetadata().getApplicationExceptions());
+        sessionBeanInfo.setApplicationExceptions(convertApplicationExceptionInfo(sessionBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
         // Only for singleton
         if (sessionBean.isSingleton()) {
             sessionBeanInfo.setStartup(sessionBean.isStartup());
@@ -993,6 +998,27 @@ public class JContainer3 implements EZBContainer {
 
         return sessionFactory;
     }
+
+    /**
+     * Convert metadata infos into runtime info.
+     * @param applicationExceptions the given metadata application exceptions
+     * @return the converted list
+     */
+    protected Map<String, IApplicationExceptionInfo> convertApplicationExceptionInfo(
+            final Map<String, IApplicationException> applicationExceptions) {
+        Map<String, IApplicationExceptionInfo> applicationExceptionInfos = new HashMap<String, IApplicationExceptionInfo>();
+        if (applicationExceptions != null) {
+            Set<Entry<String, IApplicationException>> set = applicationExceptions.entrySet();
+            Iterator<Entry<String, IApplicationException>> it = set.iterator();
+            while (it.hasNext()) {
+                Entry<String, IApplicationException> entry = it.next();
+                IApplicationException e = entry.getValue();
+                applicationExceptionInfos.put(entry.getKey(), new ApplicationExceptionInfo(e.rollback(), e.inherited()));
+            }
+        }
+        return applicationExceptionInfos;
+    }
+
 
     /**
      * Creates the WebServiceinfo structure holding data from the XML descriptors.

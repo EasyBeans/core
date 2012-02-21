@@ -31,9 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.ApplicationException;
 import javax.ejb.TransactionManagementType;
 
+import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.bean.info.ISecurityInfo;
@@ -64,7 +64,7 @@ public class BeanInfo implements IBeanInfo {
     /**
      * List of application exceptions used on this ejb-jar.
      */
-    private Map<String, ApplicationException> applicationExceptions = null;
+    private Map<String, IApplicationExceptionInfo> applicationExceptions = null;
 
     /**
      * Cluster configuration.
@@ -105,7 +105,7 @@ public class BeanInfo implements IBeanInfo {
      * Gets the list of application exceptions defined on this ejb jar metadata.
      * @return the list of application exceptions defined on this ejb jar metadata.
      */
-    public Map<String, ApplicationException> getApplicationExceptions() {
+    public Map<String, IApplicationExceptionInfo> getApplicationExceptions() {
         return this.applicationExceptions;
     }
 
@@ -113,7 +113,7 @@ public class BeanInfo implements IBeanInfo {
      * Sets the list of application exceptions defined on this ejb jar metadata.
      * @param applicationExceptions the list of application exceptions defined on this ejb jar metadata.
      */
-    public void setApplicationExceptions(final Map<String, ApplicationException> applicationExceptions) {
+    public void setApplicationExceptions(final Map<String, IApplicationExceptionInfo> applicationExceptions) {
         this.applicationExceptions = applicationExceptions;
     }
 
@@ -257,5 +257,71 @@ public class BeanInfo implements IBeanInfo {
         }
         return newList;
     }
+
+    /**
+     * Gets a default checked exception attribute with rollback = false for checkedException.
+     * @return an application exception
+     */
+    public IApplicationExceptionInfo getDefaultCheckedException() {
+        return new ApplicationExceptionInfo(true, true);
+    }
+
+
+    /**
+     * Try to see if we've an application exception object for the given exception.
+     * @param throwable the given throwable
+     * @return the object if found
+     */
+    public IApplicationExceptionInfo getApplicationException(final Throwable throwable) {
+
+        // Do we have a direct match for the given throwable
+        IApplicationExceptionInfo appException = this.applicationExceptions.get(throwable.getClass().getName());
+        if (appException != null) {
+            return appException;
+        }
+
+        // No matching exception, needs to check if there is inheritance
+
+        // Get all super classes of the given exception
+        List<String> superClasses = getSuperClass(throwable.getClass());
+
+        // Now, search if we've a matching application exceptions in these super classes
+        int i = 0;
+        while (appException == null && i < superClasses.size()) {
+            String superClass = superClasses.get(i);
+            appException = this.applicationExceptions.get(superClass);
+            // If we've found a inherited exception but this one is not
+            // inherited, the exception is not considered as an application
+            // exception
+            if (appException != null && !appException.inherited()) {
+                return null;
+            }
+            i++;
+        }
+        return appException;
+    }
+
+
+
+    /**
+     * @param clazz the class instance
+     * @return list of super class names for the given class
+     */
+    protected List<String> getSuperClass(final Class<?> clazz) {
+        Class<?> superClass = clazz.getSuperclass();
+        List<String> list = new ArrayList<String>();
+
+        // no more super classes.
+        if (Throwable.class.equals(superClass) || Object.class.equals(superClass)) {
+            return list;
+        }
+        list.add(superClass.getName());
+
+        // Else, add the super classes
+        list.addAll(getSuperClass(superClass));
+
+        return list;
+    }
+
 
 }
