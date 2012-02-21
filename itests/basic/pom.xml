@@ -47,6 +47,11 @@
       <artifactId>testng</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-ejb-3.1-spec</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.ow2.easybeans</groupId>
@@ -67,7 +72,14 @@
       <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
+    
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-exceptions</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
+      <scope>test</scope>
+    </dependency>            
 
   </dependencies>
 
@@ -142,7 +154,12 @@
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
                     <version>${easybeans-tests-applications.version}</version>
-                  </artifact>                  
+                  </artifact>
+                  <artifact>
+                    <groupId>org.ow2.easybeans.tests</groupId>
+                    <artifactId>easybeans-tests-applications-ejbjars-exceptions</artifactId>
+                    <version>${easybeans-tests-applications.version}</version>
+                  </artifact>                                          
                 </artifacts>
               </deployables>
 
