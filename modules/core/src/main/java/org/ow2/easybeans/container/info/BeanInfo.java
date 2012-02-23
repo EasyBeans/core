@@ -263,7 +263,7 @@ public class BeanInfo implements IBeanInfo {
      * @return an application exception
      */
     public IApplicationExceptionInfo getDefaultCheckedException() {
-        return new ApplicationExceptionInfo(true, true);
+        return new ApplicationExceptionInfo(false, true);
     }
 
 

@@ -32,6 +32,7 @@ import javax.naming.NamingException;
 import org.ow2.easybeans.application.exceptions.AnnotationRuntimeExceptionA;
 import org.ow2.easybeans.application.exceptions.AnnotationRuntimeExceptionB;
 import org.ow2.easybeans.application.exceptions.AnnotationRuntimeExceptionC;
+import org.ow2.easybeans.application.exceptions.ICheckerException;
 import org.ow2.easybeans.application.exceptions.IException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -47,9 +48,16 @@ public class TestExceptions {
      */
     private IException exceptionBeanAnnotation = null;
 
+    /**
+     * Bean for checking tx status.
+     */
+    private ICheckerException checkedExceptionBean = null;
+
+
     @BeforeClass
-    public void getBean() throws NamingException {
+    public void getBeans() throws NamingException {
         this.exceptionBeanAnnotation = (IException) new InitialContext().lookup("AnnotationExceptionsBean");
+        this.checkedExceptionBean = (ICheckerException) new InitialContext().lookup("CheckerExceptionBean");
     }
 
     @Test(expectedExceptions = AnnotationRuntimeExceptionA.class)
@@ -74,5 +82,16 @@ public class TestExceptions {
         // an application exception
         this.exceptionBeanAnnotation.methodD();
     }
+
+    @Test
+    public void testCheckedException() {
+        this.checkedExceptionBean.checkDefaultApplicationException();
+    }
+
+    @Test
+    public void testCheckedRollbackException() {
+        this.checkedExceptionBean.checkRollbackApplicationException();
+    }
+
 
 }
