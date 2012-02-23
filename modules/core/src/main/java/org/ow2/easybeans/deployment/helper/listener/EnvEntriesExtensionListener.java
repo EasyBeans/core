@@ -99,9 +99,9 @@ public class EnvEntriesExtensionListener extends AbstractExtensionListener {
 
         Context javaGlobalCtx = null;
         try {
-            javaGlobalCtx = (Context) javaContext.lookup("app");
+            javaGlobalCtx = (Context) javaContext.lookup("global");
         } catch (NamingException e) {
-            throwException(javaContextNamingEvent, new IllegalStateException("Cannot lookup java:app element.", e));
+            throwException(javaContextNamingEvent, new IllegalStateException("Cannot lookup java:global element.", e));
         }
 
         for (IEnvEntry envEntry : javaContextNamingEvent.getBeanMetadata().getEnvEntryCollection()) {
