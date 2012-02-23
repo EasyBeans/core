@@ -81,9 +81,10 @@ public class BeanInterceptorInvokerImpl implements EZBInterceptorInvoker {
             throws Exception {
         // Check if method is accessible or not
         boolean isAccessible = this.method.isAccessible();
-
-        LOGGER.debug("Calling bean with invocationContext ''{0}'' on bean ''{1}'' with parameters ''{2}''", invocationContext,
-                invocationContext.getTarget(), Arrays.asList(invocationContext.getParameters()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Calling bean with invocationContext ''{0}'' on bean ''{1}'' with parameters ''{2}''", invocationContext,
+                    invocationContext.getTarget(), Arrays.asList(invocationContext.getParameters()));
+        }
 
         // If accessible, call it directly
         if (isAccessible) {
