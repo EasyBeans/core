@@ -182,23 +182,24 @@ public class EasyBeansEjbJarClassMetadata
      * @param postConstructMethodMetadata the method.
      */
     public void addPostConstructMethodMetadata(final EasyBeansEjbJarMethodMetadata postConstructMethodMetadata) {
-        checkLifeCycleDuplicate(postConstructMethodMetadata, InterceptorType.POST_CONSTRUCT, getPostConstructMethodsMetadata());
-        this.postConstructMethodsMetadata.addFirst(postConstructMethodMetadata);
+        if (checkLifeCycleDuplicate(postConstructMethodMetadata, InterceptorType.POST_CONSTRUCT, getPostConstructMethodsMetadata())) {
+            this.postConstructMethodsMetadata.addFirst(postConstructMethodMetadata);
+        }
     }
 
     /**
      * Checks that only method at one level of a class is present.
-     * @param postConstructMethodMetadata method to check
+     * @param methodMetadata method to check
      * @param itcType the type of interceptor (used for the error)
      * @param existingList current list of methods
      */
-    private void checkLifeCycleDuplicate(final EasyBeansEjbJarMethodMetadata postConstructMethodMetadata,
+    private boolean checkLifeCycleDuplicate(final EasyBeansEjbJarMethodMetadata methodMetadata,
             final InterceptorType itcType, final List<EasyBeansEjbJarMethodMetadata> existingList) {
 
         // First case : not inherited
-        EasyBeansEjbJarClassMetadata wantToAddClassMetadata = postConstructMethodMetadata.getClassMetadata();
-        if (postConstructMethodMetadata.isInherited()) {
-            wantToAddClassMetadata = postConstructMethodMetadata.getOriginalClassMetadata();
+        EasyBeansEjbJarClassMetadata wantToAddClassMetadata = methodMetadata.getClassMetadata();
+        if (methodMetadata.isInherited()) {
+            wantToAddClassMetadata = methodMetadata.getOriginalClassMetadata();
         }
         for (EasyBeansEjbJarMethodMetadata method : existingList) {
             EasyBeansEjbJarClassMetadata compareMetaData;
@@ -208,11 +209,15 @@ public class EasyBeansEjbJarClassMetadata
                 compareMetaData = method.getClassMetadata();
             }
             if (compareMetaData.equals(wantToAddClassMetadata)) {
-                throw new InterceptorsValidationException("Class " + getClassName() + " has already a " + itcType
+                if (!methodMetadata.getJMethod().equals(method.getJMethod())) {
+                    throw new InterceptorsValidationException("Class " + getClassName() + " has already a " + itcType
                         + " method which is " + method.getMethodName() + ", cannot set new method "
-                        + postConstructMethodMetadata.getMethodName());
+                        + methodMetadata.getMethodName());
+                }
+                return false;
             }
         }
+        return true;
     }
 
     /**

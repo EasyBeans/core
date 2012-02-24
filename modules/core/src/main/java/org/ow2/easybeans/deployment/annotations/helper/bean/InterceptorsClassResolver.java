@@ -37,6 +37,7 @@ import javax.ejb.Remove;
 
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.api.EasyBeansInterceptor;
+import org.ow2.easybeans.asm.Opcodes;
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.container.session.stateful.interceptors.RemoveAlwaysInterceptor;
 import org.ow2.easybeans.container.session.stateful.interceptors.RemoveOnlyWithoutExceptionInterceptor;
@@ -250,6 +251,7 @@ public final class InterceptorsClassResolver {
             LinkedList<EasyBeansEjbJarClassMetadata> invertedInheritanceClassesList =
                 getInvertedSuperClassesMetadata(interceptorMetadata);
 
+
             // For each class (starting super class first, add the interceptor methods)
             for (EasyBeansEjbJarClassMetadata currentMetaData : invertedInheritanceClassesList) {
                 // Analyze methods of the interceptor meta-data and add it in the map
@@ -268,7 +270,8 @@ public final class InterceptorsClassResolver {
                     EasyBeansEjbJarMethodMetadata analyzedMethod = method;
                     EasyBeansEjbJarMethodMetadata methodSubClass = interceptorMetadata.getMethodMetadata(method
                             .getJMethod());
-                    if (methodSubClass != null) {
+                    boolean superMethodIsPrivate = (analyzedMethod.getJMethod().getAccess() & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE;
+                    if (methodSubClass != null && !superMethodIsPrivate) {
                         analyzedMethod = methodSubClass;
                     }
 
@@ -278,7 +281,8 @@ public final class InterceptorsClassResolver {
                         addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.AROUND_INVOKE), jInterceptor);
                     }
                     // Only if interceptor class is not a bean's class. Else, it is only simple methods.
-                    if (!currentMetaData.isBean()) {
+                    // Also check if the interceptor class is not a super class of the bean
+                    if (!currentMetaData.isBean() && !invertedInheritanceClassesList.contains(classMetadata)) {
                         // build interceptor object.
                         if (analyzedMethod.isPostActivate()) {
                             addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.POST_ACTIVATE), jInterceptor);

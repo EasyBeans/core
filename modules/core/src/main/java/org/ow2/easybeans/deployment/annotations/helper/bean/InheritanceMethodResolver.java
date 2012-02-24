@@ -112,12 +112,11 @@ public final class InheritanceMethodResolver {
                 EasyBeansEjbJarMethodMetadata beanMethod = beanclassAnnotationMetadata.getMethodMetadata(method);
 
                 // overriding ?
-                boolean overrided = true;
-                overrided = !((method.getAccess() & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE);
+                boolean superMethodIsPrivate = ((method.getAccess() & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE);
 
-                // Add only if it is not present or if current method is not
-                // overriding super method (it means super method is private)
-                if (beanMethod == null || (!overrided && beanMethod != null && !beanMethod.isInherited())) {
+                // Add only if it is not present and super method is not private (else if super method is private, this is not an override)
+                // Or if present and super method is private
+                if (beanMethod == null  || (beanMethod != null && superMethodIsPrivate)) {
 
                     // Add a clone of the method to bean class
                     EasyBeansEjbJarMethodMetadata clonedMethodAnnotationMetadata =
@@ -136,8 +135,11 @@ public final class InheritanceMethodResolver {
                         clonedMethodAnnotationMetadata.setIgnored(true);
                     }
 
-                    beanclassAnnotationMetadata
+                    // add only if overrided
+                    if (beanMethod == null) {
+                        beanclassAnnotationMetadata
                             .addStandardMethodMetadata(clonedMethodAnnotationMetadata);
+                    }
 
 
                     // lifecycle / aroundInvoke

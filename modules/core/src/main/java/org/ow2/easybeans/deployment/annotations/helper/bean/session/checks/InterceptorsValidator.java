@@ -160,12 +160,31 @@ public final class InterceptorsValidator {
      */
     private static void analyzeInterceptorClass(final EjbJarArchiveMetadata ejbMetaData,
             final EasyBeansEjbJarClassMetadata interceptorMetaData) {
+
         List<EasyBeansEjbJarMethodMetadata> aroundInvokeList = interceptorMetaData.getAroundInvokeMethodMetadatas();
         if (aroundInvokeList != null && aroundInvokeList.size() > 1) {
+
             String errMsg = "There are severals @AroundInvoke in the class '" + interceptorMetaData.getClassName()
                     + "', while only one is allowed. List of Methods : '" + aroundInvokeList + "'.";
-            throw new InterceptorsValidationException(errMsg);
+
+            int forCurrentClass = 0;
+            // for the same classmetadata ?
+            for (EasyBeansEjbJarMethodMetadata method : aroundInvokeList) {
+                if (method.isInherited()) {
+                    if (method.getOriginalClassMetadata().equals(interceptorMetaData)) {
+                        throw new InterceptorsValidationException(errMsg);
+                    }
+                } else {
+                    forCurrentClass++;
+                }
+            }
+            if (forCurrentClass > 1) {
+                throw new InterceptorsValidationException(errMsg);
+            }
+
         }
+
+
 
         // Ensure that interceptor has a default constructor.
         JMethod defaultConstructor = new JMethod(0, CONSTRUCTOR_METHOD, DEFAULT_CONSTRUCTOR_DESCRIPTOR, null, null);
