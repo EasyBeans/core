@@ -30,6 +30,8 @@ import static org.ow2.easybeans.enhancer.injection.InjectionClassAdapter.JAVA_LA
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -99,16 +101,95 @@ public class Enhancer {
 
     }
 
+
+    /**
+     * Gets the inverted list of metadata for a given class (super class is the first one in the list).
+     * @param classAnnotationMetadata the class to analyze
+     * @return the given list
+     */
+    private static LinkedList<String> getSuperClassesMetadata(
+            final EasyBeansEjbJarClassMetadata classAnnotationMetadata) {
+
+        // get list of super classes
+        LinkedList<String> superClassesList = new LinkedList<String>();
+        String superClassName = classAnnotationMetadata.getSuperName();
+        // loop while super class is not java.lang.Object
+        while (!JAVA_LANG_OBJECT.equals(superClassName)) {
+            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getLinkedClassMetadata(superClassName);
+            if (superMetaData != null) {
+                superClassName = superMetaData.getSuperName();
+                superClassesList.addFirst(superMetaData.getClassName());
+            } else {
+                superClassName = JAVA_LANG_OBJECT;
+            }
+        }
+        superClassesList.addLast(classAnnotationMetadata.getClassName());
+        return superClassesList;
+    }
+
+
     /**
      * Enhance all classes which match beans, etc.
      * @throws EnhancerException if enhancing fails
      */
     public void enhance() throws EnhancerException {
 
+        // Get list of beans
+        List<String> beanNames = this.ejbJarAnnotationMetadata.getBeanNames();
+
+
+        // Search all EJB that needs to be defined
+        List<String> ejbClassAndSuperClassMetadatas = new ArrayList<String>();
+        for (String beanName : beanNames) {
+            for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
+                    .getClassesForBean(beanName)) {
+                if (classAnnotationMetadata.isBean()) {
+                    ejbClassAndSuperClassMetadatas.addAll(getSuperClassesMetadata(classAnnotationMetadata));
+                }
+            }
+        }
+
+        // Defines interceptors used by beans first
+        for (String beanName : beanNames) {
+            for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
+                    .getClassesForBean(beanName)) {
+                if (classAnnotationMetadata.isInterceptor() && !ejbClassAndSuperClassMetadatas.contains(classAnnotationMetadata.getClassName()) && !classAnnotationMetadata.wasModified()) {
+                    logger.debug("ClassAdapter on interceptor : {0}", classAnnotationMetadata.getClassName());
+
+                    // Try to set as modified the normal metadata
+                    EasyBeansEjbJarClassMetadata classicMetadata = this.ejbJarAnnotationMetadata.getScannedClassMetadata(classAnnotationMetadata.getClassName());
+                    if (classicMetadata != null) {
+                        if (classicMetadata.wasModified()) {
+                            continue;
+                        }
+                    }
+
+                    // enhance all super classes of the interceptor. (if any)
+                    // And do this only one time.
+                    enhanceSuperClass(classAnnotationMetadata, null);
+
+                    // Create ClassReader/Writer
+                    ClassReader cr = getClassReader(classAnnotationMetadata);
+                    ClassWriter cw = new EasyBeansClassWriter(this.readLoader);
+                    InterceptorClassAdapter cv = new InterceptorClassAdapter(classAnnotationMetadata, cw, this.readLoader);
+                    InjectionClassAdapter cv2 = new InjectionClassAdapter(classAnnotationMetadata, cv, this.map, null, false);
+                    cr.accept(cv2, 0);
+                    classAnnotationMetadata.setModified();
+
+                    // Try to set as modified the normal metadata
+                    if (classicMetadata != null) {
+                        classicMetadata.setModified();
+                    }
+
+                    defineClass(this.writeLoader, classAnnotationMetadata.getClassName().replace("/", "."), cw.toByteArray());
+                }
+            }
+        }
+
         // Define all interceptors first.
         for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
                 .getEjbJarClassMetadataCollection()) {
-            if (classAnnotationMetadata.isInterceptor() && !classAnnotationMetadata.isBean()
+            if (classAnnotationMetadata.isInterceptor() && !ejbClassAndSuperClassMetadatas.contains(classAnnotationMetadata.getClassName())
                     && !classAnnotationMetadata.wasModified()) {
                 logger.debug("ClassAdapter on interceptor : {0}", classAnnotationMetadata.getClassName());
 
@@ -130,7 +211,6 @@ public class Enhancer {
         logger.info("Beans found are {0}", this.ejbJarAnnotationMetadata.getBeanNames());
 
 
-        List<String> beanNames = this.ejbJarAnnotationMetadata.getBeanNames();
         for (String beanName : beanNames) {
             for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
                     .getClassesForBean(beanName)) {
