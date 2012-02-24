@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="plugins/artifact-filename/target/classes" path="plugins/artifact-filename/src/main/java"/>
-	<classpathentry kind="src" path="modules/embeddable/src/test/java"/>
-	<classpathentry kind="src" path="modules/embeddable/src/main/resources"/>
-	<classpathentry kind="src" path="modules/embeddable/src/main/java"/>
-	<classpathentry kind="src" path="modules/ejbinwar/src/test/resources"/>
-	<classpathentry kind="src" path="modules/ejbinwar/src/test/java"/>
-	<classpathentry kind="src" path="modules/ejbinwar/src/main/java"/>
 	<classpathentry kind="src" output="modules/util/target/classes" path="modules/util/src/main/java"/>
 	<classpathentry kind="src" output="modules/api/target/classes" path="modules/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/jacc-provider/target/classes" path="modules/jacc-provider/src/main/java"/>
@@ -45,8 +39,14 @@
 	<classpathentry kind="src" output="plugins/maven-easybeans-plugin/target/classes" path="plugins/maven-easybeans-plugin/src/main/java"/>
 	<classpathentry kind="src" output="plugins/maven-easybeans-osgi/core/target/classes" path="plugins/maven-easybeans-osgi/core/src/main/java"/>
 	<classpathentry excluding="**" kind="src" output="plugins/maven-easybeans-osgi/core/target/classes" path="plugins/maven-easybeans-osgi/core/src/main/resources"/>
+	<classpathentry kind="src" output="modules/embeddable/target/classes" path="modules/embeddable/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/embeddable/target/classes" path="modules/embeddable/src/main/resources"/>
+	<classpathentry kind="src" output="modules/embeddable/target/test-classes" path="modules/embeddable/src/test/java"/>
 	<classpathentry kind="src" output="modules/injection/api/target/classes" path="modules/injection/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/injection/impl/target/classes" path="modules/injection/impl/src/main/java"/>
+	<classpathentry kind="src" output="modules/ejbinwar/target/classes" path="modules/ejbinwar/src/main/java"/>
+	<classpathentry kind="src" output="modules/ejbinwar/target/test-classes" path="modules/ejbinwar/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="modules/ejbinwar/target/test-classes" path="modules/ejbinwar/src/test/resources"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/client/target/classes" path="modules/components/component-smartclient/client/src/main/java"/>
 	<classpathentry kind="src" output="modules/osgi/annotations/target/classes" path="modules/osgi/annotations/src/main/java"/>
 	<classpathentry kind="src" output="modules/osgi/core/target/classes" path="modules/osgi/core/src/main/java"/>
@@ -77,5 +77,5 @@
 	<classpathentry excluding="**" kind="src" output="itests/basic/target/test-classes" path="itests/basic/src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry kind="output" path="output-eclipse"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
