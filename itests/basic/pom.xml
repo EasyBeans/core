@@ -66,20 +66,27 @@
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.ow2.easybeans.tests</groupId>
       <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.ow2.easybeans.tests</groupId>
       <artifactId>easybeans-tests-applications-ejbjars-exceptions</artifactId>
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
-    </dependency>            
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-context</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 
@@ -148,18 +155,27 @@
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-enventry</artifactId>
-                    <version>${easybeans-tests-applications.version}</version>
+                    <version>${easybeans-tests-applications.version}
+                    </version>
                   </artifact>
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
-                    <version>${easybeans-tests-applications.version}</version>
+                    <version>${easybeans-tests-applications.version}
+                    </version>
                   </artifact>
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-exceptions</artifactId>
-                    <version>${easybeans-tests-applications.version}</version>
-                  </artifact>                                          
+                    <version>${easybeans-tests-applications.version}
+                    </version>
+                  </artifact>
+                  <artifact>
+                    <groupId>org.ow2.easybeans.tests</groupId>
+                    <artifactId>easybeans-tests-applications-ejbjars-context</artifactId>
+                    <version>${easybeans-tests-applications.version}
+                    </version>
+                  </artifact>
                 </artifacts>
               </deployables>
 
@@ -182,7 +198,8 @@
           <systemProperties>
             <property>
               <name>java.naming.factory.initial</name>
-              <value>org.ow2.easybeans.component.smartclient.spi.SmartContextFactory</value>
+              <value>org.ow2.easybeans.component.smartclient.spi.SmartContextFactory
+              </value>
             </property>
             <property>
               <name>java.naming.provider.url</name>
