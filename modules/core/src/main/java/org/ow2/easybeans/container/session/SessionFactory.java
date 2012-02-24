@@ -28,6 +28,7 @@ package org.ow2.easybeans.container.session;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.FactoryException;
@@ -65,6 +66,11 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
     private static final boolean RECREATE_DYNAMIC_PROXY = Boolean.getBoolean("easybeans.recreate.dynamic.proxy");
 
     /**
+     * Number of tries when an instance cannot be created.
+     */
+    protected static final int TRIES_CREATION = 10;
+
+    /**
      * Logger.
      */
     private static Log logger = LogFactory.getLog(SessionFactory.class);
@@ -79,6 +85,10 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
      */
     private InheritableThreadLocal<String> invokedBusinessInterfaceNameThreadLocal;
 
+    /**
+     * Manage failures when creating an instance.
+     */
+    private AtomicInteger creationFails = null;
 
     /**
      * Builds a new factory with a given name and its container.
@@ -89,6 +99,7 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
     public SessionFactory(final String className, final EZBContainer container) throws FactoryException {
         super(className, container);
         this.invokedBusinessInterfaceNameThreadLocal = new InheritableThreadLocal<String>();
+        this.creationFails = new AtomicInteger(0);
     }
 
     /**
@@ -135,6 +146,15 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
      * @return the created instance.
      */
     public PoolType createPoolItem() throws CreatePoolItemException {
+
+        // If instance can't be created, abort
+        int fails = this.creationFails.get();
+        Long waitTime = WAITING_TIME_BEFORE_CREATION;
+        if (fails > TRIES_CREATION) {
+            // factory is broken
+            waitTime = null;
+        }
+
         PoolType instance = null;
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getContainer().getClassLoader());
@@ -142,21 +162,26 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
             try {
                 instance = getBeanClass().newInstance();
             } catch (InstantiationException e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to create a new instance of the class ''{0}''", getBeanClass().getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot create a new instance", e);
+                throw new CreatePoolItemException(waitTime, "Cannot create a new instance", e);
             } catch (IllegalAccessException e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to create a new instance of the class ''{0}''", getBeanClass().getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot create a new instance", e);
+                throw new CreatePoolItemException(waitTime, "Cannot create a new instance", e);
             } catch (RuntimeException e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to create a new instance of the class ''{0}''", getBeanClass().getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot create a new instance", e);
+                throw new CreatePoolItemException(waitTime, "Cannot create a new instance", e);
             } catch (Exception e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to create a new instance of the class ''{0}''", getBeanClass().getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot create a new instance", e);
+                throw new CreatePoolItemException(waitTime, "Cannot create a new instance", e);
             } catch (Error e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to create a new instance of the class ''{0}''", getBeanClass().getName(), e);
                 // null as factory is broken
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot create a new instance", e);
+                throw new CreatePoolItemException(waitTime, "Cannot create a new instance", e);
             }
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -178,49 +203,59 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
             try {
                 injectResources(instance);
             } catch (PoolException e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to perform injection of resources in the instance of the class ''{0}''", getBeanClass()
                         .getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION,
+                throw new CreatePoolItemException(waitTime,
                         "Cannot perform injection of resources in the instance of the class '" + getBeanClass().getName()
                                 + "'.", e);
             } catch (RuntimeException e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to perform injection of resources in the instance of the class ''{0}''", getBeanClass()
                         .getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION,
+                throw new CreatePoolItemException(waitTime,
                         "Cannot perform injection of resources in the instance of the class '" + getBeanClass().getName()
                                 + "'.", e);
             } catch (Exception e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to perform injection of resources in the instance of the class ''{0}''", getBeanClass()
                         .getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION,
+                throw new CreatePoolItemException(waitTime,
                         "Cannot perform injection of resources in the instance of the class '" + getBeanClass().getName()
                                 + "'.", e);
             } catch (Error e) {
+                this.creationFails.incrementAndGet();
                 logger.error("Unable to perform injection of resources in the instance of the class ''{0}''", getBeanClass()
                         .getName(), e);
-                throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION,
+                throw new CreatePoolItemException(waitTime,
                         "Cannot perform injection of resources in the instance of the class '" + getBeanClass().getName()
                                 + "'.", e);
             }
 
             // post construct callback
             postConstruct(instance);
+
         } catch (RuntimeException e) {
+            this.creationFails.incrementAndGet();
             logger.error("Unable to perform postconstruct on a new instance of the class ''{0}''", getBeanClass().getName(), e);
-            throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot perform postConstruct on the new instance",
+            throw new CreatePoolItemException(waitTime, "Cannot perform postConstruct on the new instance",
                     e);
         } catch (Exception e) {
+            this.creationFails.incrementAndGet();
             logger.error("Unable to perform postconstruct on a new instance of the class ''{0}''", getBeanClass().getName(), e);
-            throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot perform postConstruct on the new instance",
+            throw new CreatePoolItemException(waitTime, "Cannot perform postConstruct on the new instance",
                     e);
         } catch (Error e) {
+            this.creationFails.incrementAndGet();
             logger.error("Unable to perform postconstruct on a new instance of the class ''{0}''", getBeanClass().getName(), e);
-            throw new CreatePoolItemException(WAITING_TIME_BEFORE_CREATION, "Cannot perform postConstruct on the new instance",
+            throw new CreatePoolItemException(waitTime, "Cannot perform postConstruct on the new instance",
                     e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
         }
 
+        // reset counter
+        this.creationFails.set(0);
         return instance;
     }
 
