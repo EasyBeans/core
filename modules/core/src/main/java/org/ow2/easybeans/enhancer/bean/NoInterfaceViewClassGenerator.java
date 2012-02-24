@@ -153,7 +153,7 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
                 JMethod jMethod = methodMetadata.getJMethod();
 
                 // Skip special methods
-                if ("<init>".equals(jMethod.getName())) {
+                if ("<init>".equals(jMethod.getName()) || "<clinit>".equals(jMethod.getName())) {
                     continue;
                 }
 
