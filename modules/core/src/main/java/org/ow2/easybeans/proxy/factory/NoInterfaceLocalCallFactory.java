@@ -95,7 +95,7 @@ public class NoInterfaceLocalCallFactory extends LocalCallFactory implements Obj
             }
 
 
-            // load proxy class
+            // load bean class
             Class<?> beanClazz = null;
             try {
                 beanClazz = classLoader.loadClass(beanClassName);

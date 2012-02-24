@@ -81,6 +81,12 @@ public class BeanInfo implements IBeanInfo {
      */
     private List<String> remoteInterfaces = null;
 
+
+    /**
+     * no inteface view interface (if any).
+     */
+    private String noInterfaceViewInterface = null;
+
     /**
      * Web Services infos.
      */
@@ -228,6 +234,22 @@ public class BeanInfo implements IBeanInfo {
         this.remoteInterfaces = fix(remoteInterfaces);
     }
 
+
+    /**
+     * @return no inteface view interface (if any).
+     */
+    public String getNoInterfaceViewInterface() {
+        return this.noInterfaceViewInterface;
+    }
+
+    /**
+     * @param noInterfaceViewInterface no inteface view interface (if any)..
+     */
+    public void setNoInterfaceViewInterface(final String noInterfaceViewInterface) {
+        // ensure that the names are using ".'
+        this.noInterfaceViewInterface = fix(noInterfaceViewInterface);
+    }
+
     /**
      * @return the webservices info related to this bean (if any)
      */
@@ -253,10 +275,23 @@ public class BeanInfo implements IBeanInfo {
         }
         List<String> newList = new ArrayList<String>();
         for (String item : list) {
-            newList.add(item.replace('/', '.'));
+            newList.add(fix(item));
         }
         return newList;
     }
+
+    /**
+     * Convert all / char into dot chars in the elements of the list.
+     * @param name the parameter
+     * @return an updated name.
+     */
+    protected String fix(final String name) {
+        if (name == null) {
+            return null;
+        }
+        return name.replace('/', '.');
+    }
+
 
     /**
      * Gets a default checked exception attribute with rollback = false for checkedException.

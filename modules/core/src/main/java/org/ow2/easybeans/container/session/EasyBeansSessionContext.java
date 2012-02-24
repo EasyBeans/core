@@ -36,6 +36,7 @@ import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.api.container.EZBSessionContext;
 import org.ow2.easybeans.container.EasyBeansEJBContext;
 import org.ow2.easybeans.proxy.helper.ProxyHelper;
+import org.ow2.easybeans.proxy.helper.ProxyType;
 
 /**
  * Defines the Session Context used by Stateless and Stateful beans.
@@ -144,22 +145,29 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
         IBeanInfo beanInfo = getFactory().getBeanInfo();
         List<String> localInterfaces = beanInfo.getLocalInterfaces();
         List<String> remoteInterfaces = beanInfo.getRemoteInterfaces();
+        String noInterfaceViewInterface = beanInfo.getNoInterfaceViewInterface();
 
         // Not a business interfaces
-        if (!localInterfaces.contains(businessInterfaceClassname) && !remoteInterfaces.contains(businessInterfaceClassname)) {
+        if (!localInterfaces.contains(businessInterfaceClassname) && !remoteInterfaces.contains(businessInterfaceClassname)
+                && !businessInterfaceClassname.equals(noInterfaceViewInterface)) {
+            String optionalInterface = "";
+            if (noInterfaceViewInterface != null) {
+                optionalInterface = "and No-Interface view '" + noInterfaceViewInterface + "'";
+            }
             throw new IllegalStateException("The interface '" + businessInterface
                     + "' is not a valid interface for this bean '" + beanInfo.getName() + "'. Valid Local Interfaces are '"
-                    + localInterfaces + "' and remote interfaces '" + remoteInterfaces + "'.");
+                    + localInterfaces + "' and remote interfaces '" + remoteInterfaces + "'" + optionalInterface + ".");
         }
 
-        // Now build a local or remote proxy
-        boolean localInterface = false;
-        if (localInterfaces.contains(businessInterfaceClassname)) {
-            localInterface = true;
+        ProxyType proxyType = ProxyType.REMOTE;
+        if (businessInterfaceClassname.equals(noInterfaceViewInterface)) {
+            proxyType = ProxyType.NO_INTERFACE;
+        } else if (localInterfaces.contains(businessInterfaceClassname)) {
+            proxyType = ProxyType.LOCAL;
         }
 
         // Return a new proxy
-        return ProxyHelper.getProxy(getFactory(), businessInterface, localInterface);
+        return ProxyHelper.getProxy(getFactory(), businessInterface, proxyType);
 
 
 

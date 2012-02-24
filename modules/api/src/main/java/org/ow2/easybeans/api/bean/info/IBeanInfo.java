@@ -144,6 +144,16 @@ public interface IBeanInfo {
     void setRemoteInterfaces(List<String> remoteInterfaces);
 
     /**
+     * @return no inteface view interface (if any).
+     */
+    String getNoInterfaceViewInterface();
+
+    /**
+     * @param noInterfaceViewInterface no inteface view interface (if any)..
+     */
+    void setNoInterfaceViewInterface(String noInterfaceViewInterface);
+
+    /**
      * @return the webservices info related to this bean (if any)
      */
     IWebServiceInfo getWebServiceInfo();

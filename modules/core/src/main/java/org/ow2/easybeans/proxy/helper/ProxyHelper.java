@@ -33,7 +33,9 @@ import javax.naming.NamingException;
 import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.api.Factory;
+import org.ow2.easybeans.api.bean.proxy.EasyBeansNoInterfaceProxyBean;
 import org.ow2.easybeans.container.session.stateful.StatefulSessionFactory;
+import org.ow2.easybeans.enhancer.lib.ProxyClassEncoder;
 import org.ow2.easybeans.proxy.client.AbsInvocationHandler;
 import org.ow2.easybeans.proxy.client.ClientRPCInvocationHandler;
 import org.ow2.easybeans.proxy.client.LocalCallInvocationHandler;
@@ -43,6 +45,8 @@ import org.ow2.easybeans.proxy.client.LocalCallInvocationHandler;
  * @author Florent Benoit
  */
 public final class ProxyHelper {
+
+
 
     /**
      * Utility class.
@@ -56,11 +60,11 @@ public final class ProxyHelper {
      * @param <T> the interface expected
      * @param factory the given EasyBeans factory
      * @param interfaceClass the interface of the bean class
-     * @param isLocalProxy use a local proxy or remote proxy ?
-     * @return a local or remote proxy ready-to-use
+     * @param proxyType the type of proxy to use
+     * @return a proxy ready-to-use
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getProxy(final Factory<?, ?> factory, final Class<T> interfaceClass, final boolean isLocalProxy) {
+    public static <T> T getProxy(final Factory<?, ?> factory, final Class<T> interfaceClass, final ProxyType proxyType) {
 
         // Get elements used to create a proxy
         EZBContainer container = factory.getContainer();
@@ -75,12 +79,59 @@ public final class ProxyHelper {
         }
         Integer serverID = server.getID();
 
+        // Load the interface with the classloader of the thread
+        // Get current classloader
+        ClassLoader classLoader = interfaceClass.getClassLoader();
+
+
+        // Proxy bean (for type = no interface)
+        EasyBeansNoInterfaceProxyBean proxyBean = null;
+
+
+
         // Build the handler
         AbsInvocationHandler handler = null;
-        if (isLocalProxy) {
+
+
+        switch (proxyType) {
+        case NO_INTERFACE :
+            String beanProxyClassName = ProxyClassEncoder.getProxyClassName(interfaceClass.getName().replace(".", "/"))
+                    .replace("/", ".");
+
+            // Load the proxy class
+            Class<EasyBeansNoInterfaceProxyBean> clz = null;
+            try {
+                clz = (Class<EasyBeansNoInterfaceProxyBean>) classLoader.loadClass(beanProxyClassName);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Cannot find the class '" + beanProxyClassName + "' in Classloader '"
+                        + classLoader + "'.", e);
+            }
+
+            // Build handler
+            handler = new LocalCallInvocationHandler(serverID, containerID, factoryName, isStateful);
+
+            // Build a new instance of the class
+            try {
+                proxyBean = clz.newInstance();
+            } catch (InstantiationException e) {
+                throw new IllegalArgumentException("Unable to build an instance of the proxy '" + beanProxyClassName
+                        + "' in Classloader '" + classLoader + "'.", e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException("Unable to build an instance of the proxy '" + beanProxyClassName
+                        + "' in Classloader '"         + classLoader + "'.", e);
+            }
+
+            // Defines handler on the proxy bean
+            proxyBean.setInvocationHandler(handler);
+
+
+        break;
+        case LOCAL :
             // local handler
             handler = new LocalCallInvocationHandler(serverID, containerID, factoryName, isStateful);
-        } else {
+            break;
+
+        case REMOTE:
             // remote handler
             handler = new ClientRPCInvocationHandler(containerID, factoryName, isStateful);
             try {
@@ -88,20 +139,27 @@ public final class ProxyHelper {
             } catch (NamingException e) {
                 throw new IllegalArgumentException("Unable to get environment", e);
             }
+            break;
+        default: throw new IllegalStateException("No such type of proxy");
         }
 
         // handler used for getBusinessObject() method
         handler.setBusinessObjectMode(true);
 
-        // Load the interface with the classloader of the thread
-        // Get current classloader
-        ClassLoader classLoader = interfaceClass.getClassLoader();
+
 
         // set the interface class
         handler.setInterfaceClass(interfaceClass);
 
         // return the proxy
-        return (T) Proxy.newProxyInstance(classLoader, new Class[] {interfaceClass}, handler);
+        switch (proxyType) {
+        case NO_INTERFACE :
+            return (T) proxyBean;
+        case LOCAL:
+        case REMOTE:
+            return (T) Proxy.newProxyInstance(classLoader, new Class[] {interfaceClass}, handler);
+        default: throw new IllegalStateException("No such type of proxy");
+        }
     }
 
 }

@@ -942,6 +942,7 @@ public class JContainer3 implements EZBContainer {
 
         // No interface local view
         if (sessionBean.isLocalBean()) {
+            sessionBeanInfo.setNoInterfaceViewInterface(sessionBean.getClassName());
             this.bindingReferences.add(createNoInterfaceViewRef(sessionBean.getClassName(),
                                                              getEmbedded().getID(),
                                                              getId(),

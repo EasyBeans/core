@@ -28,6 +28,7 @@ package org.ow2.easybeans.itests.tests;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.ow2.easybeans.application.context.IBusinessContext;
 import org.ow2.easybeans.application.context.IContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,9 +45,17 @@ public class TestContextBean {
      */
     private IContext contextBeanXML = null;
 
+    /**
+     * Bean with annotation.
+     */
+    private IBusinessContext businessContextBean = null;
+
+
+
     @BeforeClass
     public void getBean() throws NamingException {
         this.contextBeanXML = (IContext) new InitialContext().lookup("XMLContextBean");
+        this.businessContextBean = (IBusinessContext) new InitialContext().lookup("AnnotationContextBean");
     }
 
 
@@ -86,5 +95,14 @@ public class TestContextBean {
     }
 
 
+    @Test
+    public void testNoInterfaceBusinessObject() {
+        this.businessContextBean.testNoInterfaceBusinessObject();
+    }
+
+    @Test
+    public void testRemoteBusinessObject() {
+        this.businessContextBean.testRemoteBusinessObject();
+    }
 
 }
