@@ -130,13 +130,14 @@ public final class NamingManager {
      * Create Context for application and component environments. (formally
      * known as createComponentContext)
      * @param namespace namespace to used for the Context
+     * @param envContext the env context
      * @param moduleContext the module context
      * @param appContext the application context
      * @return a java: context with comp/ subcontext
      * @throws NamingException if the creation of the java: context failed.
      */
-    public Context createEnvironmentContext(final String namespace, final Context moduleContext, final Context appContext)
-            throws NamingException {
+    public Context createEnvironmentContext(final String namespace, final Context envContext, final Context moduleContext,
+            final Context appContext) throws NamingException {
 
         // Create a new environment
         ContextImpl ctx = new ContextImpl(namespace);
@@ -144,8 +145,12 @@ public final class NamingManager {
         // Create subContext
         ContextImpl compCtx = (ContextImpl) ctx.createSubcontext(COMP_SUBCONTEXT);
 
-        // Create comp/env context
-        compCtx.createSubcontext(ENV_SUBCONTEXT);
+        // Create comp/env context or reuse
+        if (envContext != null) {
+            compCtx.addBinding(ENV_SUBCONTEXT, envContext);
+        } else {
+            compCtx.createSubcontext(ENV_SUBCONTEXT);
+        }
 
         // Add global
         ctx.addBinding(GLOBAL_SUBCONTEXT, this.ictx);

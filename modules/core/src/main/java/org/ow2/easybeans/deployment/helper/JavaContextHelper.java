@@ -30,6 +30,7 @@ import java.util.Arrays;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
@@ -71,21 +72,20 @@ public final class JavaContextHelper {
      * @param bean the bean for which there is a need to build a context.
      * @param easyBeansFactory the factory to build EJBContext
      * @param dispatcher the dispatcher for naming events
-     * @param moduleContext the module context
-     * @param appContext the application context
+     * @param containerConfig the container configuration
      * @return a java: context.
      * @throws JavaContextHelperException if environment cannot be built
      */
     public static Context build(final EasyBeansEjbJarClassMetadata bean,
                                 final Factory<?, ?> easyBeansFactory,
                                 final IEventDispatcher dispatcher,
-                                final Context moduleContext,
-                                final Context appContext)
+                                final EZBContainerConfig containerConfig)
             throws JavaContextHelperException {
 
         Context javaCtx = null;
         try {
-            javaCtx = NamingManager.getInstance().createEnvironmentContext(bean.getClassName(), moduleContext, appContext);
+            javaCtx = NamingManager.getInstance().createEnvironmentContext(bean.getClassName(),
+                    containerConfig.getEnvContext(), containerConfig.getModuleContext(), containerConfig.getAppContext());
         } catch (NamingException e) {
             throw new IllegalStateException("Cannot build a new environment", e);
         }

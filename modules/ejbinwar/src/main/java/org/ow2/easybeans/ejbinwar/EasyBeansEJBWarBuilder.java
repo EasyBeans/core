@@ -92,6 +92,7 @@ public class EasyBeansEJBWarBuilder {
 
         Context moduleContext = (Context) properties.get("module.context");
         Context appContext = (Context) properties.get("application.context");
+        Context envContext = (Context) properties.get("env.context");
 
         // Store parameters in the Deployable Info metadata
         EasyBeansDeployableInfo easyBeansDeployableInfo = new EasyBeansDeployableInfo();
@@ -114,6 +115,7 @@ public class EasyBeansEJBWarBuilder {
         containerConfig.setModuleName(moduleName);
         containerConfig.setModuleContext(moduleContext);
         containerConfig.setAppContext(appContext);
+        containerConfig.setEnvContext(envContext);
 
 
         // Add extension on the deployable

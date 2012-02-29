@@ -158,7 +158,7 @@ public class EasyBeansEJBContainer extends EJBContainer {
 
         // Build a new instance of java: context
         try {
-            NamingManager.setClientContainerComponentContext(NamingManager.getInstance().createEnvironmentContext("server",
+            NamingManager.setClientContainerComponentContext(NamingManager.getInstance().createEnvironmentContext("server", null,
                     moduleContext, applicationContext));
         } catch (NamingException e) {
             throw new EJBException("Cannot build java: context", e);

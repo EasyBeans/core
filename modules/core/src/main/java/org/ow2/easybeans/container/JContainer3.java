@@ -634,7 +634,7 @@ public class JContainer3 implements EZBContainer {
                             Context javaContext;
                             try {
                                 javaContext = JavaContextHelper.build(classAnnotationMetadata, factory, eventDispatcher,
-                                        getConfiguration().getModuleContext(), getConfiguration().getAppContext());
+                                        getConfiguration());
                             } catch (JavaContextHelperException e) {
                                 throw new EZBContainerException("Cannot build environment", e);
                             }

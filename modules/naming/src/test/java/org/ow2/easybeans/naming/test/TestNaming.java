@@ -74,7 +74,7 @@ public class TestNaming {
         // fake bind
         this.initialContext.bind("javax.transaction.UserTransaction", new Current());
 
-        Context context = this.namingManager.createEnvironmentContext("test", null, null);
+        Context context = this.namingManager.createEnvironmentContext("test", null, null, null);
         this.namingManager.setComponentContext(context);
     }
 
@@ -108,12 +108,12 @@ public class TestNaming {
         Context module2Context = new ContextImpl("module2");
 
         // Value1 for the first component
-        Context context1 = this.namingManager.createEnvironmentContext("component1", module1Context, appContext);
+        Context context1 = this.namingManager.createEnvironmentContext("component1", null, module1Context, appContext);
         String value1 = "Value1";
         context1.bind(key, value1);
 
         // Value2 for other component
-        Context context2 = this.namingManager.createEnvironmentContext("component2", module2Context, appContext);
+        Context context2 = this.namingManager.createEnvironmentContext("component2", null, module2Context, appContext);
         String value2 = "Value2";
         context2.bind(key, value2);
 

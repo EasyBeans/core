@@ -98,6 +98,11 @@ public class JContainerConfig implements EZBContainerConfig {
     private Context appContext = null;
 
     /**
+     * ENC context of this module.
+     */
+    private Context compEnvContext = null;
+
+    /**
      * Constructor.
      * @param deployable the deployable to process.
      */
@@ -241,6 +246,21 @@ public class JContainerConfig implements EZBContainerConfig {
      */
     public void setAppContext(final Context appContext) {
         this.appContext = appContext;
+    }
+
+    /**
+     * @return the java:comp/env context.
+     */
+    public Context getEnvContext() {
+        return this.compEnvContext;
+    }
+
+    /**
+     * Sets the ENC context.
+     * @param compEnvContext the java:comp/env context.
+     */
+    public void setEnvContext(final Context compEnvContext) {
+        this.compEnvContext = compEnvContext;
     }
 
     /**

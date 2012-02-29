@@ -141,6 +141,17 @@ public interface EZBContainerConfig {
     Context getAppContext();
 
     /**
+     * @return the java:comp/env context.
+     */
+    Context getEnvContext();
+
+    /**
+     * Sets the ENC context.
+     * @param compEnvContext the java:comp/env context.
+     */
+    void setEnvContext(final Context compEnvContext);
+
+    /**
      * Sets the module context.
      * @param moduleContext the java:module context.
      */
