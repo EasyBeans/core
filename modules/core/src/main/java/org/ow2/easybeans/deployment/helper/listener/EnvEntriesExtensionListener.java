@@ -193,7 +193,7 @@ public class EnvEntriesExtensionListener extends AbstractExtensionListener {
             if (value != null) {
                 returnedValue = new Long(value);
             }
-        } else if (type.equals(Float.class.getName())) {
+        } else if (Float.class.getName().equals(type)) {
             if (value != null) {
                 returnedValue = new Float(value);
             }
@@ -239,8 +239,11 @@ public class EnvEntriesExtensionListener extends AbstractExtensionListener {
                     this.logger.debug("Unable to load type for value ''{0}'' ", value, e);
                 }
             }
-
-            throwException(event, new IllegalStateException(type + " is not a valid type for env-entry."));
+            // No value specified, exit
+            if (value != null) {
+                throwException(event, new IllegalStateException(type + " is not a valid type for env-entry '" + envEntry.getName()
+                    + "'."));
+            }
         }
         return returnedValue;
     }

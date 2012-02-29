@@ -34,6 +34,7 @@ import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.REGISTRY;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +67,7 @@ import org.ow2.easybeans.enhancer.lib.MethodRenamer;
 import org.ow2.easybeans.injection.JNDILookupHelper.JndiType;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBJNDIResolverException;
+import org.ow2.util.ee.metadata.common.api.struct.IEnvEntry;
 import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationResource;
 import org.ow2.util.ee.metadata.common.api.struct.IJEjbEJB;
 import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceContext;
@@ -681,7 +683,7 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
 
                     bindResource(jAnnotationResource, mv);
 
-                } else if (isEnvEntry(typeInterface)) { // Env-Entry
+                } else if (isEnvEntry(jAnnotationResource.getName(), typeInterface)) { // Env-Entry
                     JndiType type = JAVA_COMP_ENV;
                     // Lookup name exists ?
                     if (lookupName == null) {
@@ -691,9 +693,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                         type = JAVA;
                     }
 
-
-                    callAttributeJndi(lookupName, typeInterface, mv, fieldMetaData,
-                            this.classAnnotationMetadata.getClassName(), type);
+                    if (!this.staticMode) {
+                        callAttributeNotNullJndi(lookupName, typeInterface, mv, fieldMetaData,
+                                this.classAnnotationMetadata.getClassName(), type);
+                    } else {
+                        callAttributeJndi(lookupName, typeInterface, mv, fieldMetaData,
+                                this.classAnnotationMetadata.getClassName(), type);
+                    }
                 } else if (USERTRANSACTION_ITF.equals(itfName)) {
                     callAttributeJndi("UserTransaction", typeInterface, mv, fieldMetaData,
                             this.classAnnotationMetadata.getClassName(), JAVA_COMP);
@@ -867,7 +873,7 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                 }
 
                 // Env-Entry
-                if (isEnvEntry(typeInterface)) {
+                if (isEnvEntry(jAnnotationResource.getName(), typeInterface)) {
 
                     JndiType type = JAVA_COMP_ENV;
                     // Lookup name exists ?
@@ -878,9 +884,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                         type = JAVA;
                     }
 
-
-                    callMethodJndiEnv(lookupName, typeInterface, mv, methodMetaData,
-                            this.classAnnotationMetadata.getClassName(), type);
+                    if (!this.staticMode) {
+                        callMethodJndiEnvNotNull(lookupName, typeInterface, mv, methodMetaData, this.classAnnotationMetadata
+                                .getClassName(), type);
+                    } else {
+                        callMethodJndiEnv(lookupName, typeInterface, mv, methodMetaData, this.classAnnotationMetadata
+                                .getClassName(), type);
+                    }
                 } else if (USERTRANSACTION_ITF.equals(itfName)) {
                     callMethodJndiEnv("UserTransaction", typeInterface, mv, methodMetaData,
                             this.classAnnotationMetadata.getClassName(), JAVA_COMP);
@@ -1195,25 +1205,33 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
 
     /**
      * Return true if the given type is a type used in env-entry.
+     * @param name the name of the env-entry
      * @param type an ASM type.
      * @return true if this entry is used in env-entry.
      */
-    private boolean isEnvEntry(final Type type) {
-        String itfName = type.getClassName();
-        return String.class.getName().equals(itfName) || Boolean.TYPE.getName().equals(itfName)
-                || Byte.TYPE.getName().equals(itfName) || Character.TYPE.getName().equals(itfName)
-                || Double.TYPE.getName().equals(itfName) || Float.TYPE.getName().equals(itfName)
-                || Integer.TYPE.getName().equals(itfName) || Long.TYPE.getName().equals(itfName)
-                || Short.TYPE.getName().equals(itfName)
-                || Boolean.class.getName().equals(itfName)
-                || Byte.class.getName().equals(itfName)
-                || Character.class.getName().equals(itfName)
-                || Double.class.getName().equals(itfName)
-                || Float.class.getName().equals(itfName)
-                || Integer.class.getName().equals(itfName)
-                || Long.class.getName().equals(itfName)
-                || Long.class.getName().equals(itfName)
-                || Short.class.getName().equals(itfName);
+    private boolean isEnvEntry(final String name, final Type type) {
+        // Is the name in the env-entries ?
+        Collection<? extends IEnvEntry> envEntries = null;
+
+        // Part of a bean ?
+        if (this.beanChildClassAnnotationMetadata != null) {
+            envEntries = this.beanChildClassAnnotationMetadata.getEnvEntryCollection();
+        } else {
+            envEntries = this.classAnnotationMetadata.getEnvEntryCollection();
+        }
+        if (envEntries != null && name != null) {
+            // search name
+            for (IEnvEntry envEntry : envEntries) {
+                // Found env-entry
+                if (name.equals(envEntry.getName()) || "java:comp/env/".concat(name).equals(envEntry.getName())) {
+                    // Inject only if there is a value that override
+                    if (envEntry.getValue() != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -1292,6 +1310,20 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         if (!this.staticMode) {
             mv.visitVarInsn(ALOAD, 0);
         }
+        generateCallJndi(jndiName, type, mv, className, jndiType);
+        CommonClassGenerator.transformObjectIntoPrimitive(type, mv);
+    }
+
+    /**
+     * Generates a call to JNDI helper.
+     * @param jndiName the name to lookup.
+     * @param type the ASM type
+     * @param mv the method visitor to write code.
+     * @param className the name of the generated class.
+     * @param jndiType the type of access (registry, java:comp/env, etc)
+     */
+    private void generateCallJndi(final String jndiName, final Type type, final MethodVisitor mv,
+            final String className, final JndiType jndiType) {
         mv.visitLdcInsn(jndiName);
         String mName = "";
         switch (jndiType) {
@@ -1312,8 +1344,8 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         }
         mv.visitMethodInsn(INVOKESTATIC, "org/ow2/easybeans/injection/JNDILookupHelper", mName,
                 "(Ljava/lang/String;)Ljava/lang/Object;");
-        CommonClassGenerator.transformObjectIntoPrimitive(type, mv);
     }
+
 
     /**
      * Generates a call to JNDILookupHelper class to get the java:comp/env name
@@ -1333,6 +1365,43 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         String formattedJndiName = getJndiName(jndiName, fieldMetaData);
         callJndi(formattedJndiName, type, mv, className, jndiType);
         setField(mv, className, fieldMetaData, type);
+    }
+
+    /**
+     * Generates a call to JNDILookupHelper class to get the java:comp/env name
+     * requested.
+     * @param jndiName the name to lookup.
+     * @param type the ASM type.
+     * @param mv the method visitor to write code.
+     * @param fieldMetaData the metadata of the attribute.
+     * @param className the name of the generated class.
+     * @param jndiType the type of access (registry, java:comp/env, etc)
+     */
+    private void callAttributeNotNullJndi(final String jndiName, final Type type, final MethodVisitor mv,
+            final EasyBeansEjbJarFieldMetadata fieldMetaData, final String className, final JndiType jndiType) {
+        logger.debug("Add injection for @Resource on attribute {0} of class {1} for the type {2}", fieldMetaData
+                .getFieldName(), className, type.getClassName());
+
+        /***
+         * this.entryFloat = JNDILookupHelper.getEnvJndiName("resource/entry-float", Float.valueOf(this.entryFloat));
+         */
+        String formattedJndiName = getJndiName(jndiName, fieldMetaData);
+
+        generateCallJndi(formattedJndiName, type, mv, className, jndiType);
+        // store result
+        mv.visitVarInsn(ASTORE, 1);
+        mv.visitVarInsn(ALOAD, 1);
+        Label ifNullLabel = new Label();
+        mv.visitJumpInsn(IFNULL, ifNullLabel);
+
+        // Read value
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 1);
+        CommonClassGenerator.transformObjectIntoPrimitive(type, mv);
+        setField(mv, className, fieldMetaData, type);
+
+        // if null label
+        mv.visitLabel(ifNullLabel);
     }
 
     /**
@@ -1379,6 +1448,46 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         String checkedJndiName = getJndiName(jndiName, methodMetaData);
         callJndi(checkedJndiName, type, mv, className, jndiType);
         callSetterMethod(mv, className, methodMetaData, type);
+    }
+
+
+    /**
+     * Generates a call to JNDILookupHelper class to get the java:comp/env name
+     * requested.
+     * @param jndiName the name to lookup.
+     * @param type the ASM type.
+     * @param mv the method visitor to write code.
+     * @param methodMetaData the metadata of the method.
+     * @param className the name of the generated class.
+     * @param jndiType the type of access (registry, java:comp/env, etc)
+     */
+    private void callMethodJndiEnvNotNull(final String jndiName, final Type type, final MethodVisitor mv,
+            final EasyBeansEjbJarMethodMetadata methodMetaData, final String className, final JndiType jndiType) {
+        logger.debug("Add injection for @Resource on method {0} of class {1} for the type {2}", methodMetaData
+                .getMethodName(), className, type.getClassName());
+
+        String checkedJndiName = getJndiName(jndiName, methodMetaData);
+
+        /**
+         * Object value = JNDILookupHelper.getEnvJndiName("resource/entry-float");
+         * if (value != null) {
+         *    setFloat(((Float) value).floatValue());
+         * }
+         */
+        generateCallJndi(checkedJndiName, type, mv, className, jndiType);
+        // store result
+        mv.visitVarInsn(ASTORE, 1);
+        mv.visitVarInsn(ALOAD, 1);
+        Label ifNullLabel = new Label();
+        mv.visitJumpInsn(IFNULL, ifNullLabel);
+
+        // Read value
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 1);
+        CommonClassGenerator.transformObjectIntoPrimitive(type, mv);
+        callSetterMethod(mv, className, methodMetaData, type);
+        // if null label
+        mv.visitLabel(ifNullLabel);
     }
 
 

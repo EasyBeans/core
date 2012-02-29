@@ -43,20 +43,70 @@ public class TestEnvEntries {
      */
     private IEnvEntry envEntryBean = null;
 
+    /**
+     * Bean without env-entry-type.
+     */
+    private IEnvEntry noTypeEnvEntryBean = null;
+
+    /**
+     * Bean with @Resource on env entries.
+     */
+    private IEnvEntry annotationResourceEntryBean = null;
+
+    /**
+     * Bean with @Resource on env entries but without value so we should keep the values.
+     */
+    private IEnvEntry defaultEntryBean = null;
+
+
     @BeforeClass
-    public void getBean() throws NamingException {
+    public void getBeans() throws NamingException {
         this.envEntryBean = (IEnvEntry) new InitialContext().lookup("EnvEntryBean@Remote");
+        this.noTypeEnvEntryBean = (IEnvEntry) new InitialContext().lookup("NoTypeEnvEntryBean@Remote");
+        this.annotationResourceEntryBean = (IEnvEntry) new InitialContext().lookup("AnnotationResourceEnvEntryBean@Remote");
+        this.defaultEntryBean = (IEnvEntry) new InitialContext().lookup("DefaultEnvEntryBean@Remote");
+
+
     }
 
     @Test
-    public void testInjectedFields() {
+    public void testInjectedFieldsEntries() {
         this.envEntryBean.checkInjectedFields();
     }
 
     @Test
-    public void checkCompNotEqualsModule() throws NamingException {
+    public void checkCompNotEqualsModuleEntries() throws NamingException {
         this.envEntryBean.checkCompNotEqualsModule();
     }
 
+    @Test
+    public void testInjectedFieldsNoType() {
+        this.noTypeEnvEntryBean.checkInjectedFields();
+    }
 
+    @Test
+    public void checkCompNotEqualsModuleNoType() throws NamingException {
+        this.noTypeEnvEntryBean.checkCompNotEqualsModule();
+    }
+
+
+    @Test
+    public void testInjectedFieldsAnnotationResource() {
+        this.annotationResourceEntryBean.checkInjectedFields();
+    }
+
+    @Test
+    public void checkCompNotEqualsModuleAnnotationResource() throws NamingException {
+        this.annotationResourceEntryBean.checkCompNotEqualsModule();
+    }
+
+    @Test
+    public void testInjectedFieldsDefault() {
+        this.defaultEntryBean.checkInjectedFields();
+    }
+
+    @Test
+    public void checkCompNotEqualsModuleDefault() throws NamingException {
+        this.defaultEntryBean.checkCompNotEqualsModule();
+    }
 }
