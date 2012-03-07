@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.api;
 
+import java.util.Map;
+
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
 import javax.naming.Context;
@@ -152,4 +154,9 @@ public interface Factory<PoolType, Clue> extends EZBJ2EEManagedObject {
        * @return the current operation state thread local.
        */
       InheritableThreadLocal<OperationState> getOperationStateThreadLocal();
+
+      /**
+       * @return the current context map of the current invocation
+       */
+      InheritableThreadLocal<Map<String, Object>> getContextDataThreadLocal();
 }

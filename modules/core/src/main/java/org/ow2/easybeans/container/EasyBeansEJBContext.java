@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.EJBContext;
@@ -436,6 +437,16 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      */
     public FactoryType getFactory() {
         return this.easyBeansFactory;
+    }
+
+    /**
+     * Enables a business method, lifecycle callback method, or timeout method to retrieve any interceptor/webservices context
+     * associated with its invocation.
+     * @return the shared context
+     * @since EJB 3.1 version.
+     */
+    public Map<String, Object> getContextData() {
+        return this.easyBeansFactory.getContextDataThreadLocal().get();
     }
 
     /**

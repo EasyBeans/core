@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.api.container;
 
+import java.util.Map;
+
 import javax.ejb.EJBContext;
 import javax.ejb.TimerService;
 
@@ -49,4 +51,9 @@ public interface EZBEJBContext<FactoryType extends Factory<?, ?>> extends EJBCon
      * @return Timer service.
      */
     TimerService getInternalTimerService();
+
+    /**
+     * @return the context data associated to the current invocation.
+     */
+    Map<String, Object> getContextData();
 }

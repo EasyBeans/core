@@ -188,6 +188,11 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
         = new InheritableThreadLocal<OperationState>();
 
     /**
+     * Inherited Local thread used to keep the Context data.
+     */
+    private InheritableThreadLocal<Map<String, Object>> contextDataThreadLocal;
+
+    /**
      * Builds a new factory with a given name and its container.
      * @param className name of this factory (name of class that is managed)
      * @param container the root component of this factory.
@@ -199,6 +204,7 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
         this.container = container;
         this.id = String.valueOf(System.identityHashCode(this));
         this.j2eeManagedObjectId = J2EEManagedObjectNamingHelper.getJ2EEManagedObjectId(this);
+        this.contextDataThreadLocal = new InheritableThreadLocal<Map<String, Object>>();
 
         Class clazz = null;
         try {
@@ -661,6 +667,13 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
      */
     public ICurrentInvocationID getCurrentInvocationID() {
         return this.currentInvocationID;
+    }
+
+    /**
+     * @return the current context map of the current invocation
+     */
+    public InheritableThreadLocal<Map<String, Object>> getContextDataThreadLocal() {
+        return this.contextDataThreadLocal;
     }
 
 }
