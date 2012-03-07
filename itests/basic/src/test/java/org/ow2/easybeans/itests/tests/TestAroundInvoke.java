@@ -32,6 +32,7 @@ import javax.naming.NamingException;
 
 import org.ow2.easybeans.application.aroundinvoke.IAroundInvoke;
 import org.ow2.easybeans.application.aroundinvoke.IXMLAroundInvoke;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -90,6 +91,25 @@ public class TestAroundInvoke {
         this.aroundInvokeAnnotationBean.dummyCallWithOverridedInterceptors(new ArrayList<String>());
     }
 
+
+    @Test
+    public void testCheckSetParametersSubClass() {
+        // Interceptor should have changed the parameters
+        Assert.assertEquals(this.aroundInvokeAnnotationBean.testAdd(3, 5), 3);
+    }
+
+
+    @Test
+    public void testCheckSetParametersPrimitive() {
+        // Interceptor should have changed the parameters
+        Assert.assertEquals(this.aroundInvokeAnnotationBean.testBoolean(false), true);
+    }
+
+
+    @Test
+    public void testCheckProceedCalledManyTimes() {
+        this.aroundInvokeAnnotationBean.testManyProceed();
+    }
 
 
 
