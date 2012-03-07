@@ -127,8 +127,21 @@ public class DynamicInvocationContextImpl implements EasyBeansInvocationContext 
      * @return the invocation result
      */
     public Object proceed() throws Exception {
-        //LOGGER.debug("Calling {0}", this.interceptorInvokerList.get(this.index));
-        return this.interceptorInvokerList.get(this.index++).invoke(this, this.interceptorManager);
+        // index is too high
+        if (this.index == this.interceptorInvokerList.size()) {
+            this.index = this.interceptorInvokerList.size() - 1;
+        }
+
+        try {
+            if (getFactory() != null) {
+                getFactory().getContextDataThreadLocal().set(getContextData());
+            }
+            return this.interceptorInvokerList.get(this.index++).invoke(this, this.interceptorManager);
+        } finally {
+            if (getFactory() != null) {
+                getFactory().getContextDataThreadLocal().set(null);
+            }
+        }
     }
 
     /**
@@ -204,7 +217,56 @@ public class DynamicInvocationContextImpl implements EasyBeansInvocationContext 
         if (this.isLifeCycleMode) {
             throw new IllegalStateException("setParameters method shouldn't be called on lifecycle interceptors");
         }
+
+        Class<?>[] types = this.method.getParameterTypes();
+        if (types.length > 0 && parameters == null) {
+            throw new IllegalArgumentException("Invalid null argument. Expecting '" + types + "' and got '"
+                    + parameters + "'.");
+        }
+
+        // Check if parameters length are ok
+        if (types.length != parameters.length) {
+            throw new IllegalArgumentException("Invalid size of the parameters. Expecting '" + types + "' and got '"
+                    + parameters + "'.");
+        }
+
+        // Now check the types
+        for (int i = 0; i < types.length; i++) {
+            Class<?> type = convertType(types[i]);
+            if (parameters[i] != null) {
+                // Check if type is a super type
+                if (!type.isAssignableFrom((parameters[i].getClass()))) {
+                    throw new IllegalArgumentException("Expecting '" + types + "' and got '" + parameters + "'.");
+                }
+            }
+        }
+
+
         this.parameters = parameters;
+    }
+
+    /**
+     * Convert primitive type to object class.
+     * @param clazz the given class to use
+     * @return the updated class
+     */
+    private Class<?> convertType(final Class<?> clazz) {
+        if (Boolean.TYPE.equals(clazz)) {
+            return Boolean.class;
+        } else if (Byte.TYPE.equals(clazz)) {
+            return Byte.class;
+        } else  if (Character.TYPE.equals(clazz)) {
+            return Character.class;
+        } else  if (Short.TYPE.equals(clazz)) {
+            return Short.class;
+        } else  if (Float.TYPE.equals(clazz)) {
+            return Float.class;
+        } else  if (Long.TYPE.equals(clazz)) {
+            return Long.class;
+        } else  if (Double.TYPE.equals(clazz)) {
+            return Double.class;
+        }
+        return clazz;
     }
 
     /**

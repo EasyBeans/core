@@ -423,6 +423,7 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
         addInvocationContextGetTarget();
         addInvocationContextProceed();
         addInvocationContextGetContextData();
+        addInvocationContextGetTimer();
     }
 
     /**
@@ -450,6 +451,26 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
         mv.visitCode();
         mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(GETFIELD, this.generatedClassName, "bean", this.beanClassDesc);
+        mv.visitInsn(ARETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+
+
+    /**
+     * Adds the getTimer method of InvocationContext interface.<br>
+     * It adds :
+     *
+     * <pre>
+     * public Object getTimer() {
+     *   return null;
+     * }
+     * </pre>
+     */
+    private void addInvocationContextGetTimer() {
+        MethodVisitor mv = getCW().visitMethod(ACC_PUBLIC, "getTimer", "()Ljava/lang/Object;", null, null);
+        mv.visitCode();
+        mv.visitInsn(ACONST_NULL);
         mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
@@ -701,6 +722,9 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
      * <pre>
      *  public Object proceed() throws Exception {
      *    interceptor++;
+     *    if (interceptor > interceptor.length) {
+     *        interceptor = interceptor.length;
+     *    }
      *    switch (interceptor) {
      *      case 1 :
      *        return myInterceptor.intercept(this);
@@ -729,17 +753,31 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
         mv.visitFieldInsn(PUTFIELD, this.generatedClassName, "interceptor", "I");
 
 
-
-        // load interceptor constant to do the switch
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, this.generatedClassName, "interceptor", "I");
-
-
         // Size
         int sizeInterceptors = this.allInterceptors.size();
 
         // need to add call to the original method
         int switchSize = sizeInterceptors + 1;
+
+        /**
+         * if (interceptor > interceptor.length) {
+         *     interceptor = interceptor.length;
+         * }
+         */
+        Label labelNotEquals = new Label();
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, this.generatedClassName, "interceptor", "I");
+        mv.visitIntInsn(BIPUSH, switchSize);
+        mv.visitJumpInsn(IF_ICMPLE, labelNotEquals);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitIntInsn(BIPUSH, switchSize);
+        mv.visitFieldInsn(PUTFIELD, this.generatedClassName, "interceptor", "I");
+        mv.visitLabel(labelNotEquals);
+
+
+        // load interceptor constant to do the switch
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, this.generatedClassName, "interceptor", "I");
 
         // Build array of labels corresponding to swtich entries
         Label[] switchLabels = new Label[switchSize];
@@ -951,10 +989,10 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
      * <pre>
      * public void setParameters(Object aobj[]) {
      *   if (aobj == null) {
-     *     throw new IllegalStateException("Cannot set a null array.");
+     *     throw new IllegalArgumentException("Cannot set a null array.");
      *   }
      *   if (aobj.length != ...) {
-     *     throw new IllegalStateException("Invalid size of the given array. The length should be '" + ... + "'.");
+     *     throw new IllegalArgumentException("Invalid size of the given array. The length should be '" + ... + "'.");
      *   }
      *   parameters = aobj;
      *
@@ -975,16 +1013,16 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
         // only for aroundInvoke
         if (this.interceptorType == AROUND_INVOKE) {
             /**
-             * if (aobj == null) { throw new IllegalStateException("Cannot set a
+             * if (aobj == null) { throw new IllegalArgumentException("Cannot set a
              * null array."); }
              */
             mv.visitVarInsn(ALOAD, 1);
             Label notNull = new Label();
             mv.visitJumpInsn(IFNONNULL, notNull);
-            mv.visitTypeInsn(NEW, "java/lang/IllegalStateException");
+            mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException");
             mv.visitInsn(DUP);
             mv.visitLdcInsn("Cannot set a null array.");
-            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;)V");
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V");
             mv.visitInsn(ATHROW);
             mv.visitLabel(notNull);
 
@@ -998,12 +1036,68 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
             mv.visitIntInsn(BIPUSH, this.methodArgsType.length);
             Label sizeOk = new Label();
             mv.visitJumpInsn(IF_ICMPEQ, sizeOk);
-            mv.visitTypeInsn(NEW, "java/lang/IllegalStateException");
+            mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException");
             mv.visitInsn(DUP);
             mv.visitLdcInsn("Invalid size of the given array. The length should be '" + this.methodArgsType.length + "'.");
-            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;)V");
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V");
             mv.visitInsn(ATHROW);
             mv.visitLabel(sizeOk);
+
+
+            // Check types of the parameters
+            /**
+             *  if (parameters[0] != null) {
+             *    if (!String.class.isAssignableFrom(parameters[0].getClass())) {
+             *      throw new IllegalArgumentException("Expecting type '" + String.class + "' and got '" + parameters[0] + "'.");
+             *    }
+             *  }
+             */
+
+            int argIndex = 0;
+            for (Type type : this.methodArgsType) {
+                Label labelNotNull = new Label();
+
+                Type updateType = updateType(type);
+
+
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitIntInsn(BIPUSH, argIndex);
+                mv.visitInsn(AALOAD);
+                mv.visitJumpInsn(IFNULL, labelNotNull);
+                mv.visitLdcInsn(updateType);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitIntInsn(BIPUSH, argIndex);
+                mv.visitInsn(AALOAD);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;");
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "isAssignableFrom", "(Ljava/lang/Class;)Z");
+                mv.visitJumpInsn(IFNE, labelNotNull);
+                mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException");
+                mv.visitInsn(DUP);
+                mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+                mv.visitInsn(DUP);
+                mv.visitLdcInsn("Expecting type '");
+                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(Ljava/lang/String;)V");
+                mv.visitLdcInsn(updateType);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;");
+                mv.visitLdcInsn("' and got '");
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitIntInsn(BIPUSH, argIndex);
+                mv.visitInsn(AALOAD);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;");
+                mv.visitLdcInsn("'.");
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
+                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V");
+                mv.visitInsn(ATHROW);
+                mv.visitLabel(labelNotNull);
+                argIndex++;
+            }
+
+
+
+
+
 
             // this.parameters = parameters
             mv.visitVarInsn(ALOAD, 0);
@@ -1039,6 +1133,37 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+    }
+
+    /**
+     * Return an updated object type from primitive type if found, else return the given type.
+     * @param type the given type
+     * @return the Object type
+     */
+    protected Type updateType(final Type type) {
+        switch (type.getSort()) {
+        case Type.BOOLEAN:
+            return Type.getType(Boolean.class);
+        case Type.BYTE:
+            return Type.getType(Byte.class);
+        case Type.CHAR:
+            return Type.getType(Character.class);
+        case Type.SHORT:
+            return Type.getType(Short.class);
+        case Type.INT:
+            return Type.getType(Integer.class);
+        case Type.FLOAT:
+            return Type.getType(Float.class);
+        case Type.LONG:
+            return Type.getType(Long.class);
+        case Type.DOUBLE:
+            return Type.getType(Double.class);
+        case Type.ARRAY:
+        case Type.OBJECT:
+            return type;
+        default:
+            return type;
+        }
     }
 
 
