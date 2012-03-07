@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.deployment.annotations.helper.bean;
 
+import java.util.LinkedList;
+
 import org.ow2.easybeans.asm.Opcodes;
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.annotations.exceptions.ResolverException;
@@ -68,7 +70,7 @@ public final class InheritanceMethodResolver {
      * @throws ResolverException if the super class in not in the given ejb-jar
      */
     public static void resolve(final EasyBeansEjbJarClassMetadata classAnnotationMetadata) throws ResolverException {
-        addMethodMetadata(classAnnotationMetadata, classAnnotationMetadata);
+        addMethodMetadata(classAnnotationMetadata, classAnnotationMetadata, 1);
     }
 
     /**
@@ -81,7 +83,11 @@ public final class InheritanceMethodResolver {
      *         ejb-jar
      */
     private static void addMethodMetadata(final EasyBeansEjbJarClassMetadata beanclassAnnotationMetadata,
-            final EasyBeansEjbJarClassMetadata visitingClassAnnotationMetadata) throws ResolverException {
+            final EasyBeansEjbJarClassMetadata visitingClassAnnotationMetadata, int inheritanceLevel) throws ResolverException {
+
+
+        getInvertedSuperClassesMetadata(beanclassAnnotationMetadata);
+
 
         // Analyze super classes of the given class
         String superClass = visitingClassAnnotationMetadata.getSuperName();
@@ -105,7 +111,10 @@ public final class InheritanceMethodResolver {
             // Takes method metadata of the super class and adds them to the
             // bean class
             // Note : the flag inherited is set to true
-            for (EasyBeansEjbJarMethodMetadata methodAnnotationMetadata : superClassMetadata.getMethodMetadataCollection()) {
+
+            EasyBeansEjbJarMethodMetadata[] methodsToAnalyze = superClassMetadata.getMethodMetadataCollection().toArray(new EasyBeansEjbJarMethodMetadata[superClassMetadata.getMethodMetadataCollection().size()]);
+            for (EasyBeansEjbJarMethodMetadata methodAnnotationMetadata : methodsToAnalyze) {
+
                 // check that the method has not be redefined
                 JMethod method = methodAnnotationMetadata.getJMethod();
 
@@ -113,6 +122,35 @@ public final class InheritanceMethodResolver {
 
                 // overriding ?
                 boolean superMethodIsPrivate = ((method.getAccess() & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE);
+
+                // Handle case of super method which is private and we
+                // already have the method, so we need to add a generated method on the super class
+                if (beanMethod != null && superMethodIsPrivate && !visitingClassAnnotationMetadata.isBean()) {
+
+
+                    // Add a clone of the method to super class
+                    EasyBeansEjbJarMethodMetadata clonedMethodAnnotationMetadata =
+                        (EasyBeansEjbJarMethodMetadata) methodAnnotationMetadata.clone();
+
+                    // Change metadata method name
+                    JMethod oldMethod = clonedMethodAnnotationMetadata.getJMethod();
+                    JMethod newMethod = new JMethod(Opcodes.ACC_PUBLIC, oldMethod.getName()
+                            + superClassMetadata.getClassName().replace("/", ""), oldMethod.getDescriptor(), oldMethod
+                            .getSignature(), oldMethod.getExceptions());
+                    // update metadata
+                    clonedMethodAnnotationMetadata.setJMethod(newMethod);
+                    clonedMethodAnnotationMetadata.setPrivateSuperCallGenerated(true, superClassMetadata, 0);
+                    clonedMethodAnnotationMetadata.setSuperPrivateMethodName(oldMethod.getName());
+
+                    // Add the method
+                    superClassMetadata.addStandardMethodMetadata(clonedMethodAnnotationMetadata);
+
+                    // Update current parameters
+                    methodAnnotationMetadata = clonedMethodAnnotationMetadata;
+                    beanMethod = beanclassAnnotationMetadata.getMethodMetadata(newMethod);
+
+                }
+
 
                 // Add only if it is not present and super method is not private (else if super method is private, this is not an override)
                 // Or if present and super method is private
@@ -126,6 +164,8 @@ public final class InheritanceMethodResolver {
                             .setClassMetadata(beanclassAnnotationMetadata);
 
                     // method is inherited
+                    clonedMethodAnnotationMetadata.setPrivateSuperCallGenerated(false, null, 0);
+                    clonedMethodAnnotationMetadata.setSuperPrivateMethodName(null);
                     clonedMethodAnnotationMetadata.setInherited(true, superClassMetadata);
 
                     // Final method ? ignore it
@@ -140,7 +180,6 @@ public final class InheritanceMethodResolver {
                         beanclassAnnotationMetadata
                             .addStandardMethodMetadata(clonedMethodAnnotationMetadata);
                     }
-
 
                     // lifecycle / aroundInvoke
                     if (clonedMethodAnnotationMetadata.isPostConstruct()) {
@@ -162,9 +201,34 @@ public final class InheritanceMethodResolver {
             }
 
             // Loop again
-            addMethodMetadata(beanclassAnnotationMetadata, superClassMetadata);
+            addMethodMetadata(beanclassAnnotationMetadata, superClassMetadata, ++inheritanceLevel);
 
         }
+    }
+
+    /**
+     * Gets the inverted list of metadata for a given class (super class is the first one in the list).
+     * @param classAnnotationMetadata the class to analyze
+     * @return the given list
+     */
+    private static LinkedList<String> getInvertedSuperClassesMetadata(
+            final EasyBeansEjbJarClassMetadata classAnnotationMetadata) {
+
+        // get list of super classes
+        LinkedList<String> superClassesList = new LinkedList<String>();
+        String superClassName = classAnnotationMetadata.getSuperName();
+        // loop while super class is not java.lang.Object
+        while (!JAVA_LANG_OBJECT.equals(superClassName)) {
+            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getLinkedClassMetadata(superClassName);
+            if (superMetaData != null) {
+                superClassName = superMetaData.getSuperName();
+                superClassesList.addFirst(superMetaData.getClassName());
+            } else {
+                superClassName = JAVA_LANG_OBJECT;
+            }
+        }
+        superClassesList.addLast(classAnnotationMetadata.getClassName());
+        return superClassesList;
     }
 
 }

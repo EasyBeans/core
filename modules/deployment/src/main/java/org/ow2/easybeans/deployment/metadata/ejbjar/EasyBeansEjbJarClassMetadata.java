@@ -66,7 +66,7 @@ public class EasyBeansEjbJarClassMetadata
      * List of &#64;{@link javax.interceptor.AroundInvoke} methods on this
      * class (should be only one per class, validating occurs after).
      */
-    private List<EasyBeansEjbJarMethodMetadata> aroundInvokeMethodsMetadata = null;
+    private LinkedList<EasyBeansEjbJarMethodMetadata> aroundInvokeMethodsMetadata = null;
 
     /**
      * Methods used for &#64;{@link javax.annotation.PostConstruct} on this
@@ -165,9 +165,18 @@ public class EasyBeansEjbJarClassMetadata
      */
     public void addAroundInvokeMethodMetadata(final EasyBeansEjbJarMethodMetadata aroundInvokeMethodMetadata) {
         if (this.aroundInvokeMethodsMetadata == null) {
-            this.aroundInvokeMethodsMetadata = new ArrayList<EasyBeansEjbJarMethodMetadata>();
+            this.aroundInvokeMethodsMetadata = new LinkedList<EasyBeansEjbJarMethodMetadata>();
         }
-        this.aroundInvokeMethodsMetadata.add(aroundInvokeMethodMetadata);
+        // Check not yet present
+        for (EasyBeansEjbJarMethodMetadata methodMetadata : this.aroundInvokeMethodsMetadata) {
+            if (aroundInvokeMethodMetadata.getClassMetadata().getClassName().equals(methodMetadata.getClassMetadata().getClassName())) {
+                if (aroundInvokeMethodMetadata.getJMethod().equals(methodMetadata.getJMethod())) {
+                    return;
+                }
+            }
+        }
+
+        this.aroundInvokeMethodsMetadata.addFirst(aroundInvokeMethodMetadata);
     }
 
     /**

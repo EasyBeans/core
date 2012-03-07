@@ -289,6 +289,17 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
     public void visitEnd() {
         super.visitEnd();
 
+
+        // If we have methods to generate, generate them
+        for (EasyBeansEjbJarMethodMetadata m : this.classAnnotationMetadata.getMethodMetadataCollection()) {
+            if (m.isPrivateSuperCallGenerated()) {
+                // Generate super call
+                String originalMethodName = m.getSuperPrivateMethodName();
+                generateCallSuperEncodedMethod(m, m.getMethodName(), originalMethodName, m.getOriginalClassMetadata().getClassName());
+            }
+        }
+
+
         // For Bean only
         if (this.classAnnotationMetadata.isBean()) {
             // Add default lifecycle methods. These methods will call defined
@@ -820,6 +831,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
 
     }
 
+
     /**
      * Generates a call to the method defined in the super class.
      * public int original$add(int i, int j) {
@@ -827,9 +839,8 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
      * }
      * @param method the annotation metadata of the method
      */
-    private void generateCallSuperEncodedMethod(final EasyBeansEjbJarMethodMetadata method) {
+    private void generateCallSuperEncodedMethod(final EasyBeansEjbJarMethodMetadata method, final String generatedMethodName, final String superMethodName, final String superClassName) {
 
-        String generatedMethodName = MethodRenamer.encode(method.getMethodName());
         JMethod jMethod = method.getJMethod();
         MethodVisitor mv = this.cv.visitMethod(jMethod.getAccess(), generatedMethodName,
                 jMethod.getDescriptor(), jMethod.getSignature(), jMethod.getExceptions());
@@ -856,8 +867,8 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
         }
 
         // call super class method()
-        mv.visitMethodInsn(INVOKESPECIAL, method.getClassMetadata().getSuperName(),
-                jMethod.getName(), jMethod.getDescriptor());
+        mv.visitMethodInsn(INVOKESPECIAL, superClassName,
+                superMethodName, jMethod.getDescriptor());
 
         Type returnType = Type.getReturnType(jMethod.getDescriptor());
         CommonClassGenerator.addReturnType(returnType, mv);
@@ -865,6 +876,18 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
 
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+    }
+
+
+    /**
+     * Generates a call to the method defined in the super class.
+     * public int original$add(int i, int j) {
+     *     return super.add(i, j);
+     * }
+     * @param method the annotation metadata of the method
+     */
+    private void generateCallSuperEncodedMethod(final EasyBeansEjbJarMethodMetadata method) {
+        generateCallSuperEncodedMethod(method, MethodRenamer.encode(method.getMethodName()), method.getMethodName(), method.getClassMetadata().getSuperName());
     }
 
 

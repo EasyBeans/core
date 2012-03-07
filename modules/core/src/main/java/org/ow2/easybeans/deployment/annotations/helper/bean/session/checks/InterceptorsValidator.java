@@ -170,7 +170,7 @@ public final class InterceptorsValidator {
             int forCurrentClass = 0;
             // for the same classmetadata ?
             for (EasyBeansEjbJarMethodMetadata method : aroundInvokeList) {
-                if (method.isInherited()) {
+                if (method.getOriginalClassMetadata() != null) {
                     if (method.getOriginalClassMetadata().equals(interceptorMetaData)) {
                         throw new InterceptorsValidationException(errMsg);
                     }

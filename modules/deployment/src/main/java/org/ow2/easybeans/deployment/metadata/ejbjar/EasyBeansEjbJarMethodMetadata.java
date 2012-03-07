@@ -62,9 +62,24 @@ public class EasyBeansEjbJarMethodMetadata
     private boolean transacted = false;
 
     /**
+     * A method needs to be generated in order to call a super method.
+     */
+    private boolean privateSuperCallGenerated = false;
+
+    /**
+     * Method name of the super method.
+     */
+    private String superPrivateMethodName = null;
+
+    /**
      * Original parent metadata (if method is inherited).
      */
     private EasyBeansEjbJarClassMetadata originalClassMetadata = null;
+
+    /**
+     * Inheritance level. (0 is for current class, 1 is for super class, 2 for super super class, etc)
+     */
+    private int inheritanceLevel = 0;
 
     /**
      * EasyBeans method interceptors. These interceptors correspond to a list of
@@ -86,6 +101,27 @@ public class EasyBeansEjbJarMethodMetadata
      */
     public boolean isInherited() {
         return this.inherited;
+    }
+
+    /**
+     * @return true if this method is generated for a super method call
+     */
+    public boolean isPrivateSuperCallGenerated() {
+        return this.privateSuperCallGenerated;
+    }
+
+    /**
+     * Sets the inheritance of this method.
+     * @param privateSuperCallGenerated true if a method needs to be generated for a super private call method.
+     * @param originalClassMetadata the metadata of the original class (not
+     *        inherited)
+     */
+    public void setPrivateSuperCallGenerated(final boolean privateSuperCallGenerated, final EasyBeansEjbJarClassMetadata originalClassMetadata, final int inheritanceLevel) {
+        // disable inheritance
+        this.inherited = false;
+        this.privateSuperCallGenerated = privateSuperCallGenerated;
+        this.originalClassMetadata = originalClassMetadata;
+        this.inheritanceLevel = inheritanceLevel;
     }
 
     /**
@@ -175,5 +211,24 @@ public class EasyBeansEjbJarMethodMetadata
     public void setTransacted(final boolean transacted) {
         this.transacted = transacted;
     }
+
+    /**
+     * Inheritance Level.
+     * @return inheritance level
+     */
+    public int getInheritanceLevel() {
+        return this.inheritanceLevel;
+    }
+
+    public String getSuperPrivateMethodName() {
+        return this.superPrivateMethodName;
+    }
+
+    public void setSuperPrivateMethodName(final String superPrivateMethodName) {
+        this.superPrivateMethodName = superPrivateMethodName;
+    }
+
+
+
 
 }

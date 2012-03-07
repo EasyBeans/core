@@ -155,9 +155,8 @@ public class MethodInterceptorsBuilder {
         }
 
         // interceptors on the bean class (user) + not excluded
-            if (this.classAnnotationMetadata.getInternalUserEasyBeansInterceptors() != null
-                    && !this.methodAnnotationMetadata.isExcludedClassInterceptors()) {
-                List<? extends IJClassInterceptor> userInterceptorslist =
+        if (this.classAnnotationMetadata.getInternalUserEasyBeansInterceptors() != null) {
+            List<? extends IJClassInterceptor> userInterceptorslist =
 
                 this.classAnnotationMetadata.getInternalUserEasyBeansInterceptors().get(this.interceptorType);
             if (userInterceptorslist != null) {

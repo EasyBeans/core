@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.ejb.Remove;
@@ -80,7 +81,8 @@ public final class InterceptorsClassResolver {
      * @param ezbServer server that is specifying config
      * @throws ResolverException if metadata is missing
      */
-    public static void resolve(final EasyBeansEjbJarClassMetadata classAnnotationMetadata, final EZBServer ezbServer) throws ResolverException {
+    public static void resolve(final EasyBeansEjbJarClassMetadata classAnnotationMetadata, final EZBServer ezbServer)
+            throws ResolverException {
 
         // First, EasyBeans interceptors
         List<String> easyBeansInterceptorsClasses = new ArrayList<String>();
@@ -251,9 +253,9 @@ public final class InterceptorsClassResolver {
             LinkedList<EasyBeansEjbJarClassMetadata> invertedInheritanceClassesList =
                 getInvertedSuperClassesMetadata(interceptorMetadata);
 
-
             // For each class (starting super class first, add the interceptor methods)
             for (EasyBeansEjbJarClassMetadata currentMetaData : invertedInheritanceClassesList) {
+
                 // Analyze methods of the interceptor meta-data and add it in the map
                 for (EasyBeansEjbJarMethodMetadata method : currentMetaData.getMethodMetadataCollection()) {
                     // Don't look inherited methods.
@@ -268,18 +270,29 @@ public final class InterceptorsClassResolver {
                     // As the method is only add once for a single interceptor
                     // class.
                     EasyBeansEjbJarMethodMetadata analyzedMethod = method;
-                    EasyBeansEjbJarMethodMetadata methodSubClass = interceptorMetadata.getMethodMetadata(method
-                            .getJMethod());
-                    boolean superMethodIsPrivate = (analyzedMethod.getJMethod().getAccess() & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE;
-                    if (methodSubClass != null && !superMethodIsPrivate) {
+                    EasyBeansEjbJarMethodMetadata methodSubClass = findLastRedefinedMethod(method,
+                            invertedInheritanceClassesList);
+                    boolean superMethodIsPrivate = (analyzedMethod.getJMethod().getAccess()
+                            & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE;
+                    if (methodSubClass != null && !superMethodIsPrivate && !methodSubClass.isInherited()) {
                         analyzedMethod = methodSubClass;
                     }
 
+                    // check if method is redefined in a super class
+
+                    // Skip super method that we have also as it will be added in a generated method
+                    if (methodSubClass != null && !methodSubClass.isInherited()
+                            && methodSubClass.getClassMetadata().equals(interceptorMetadata) && superMethodIsPrivate
+                            && !currentMetaData.equals(interceptorMetadata)
+                            && !invertedInheritanceClassesList.contains(classMetadata)) {
+                        continue;
+                    }
 
                     // A method can be designed to be used for all annotation, so no "else if" !
                     if (analyzedMethod.isAroundInvoke()) {
                         addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.AROUND_INVOKE), jInterceptor);
                     }
+
                     // Only if interceptor class is not a bean's class. Else, it is only simple methods.
                     // Also check if the interceptor class is not a super class of the bean
                     if (!currentMetaData.isBean() && !invertedInheritanceClassesList.contains(classMetadata)) {
@@ -307,6 +320,31 @@ public final class InterceptorsClassResolver {
 
         return mapInterceptors;
     }
+
+    /**
+     * Gets the method with the lower inheritance level defined in the class which is not inherited from a super class.
+     * @param method the given method
+     * @param classMetadatas the list of class to parse
+     * @return a method if found
+     */
+    protected static EasyBeansEjbJarMethodMetadata findLastRedefinedMethod(final EasyBeansEjbJarMethodMetadata method,
+            final LinkedList<EasyBeansEjbJarClassMetadata> classMetadatas) {
+        ListIterator<EasyBeansEjbJarClassMetadata> it = classMetadatas.listIterator();
+        EasyBeansEjbJarMethodMetadata foundMethod = null;
+        // search method
+        while (it.hasNext()) {
+            EasyBeansEjbJarClassMetadata subClass = it.next();
+            EasyBeansEjbJarMethodMetadata subMethod = subClass.getMethodMetadata(method.getJMethod());
+            if (subMethod != null && !subMethod.isInherited()) {
+                foundMethod = subMethod;
+            }
+        }
+        if (foundMethod != null) {
+            return foundMethod;
+        }
+        return null;
+    }
+
 
     /**
      * Adds in the given interceptors list the interceptor object.
