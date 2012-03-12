@@ -251,7 +251,9 @@ public class DynamicInvocationContextImpl implements EasyBeansInvocationContext 
      * @return the updated class
      */
     private Class<?> convertType(final Class<?> clazz) {
-        if (Boolean.TYPE.equals(clazz)) {
+        if (Integer.TYPE.equals(clazz)) {
+            return Integer.class;
+        } else if (Boolean.TYPE.equals(clazz)) {
             return Boolean.class;
         } else if (Byte.TYPE.equals(clazz)) {
             return Byte.class;
