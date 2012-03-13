@@ -569,6 +569,12 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                     continue;
                 }
 
+                // Update interface name ?
+                String beanInterface = jEjb.getBeanInterface();
+                if (beanInterface != null && !"java/lang/Object".equals(beanInterface)) {
+                    itfName = beanInterface;
+                }
+
                 logger.debug("Add injection for EJB on attribute {0} of class {1}", fieldMetaData.getFieldName(),
                         this.classAnnotationMetadata.getClassName());
 
@@ -970,6 +976,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
 
                 Type typeInterface = validateSetterMethod(methodMetaData);
                 String itfName = typeInterface.getClassName();
+
+                // Update interface name ?
+                String beanInterface = jEjb.getBeanInterface();
+                if (beanInterface != null && !"java/lang/Object".equals(beanInterface)) {
+                    itfName = beanInterface;
+                }
+
 
                 String lookup = jEjb.getLookup();
                 if (lookup != null && !lookup.equals("")) {
