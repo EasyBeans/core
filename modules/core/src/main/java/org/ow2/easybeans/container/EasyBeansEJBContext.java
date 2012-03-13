@@ -65,6 +65,7 @@ import org.ow2.easybeans.container.session.stateful.StatefulSessionFactory;
 import org.ow2.easybeans.container.session.stateless.StatelessSessionFactory;
 import org.ow2.easybeans.security.propagation.context.SecurityCurrent;
 import org.ow2.easybeans.transaction.JTransactionManager;
+import org.ow2.easybeans.transaction.interceptors.CMTSupportsTransactionInterceptor;
 import org.ow2.util.ee.metadata.common.api.xml.struct.ISecurityRoleRef;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -301,6 +302,12 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
                     + " method as it is in BeanManagedTransaction");
         }
 
+        Object value = getContextData().get(CMTSupportsTransactionInterceptor.class.getName());
+        if (value != null && ((Boolean) value).booleanValue()) {
+            throw new IllegalStateException("This bean is not allowed to use getRollbackOnly() "
+                    + " method as it is in a SUPPORTS call");
+        }
+
         // Check if there is a transaction, as it is mandatory
         try {
             if (this.transactionManager.getTransaction() == null) {
@@ -341,6 +348,14 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
             throw new IllegalStateException("This bean is not allowed to use getRollbackOnly() "
                     + " method as it is in BeanManagedTransaction");
         }
+
+        Object value = getContextData().get(CMTSupportsTransactionInterceptor.class.getName());
+        if (value != null && ((Boolean) value).booleanValue()) {
+            throw new IllegalStateException("This bean is not allowed to use getRollbackOnly() "
+                    + " method as it is in a SUPPORTS call");
+        }
+
+
         try {
             switch (this.transactionManager.getStatus()) {
                 case Status.STATUS_MARKED_ROLLBACK:

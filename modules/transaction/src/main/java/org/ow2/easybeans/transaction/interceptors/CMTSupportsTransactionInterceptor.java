@@ -63,7 +63,7 @@ public class CMTSupportsTransactionInterceptor extends AbsTransactionInterceptor
      */
     @Override
     public Object intercept(final EasyBeansInvocationContext invocationContext) throws Exception {
-        logger.debug("Calling Supports TX interceptor");
+        this.logger.debug("Calling Supports TX interceptor");
 
         // Get current transaction
         Transaction transaction;
@@ -73,7 +73,9 @@ public class CMTSupportsTransactionInterceptor extends AbsTransactionInterceptor
             throw new EJBException("Cannot get the current transaction on transaction manager.", se);
         }
 
-        logger.debug("Transaction found = {0}", transaction);
+        invocationContext.getContextData().put(CMTSupportsTransactionInterceptor.class.getName(), Boolean.TRUE);
+
+        this.logger.debug("Transaction found = {0}", transaction);
 
         try {
             return invocationContext.proceed();
