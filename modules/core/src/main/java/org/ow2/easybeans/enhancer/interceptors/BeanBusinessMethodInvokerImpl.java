@@ -32,6 +32,7 @@ import java.util.Arrays;
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
 import org.ow2.easybeans.api.interceptor.EZBInterceptorInvoker;
 import org.ow2.easybeans.api.interceptor.EZBInterceptorManager;
+import org.ow2.easybeans.enhancer.lib.MethodRenamer;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
@@ -65,7 +66,17 @@ public class BeanBusinessMethodInvokerImpl implements EZBInterceptorInvoker {
      */
     public BeanBusinessMethodInvokerImpl(final String beanClassname, final JMethod jMethod, final ClassLoader classLoader) {
         this.beanClassname = beanClassname;
-        this.method = MethodHelper.getMethod(beanClassname, jMethod, classLoader);
+
+        // If method has not be flagged as a business method, it doesn't exist so we need to change to the not-renamed method
+        try {
+            this.method = MethodHelper.getMethod(beanClassname, jMethod, classLoader);
+        } catch (IllegalStateException e) {
+            LOGGER.warn("Method ''{0}'' has not been found, maybe because it wasn''t generated. Try with the not-renamed method", jMethod.getName());
+            String oldName = MethodRenamer.decode(jMethod.getName());
+            JMethod newMethod = new JMethod(jMethod.getAccess(), oldName, jMethod.getDescriptor(), jMethod.getSignature(), jMethod
+                    .getExceptions());
+            this.method = MethodHelper.getMethod(beanClassname, newMethod, classLoader);
+        }
     }
 
     /**
