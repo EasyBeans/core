@@ -48,6 +48,14 @@ import org.ow2.easybeans.asm.Label;
 import org.ow2.easybeans.asm.MethodVisitor;
 import org.ow2.easybeans.asm.Opcodes;
 import org.ow2.easybeans.asm.Type;
+import org.ow2.easybeans.deployment.annotations.exceptions.ResolverException;
+import org.ow2.easybeans.deployment.annotations.helper.bean.BusinessMethodResolver;
+import org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper;
+import org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceMethodResolver;
+import org.ow2.easybeans.deployment.annotations.helper.bean.InterfaceAnnotatedHelper;
+import org.ow2.easybeans.deployment.annotations.helper.bean.SessionBeanHelper;
+import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBBeanHelper;
+import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBListenerBusinessMethodResolver;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.enhancer.CommonClassGenerator;
@@ -60,6 +68,8 @@ import org.ow2.easybeans.enhancer.lib.MethodRenamer;
 import org.ow2.easybeans.enhancer.lib.ParameterAnnotationRecorder;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
 
 /**
@@ -69,6 +79,11 @@ import org.ow2.util.scan.api.metadata.structures.JMethod;
  * @author Florent Benoit
  */
 public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
+
+    /**
+     * Logger.
+     */
+    private Log LOGGER = LogFactory.getLog(InterceptorClassAdapter.class);
 
     /**
      * If this flag is enabled, it allows to share the bean class with other frameworks/tools that load the enhanced class.
@@ -502,8 +517,14 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                 methodArg++;
             }
 
+            String encodedMethodName = MethodRenamer.encode(method.getMethodName());
+            if (method.getJMethod().equals(InjectionClassAdapter.INJECTED_JMETHOD)) {
+                encodedMethodName = InjectionClassAdapter.INJECTED_JMETHOD.getName();
+            }
+
+
             // Call the original method
-            mv.visitMethodInsn(INVOKEVIRTUAL,  this.classAnnotationMetadata.getClassName(), MethodRenamer.encode(method.getMethodName()), method.getJMethod().getDescriptor());
+            mv.visitMethodInsn(INVOKEVIRTUAL,  this.classAnnotationMetadata.getClassName(), encodedMethodName, method.getJMethod().getDescriptor());
 
             // Cast and return value
             Type returnType = Type.getReturnType(method.getJMethod().getDescriptor());
@@ -887,7 +908,52 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
      * @param method the annotation metadata of the method
      */
     private void generateCallSuperEncodedMethod(final EasyBeansEjbJarMethodMetadata method) {
-        generateCallSuperEncodedMethod(method, MethodRenamer.encode(method.getMethodName()), method.getMethodName(), method.getClassMetadata().getSuperName());
+
+        // If the super class is a bean, then it means that we should call the super original$add method
+        EasyBeansEjbJarClassMetadata classMetadata = method.getClassMetadata();
+        String superClassName = classMetadata.getSuperName();
+
+        // we've metadata of the super class ?
+        EasyBeansEjbJarClassMetadata superClassMetadata = classMetadata.getLinkedClassMetadata(superClassName);
+
+        String superMethodName = method.getMethodName();
+        if (superClassMetadata.isBean()) {
+            // Resolve the bean in order to check for business methods on this class
+            try {
+                InheritanceInterfacesHelper.resolve(superClassMetadata);
+
+                InterfaceAnnotatedHelper.resolve(superClassMetadata);
+                InheritanceMethodResolver.resolve(superClassMetadata);
+
+                // Find business method
+                if (superClassMetadata.isSession()) {
+                    BusinessMethodResolver.resolve(superClassMetadata);
+                } else if (superClassMetadata.isMdb()) {
+                    MDBListenerBusinessMethodResolver.resolve(superClassMetadata);
+                }
+
+                // for each bean, call sub helper
+                if (superClassMetadata.isSession()) {
+                    SessionBeanHelper.resolve(superClassMetadata);
+                } else if (superClassMetadata.isMdb()) {
+                    MDBBeanHelper.resolve(superClassMetadata);
+                }
+
+            } catch (ResolverException e) {
+                this.LOGGER.error("Unable to resolve some methods for a super class which is also a Bean", e);
+            }
+
+
+            EasyBeansEjbJarMethodMetadata superClassMethod = superClassMetadata.getMethodMetadata(method.getJMethod());
+            if (superClassMethod.isBusinessMethod()) {
+                // Needs to call the super method not changed
+                superMethodName = MethodRenamer.encode(method.getMethodName());
+            }
+
+        }
+
+
+        generateCallSuperEncodedMethod(method, MethodRenamer.encode(method.getMethodName()), superMethodName, method.getClassMetadata().getSuperName());
     }
 
 
@@ -1039,6 +1105,10 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
      * @return true if the given method is an interceptor method (ie AroundInvoke, PostConstruct, etc).
      */
     private boolean isInterceptorMethod(final JMethod jMethod) {
+
+        if (isInjectedMethod(jMethod)) {
+            return false;
+        }
         // get method metadata
         EasyBeansEjbJarMethodMetadata method = this.classAnnotationMetadata.getMethodMetadata(jMethod);
         if (method == null) {
