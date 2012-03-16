@@ -270,6 +270,12 @@ public class Enhancer {
             if (superMetaData != null && !superMetaData.wasModified()) {
                 ClassReader cr = getClassReader(superMetaData);
                 ClassWriter cw = new EasyBeansClassWriter(this.readLoader);
+
+                // If super class is also a bean, report some interceptors
+                if (superMetaData.isBean()) {
+                    superMetaData.setGlobalEasyBeansInterceptors(beanClassMetadata.getGlobalEasyBeansInterceptors());
+                }
+
                 InterceptorClassAdapter itcpClassAdapter = new InterceptorClassAdapter(superMetaData, cw, this.readLoader);
                 InjectionClassAdapter cv = new InjectionClassAdapter(superMetaData, itcpClassAdapter, this.map,
                         beanClassMetadata, false);
