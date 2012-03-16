@@ -29,12 +29,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ow2.easybeans.asm.Opcodes;
 import org.ow2.easybeans.deployment.annotations.exceptions.InterceptorsValidationException;
 import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
 import org.ow2.util.ee.metadata.ejbjar.impl.EjbJarClassMetadata;
 import org.ow2.util.pool.api.IPoolConfiguration;
 import org.ow2.util.pool.api.IPoolMetadata;
+import org.ow2.util.scan.api.metadata.structures.JMethod;
 
 /**
  * This class represents the annotation metadata of a Bean.<br>
@@ -218,7 +220,11 @@ public class EasyBeansEjbJarClassMetadata
                 compareMetaData = method.getClassMetadata();
             }
             if (compareMetaData.equals(wantToAddClassMetadata)) {
-                if (!methodMetadata.getJMethod().equals(method.getJMethod())) {
+                JMethod jMethod = method.getJMethod();
+                JMethod otherMethod = new JMethod(Opcodes.ACC_PUBLIC, jMethod.getName()
+                        + compareMetaData.getClassName().replace("/", ""), jMethod.getDescriptor(), jMethod
+                        .getSignature(), jMethod.getExceptions());
+                if (!methodMetadata.getJMethod().equals(method.getJMethod()) && !methodMetadata.getJMethod().equals(otherMethod)) {
                     throw new InterceptorsValidationException("Class " + getClassName() + " has already a " + itcType
                         + " method which is " + method.getMethodName() + ", cannot set new method "
                         + methodMetadata.getMethodName());
