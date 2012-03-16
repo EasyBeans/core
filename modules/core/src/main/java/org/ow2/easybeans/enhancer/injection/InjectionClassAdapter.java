@@ -164,9 +164,14 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
     public static final String JAVA_LANG_OBJECT = "java/lang/Object";
 
     /**
-     * Injected method name.
+     * Injected method name (used to be called by the Bean class).
      */
     public static final String INJECTED_METHOD = "injectedByEasyBeans";
+
+    /**
+     * Internal injected method name (used to  be called between classes/super classes).
+     */
+    public static final String INTERNAL_INJECTED_METHOD = "internalInjectedByEasyBeans";
 
     /**
      * JMethod object for injectedByEasyBeans.
@@ -175,10 +180,16 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
             new String[] {"org/ow2/easybeans/api/injection/EasyBeansInjectionException"});
 
     /**
+     * JMethod object for internalInjectedByEasyBeans.
+     */
+    public static final JMethod INTERNAL_INJECTED_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(INTERNAL_INJECTED_METHOD), "()V", null,
+            new String[] {"org/ow2/easybeans/api/injection/EasyBeansInjectionException"});
+
+    /**
      * List of injected methods.
      */
     public static final String[] INJECTED_METHODS = new String[] {"getEasyBeansContext", "setEasyBeansContext",
-            "getEasyBeansFactory", "setEasyBeansFactory"};
+            "getEasyBeansFactory", "setEasyBeansFactory", INTERNAL_INJECTED_METHOD};
 
     /**
      * Replace length to create default JNDI names.
@@ -259,8 +270,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
     public void visitEnd() {
         super.visitEnd();
 
-        // now, adds the injected method
-        addInjectedMethod();
+        // now, adds the injected method for beans (that will be intercepted)
+        if (this.classAnnotationMetadata.isBean()) {
+            addInjectedMethod();
+        }
+
+        // Adds the internal injected method
+        addInternalInjectedMethod();
 
         // Adds methods if it's not a bean (as it should have been already added by the bean class adapter).
         // If it's a super class of a bean, as the class that will be instantiated
@@ -293,10 +309,12 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                 "easyBeansContext", contextClass);
     }
 
+
     /**
      * Generates the injectedByEasyBeans() method on the current class.
      */
     private void addInjectedMethod() {
+
         int access = ACC_PUBLIC;
         if (this.staticMode) {
             access = access + ACC_STATIC;
@@ -308,6 +326,7 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         CommonClassGenerator.addAnnotationsOnGeneratedMethod(mv);
 
         mv.visitCode();
+
 
         // Init the dynamic interceptor manager if there is an invocation
         // context factory
@@ -342,6 +361,40 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         }
 
 
+        // Now, calls our internal injected method
+        if (!this.staticMode) {
+            // generate call to INTERNAL_INJECTED_METHOD();
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESPECIAL, this.classAnnotationMetadata.getClassName(), INTERNAL_INJECTED_METHOD, "()V");
+        } else {
+            mv.visitMethodInsn(INVOKESTATIC, this.classAnnotationMetadata.getClassName(), INTERNAL_INJECTED_METHOD, "()V");
+        }
+
+
+        mv.visitInsn(RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+
+
+
+
+    /**
+     * Generates the internalInjectedByEasyBeans() method on the current class.
+     */
+    private void addInternalInjectedMethod() {
+        int access = ACC_PUBLIC;
+        if (this.staticMode) {
+            access = access + ACC_STATIC;
+        }
+
+        MethodVisitor mv = this.cv.visitMethod(access, INTERNAL_INJECTED_METHOD, "()V", null,
+                new String[] {"org/ow2/easybeans/api/injection/EasyBeansInjectionException"});
+        // Add some flags on the generated method
+        CommonClassGenerator.addAnnotationsOnGeneratedMethod(mv);
+
+        mv.visitCode();
+
 
         // First, call the super class method (if the super class has been
         // analyzed) and if there is one
@@ -350,11 +403,11 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
             EasyBeansEjbJarClassMetadata superMetadata = this.classAnnotationMetadata.getLinkedClassMetadata(superNameClass);
             if (superMetadata != null) {
                 if (!this.staticMode) {
-                    // generate call to super method : super.INJECTED_METHOD();
+                    // generate call to super method : super.INTERNAL_INJECTED_METHOD();
                     mv.visitVarInsn(ALOAD, 0);
-                    mv.visitMethodInsn(INVOKESPECIAL, superMetadata.getClassName(), INJECTED_METHOD, "()V");
+                    mv.visitMethodInsn(INVOKESPECIAL, superMetadata.getClassName(), INTERNAL_INJECTED_METHOD, "()V");
                 } else {
-                    mv.visitMethodInsn(INVOKESTATIC, superMetadata.getClassName(), INJECTED_METHOD, "()V");
+                    mv.visitMethodInsn(INVOKESTATIC, superMetadata.getClassName(), INTERNAL_INJECTED_METHOD, "()V");
                 }
             }
         }

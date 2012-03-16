@@ -34,6 +34,7 @@ import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.easybeans.enhancer.CommonClassGenerator;
 import org.ow2.easybeans.enhancer.EasyBeansClassWriter;
+import org.ow2.easybeans.enhancer.injection.InjectionClassAdapter;
 
 /**
  * This generates a class that manage the interceptor of a given bean. It
@@ -248,7 +249,7 @@ public class InterceptorManagerGenerator extends CommonClassGenerator {
                 // interceptorXX.injectedByEasyBeans();
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, this.generatedClassName, fieldName, encodeClassDesc(interceptor));
-                mv.visitMethodInsn(INVOKEVIRTUAL, interceptor, "injectedByEasyBeans", "()V");
+                mv.visitMethodInsn(INVOKEVIRTUAL, interceptor, InjectionClassAdapter.INTERNAL_INJECTED_METHOD, "()V");
             }
         }
         mv.visitInsn(RETURN);

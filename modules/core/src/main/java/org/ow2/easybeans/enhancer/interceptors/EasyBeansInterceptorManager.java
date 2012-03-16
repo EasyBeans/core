@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.ow2.easybeans.api.container.EZBEJBContext;
 import org.ow2.easybeans.api.interceptor.EZBInterceptorManager;
+import org.ow2.easybeans.enhancer.injection.InjectionClassAdapter;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -130,7 +131,7 @@ public class EasyBeansInterceptorManager implements EZBInterceptorManager {
             // Call injectedByEasyBeans method
             Method injectedByEasyBeansMethod = null;
             try {
-                injectedByEasyBeansMethod = interceptor.getClass().getDeclaredMethod("injectedByEasyBeans");
+                injectedByEasyBeansMethod = interceptor.getClass().getDeclaredMethod(InjectionClassAdapter.INTERNAL_INJECTED_METHOD);
             } catch (SecurityException e) {
                 throw new IllegalStateException("Unable to get injectedByEasyBeans method", e);
             } catch (NoSuchMethodException e) {
