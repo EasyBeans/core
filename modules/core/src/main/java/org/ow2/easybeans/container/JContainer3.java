@@ -597,6 +597,18 @@ public class JContainer3 implements EZBContainer {
                     for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.deployment.getEjbJarArchiveMetadata()
                             .getClassesForBean(beanName)) {
                         Factory<?, ?> factory = null;
+
+                        // Check class is a bean
+                        if (!classAnnotationMetadata.isBean()) {
+                            continue;
+                        }
+
+                        // Check bean name is matching (can happen with super class also being beans)
+                        if (!beanName.equals(classAnnotationMetadata.getJCommonBean().getName())) {
+                            continue;
+                        }
+
+
                         if (classAnnotationMetadata.isSession()) {
                             factory = createSessionBeanFactory(classAnnotationMetadata);
                         } else if (classAnnotationMetadata.isMdb()) {
