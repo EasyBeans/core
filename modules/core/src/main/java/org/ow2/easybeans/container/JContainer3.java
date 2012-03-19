@@ -258,6 +258,7 @@ public class JContainer3 implements EZBContainer {
     public JContainer3(final EZBContainerConfig config) {
         setContainerConfig(config);
         this.bindingReferences = new ArrayList<EZBRef>();
+
     }
 
     /**
@@ -351,7 +352,9 @@ public class JContainer3 implements EZBContainer {
         long tStart = System.currentTimeMillis();
 
         // Create the event dispatcher
-        this.dispatcher = new EventDispatcher();
+        if (this.dispatcher == null) {
+            this.dispatcher = new EventDispatcher();
+        }
         this.dispatcher.start();
 
         this.j2eeManagedObjectId = J2EEManagedObjectNamingHelper.getJ2EEManagedObjectId(this);
@@ -536,6 +539,9 @@ public class JContainer3 implements EZBContainer {
 
             // Create Beans Factories
             if (createBeanFactories) {
+                if (this.dispatcher == null) {
+                    this.dispatcher = new EventDispatcher();
+                }
                 createBeanFactories();
             }
 
