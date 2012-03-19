@@ -26,7 +26,9 @@
 package org.ow2.easybeans.enhancer.bean;
 
 import java.lang.reflect.InvocationHandler;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.ow2.easybeans.api.bean.proxy.EasyBeansNoInterfaceProxyBean;
 import org.ow2.easybeans.asm.Label;
@@ -39,11 +41,34 @@ import org.ow2.easybeans.enhancer.EasyBeansClassWriter;
 import org.ow2.easybeans.enhancer.lib.ProxyClassEncoder;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
 
+
 /**
  * Adapter used to generate a new class based on a super class.
  * @author Florent Benoit
  */
 public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
+
+    /**
+     * JMethod object for toString().
+     */
+    public static final JMethod TO_STRING_JMETHOD = new JMethod(ACC_PUBLIC, "toString", "()Ljava/lang/String;", null, null);
+
+    /**
+     * JMethod object for equals(Other object).
+     */
+    public static final JMethod EQUALS_JMETHOD = new JMethod(ACC_PUBLIC, "equals", "(Ljava/lang/Object;)Z", null, null);
+
+    /**
+     * JMethod object for hashCode().
+     */
+    public static final JMethod HASHCODE_JMETHOD = new JMethod(ACC_PUBLIC, "hashCode", "()I", null, null);
+
+
+    /**
+     * Object jmethods.
+     */
+    public static final List<String> METHODS_TO_IGNORE = Arrays.asList(new String[] {"<init>", "<clinit>",
+            TO_STRING_JMETHOD.getName(), EQUALS_JMETHOD.getName(), HASHCODE_JMETHOD.getName()});
 
     /**
      * InvocationHelper class.
@@ -153,7 +178,7 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
                 JMethod jMethod = methodMetadata.getJMethod();
 
                 // Skip special methods
-                if ("<init>".equals(jMethod.getName()) || "<clinit>".equals(jMethod.getName())) {
+                if (METHODS_TO_IGNORE.contains(jMethod.getName())) {
                     continue;
                 }
 
@@ -168,6 +193,14 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
 
             }
         }
+
+
+        // Now add Object methods
+        addTransformedMethod(new EasyBeansEjbJarMethodMetadata(TO_STRING_JMETHOD, this.classMetadata));
+        addTransformedMethod(new EasyBeansEjbJarMethodMetadata(EQUALS_JMETHOD, this.classMetadata));
+        addTransformedMethod(new EasyBeansEjbJarMethodMetadata(HASHCODE_JMETHOD, this.classMetadata));
+
+
     }
 
     /**
