@@ -25,6 +25,7 @@
 
 package org.ow2.easybeans.ejbinwar;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,8 @@ import java.util.Map;
 import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.archive.impl.AbsArchiveImpl;
+import org.ow2.util.archive.impl.ArchiveManager;
+import org.ow2.util.url.URLUtils;
 
 /**
  * Wrap a War archive into a EJB Archive.
@@ -63,6 +66,22 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
     private static final String WEB_INF_CLASSES = WEB_INF.concat("classes");
 
     /**
+     * WEB-INF/lib folder.
+     */
+    private static final String WEB_INF_LIB = WEB_INF.concat("lib");
+
+    /**
+     * .jar Suffix.
+     */
+    private static final String JAR_SUFFIX = ".jar";
+
+    /**
+     * .class Suffix.
+     */
+    private static final String CLASS_SUFFIX = ".class";
+
+
+    /**
      * Wrapped Archive.
      */
     private IArchive wrappedWarArchive = null;
@@ -70,12 +89,9 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
     /**
      * Resource names of the entries.
      */
-    private Map<String, String> nameEntries = null;
+    private Map<String, URL> entries = null;
 
-    /**
-     * URL entries of the EJB3 (based on the war).
-     */
-    private List<URL> urlEntries = null;
+
 
     /**
      * Build a new EJB archive based on the given WAR archive.
@@ -85,8 +101,7 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
     public EJBInWarArchive(final IArchive wrappedWarArchive) throws ArchiveException {
         super();
         this.wrappedWarArchive = wrappedWarArchive;
-        this.nameEntries = new HashMap<String, String>();
-        this.urlEntries = new ArrayList<URL>();
+        this.entries = new HashMap<String, URL>();
         init();
     }
 
@@ -103,7 +118,7 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
             // Handle special case of ejb-jar.xml
             if (WEB_INF_EJBJAR_XML.equals(wrappedEntry)) {
                 // add it on our own entry
-                addEntry(META_INF_EJBJAR_XML, wrappedEntry);
+                addEntry(META_INF_EJBJAR_XML, this.wrappedWarArchive.getResource(wrappedEntry));
             }
 
             // Filter WEB-INF/ resources
@@ -111,12 +126,33 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
 
                 // remove WEB-INF/classes
                 if (wrappedEntry.startsWith(WEB_INF_CLASSES)) {
-                    addEntry(wrappedEntry.substring(WEB_INF_CLASSES.length() + 1), wrappedEntry);
+                    addEntry(wrappedEntry.substring(WEB_INF_CLASSES.length() + 1), this.wrappedWarArchive
+                            .getResource(wrappedEntry));
+                }
+
+                // WEB-INF/lib
+                if (wrappedEntry.startsWith(WEB_INF_LIB) && wrappedEntry.endsWith(JAR_SUFFIX)) {
+                    // Get all entries of this jar
+                    URL url = this.wrappedWarArchive.getResource(wrappedEntry);
+                    // Now, scan all entries (if available)
+                    if ("file".equals(url.getProtocol())) {
+                        File lib = URLUtils.urlToFile(url);
+                        IArchive libArchive = ArchiveManager.getInstance().getArchive(lib);
+                        Iterator<String> libIterator = libArchive.getEntries();
+                        while (libIterator.hasNext()) {
+                            String libEntry = libIterator.next();
+                            if (libEntry.endsWith(CLASS_SUFFIX)) {
+                                addEntry(libEntry, libArchive.getResource(libEntry));
+                            }
+                        }
+
+                    }
+
                 }
             }
         }
-
     }
+
 
     /**
      * Add the given resource name on this archive which is acting as the delegating entry.
@@ -124,12 +160,9 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
      * @param wrappedEntry the entry to wrap
      * @throws ArchiveException if entry can't be added
      */
-    protected void addEntry(final String name, final String wrappedEntry) throws ArchiveException {
+    protected void addEntry(final String name, final URL wrappedEntry) throws ArchiveException {
         // Add the resource name
-        this.nameEntries.put(name, wrappedEntry);
-
-        // Add URL entry
-        this.urlEntries.add(this.wrappedWarArchive.getResource(wrappedEntry));
+        this.entries.put(name, wrappedEntry);
     }
 
     /**
@@ -147,7 +180,7 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
      */
     public Iterator<String> getEntries() throws ArchiveException {
         // Return our own filtered entries
-        return this.nameEntries.keySet().iterator();
+        return this.entries.keySet().iterator();
     }
 
     /**
@@ -166,12 +199,7 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
      * @throws ArchiveException if method fails.
      */
     public URL getResource(final String resourceName) throws ArchiveException {
-        String wrappedEntry = this.nameEntries.get(resourceName);
-        if (wrappedEntry != null) {
-            return this.wrappedWarArchive.getResource(wrappedEntry);
-        }
-        // Not found
-        return null;
+        return this.entries.get(resourceName);
     }
 
     /**
@@ -179,7 +207,7 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
      * @throws ArchiveException if method fails.
      */
     public Iterator<URL> getResources() throws ArchiveException {
-        return this.urlEntries.iterator();
+        return this.entries.values().iterator();
     }
 
     /**
@@ -188,7 +216,12 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
      * @throws ArchiveException if method fails.
      */
     public Iterator<URL> getResources(final String resourceName) throws ArchiveException {
-        return this.wrappedWarArchive.getResources(this.nameEntries.get(resourceName));
+        List<URL> lst = new ArrayList<URL>();
+        URL url = this.entries.get(resourceName);
+        if (url != null) {
+            lst.add(url);
+        }
+        return lst.iterator();
     }
 
     /**
