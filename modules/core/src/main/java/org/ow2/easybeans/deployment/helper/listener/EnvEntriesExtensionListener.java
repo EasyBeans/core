@@ -26,6 +26,7 @@
 package org.ow2.easybeans.deployment.helper.listener;
 
 import javax.naming.Context;
+import javax.naming.LinkRef;
 import javax.naming.NamingException;
 
 import org.ow2.easybeans.event.naming.JavaContextNamingEvent;
@@ -154,14 +155,25 @@ public class EnvEntriesExtensionListener extends AbstractExtensionListener {
     private Object getEnvEntryValue(final IEnvEntry envEntry, final JavaContextNamingEvent event) {
         final String type = envEntry.getType();
         final String value = envEntry.getValue();
+        final String lookupName = envEntry.getLookupName();
+
+
 
         Object returnedValue = null;
 
+        // lookup-name
+        if (lookupName != null) {
+            return new LinkRef(lookupName);
+        }
+
+
         if (Boolean.class.getName().equals(type)) {
-            if ("true".equalsIgnoreCase(value)) {
-                returnedValue = Boolean.TRUE;
-            } else if ("false".equalsIgnoreCase(value)) {
-                returnedValue = Boolean.FALSE;
+            if (value != null) {
+                if ("true".equalsIgnoreCase(value)) {
+                    returnedValue = Boolean.TRUE;
+                } else {
+                    returnedValue = Boolean.FALSE;
+                }
             }
         } else if (String.class.getName().equals(type)) {
             returnedValue = value;
