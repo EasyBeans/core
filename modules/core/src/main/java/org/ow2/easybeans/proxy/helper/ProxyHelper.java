@@ -74,8 +74,10 @@ public final class ProxyHelper {
 
         // If factory is a stateful factory, add the stateful flag
         boolean isStateful = false;
+        Long beanId = null;
         if (factory instanceof StatefulSessionFactory) {
             isStateful = true;
+            beanId = ((StatefulSessionFactory) factory).getCurrentBeanIDThreadLocal().get();
         }
         Integer serverID = server.getID();
 
@@ -150,6 +152,9 @@ public final class ProxyHelper {
 
         // set the interface class
         handler.setInterfaceClass(interfaceClass);
+        if (beanId != null) {
+            handler.setBeanId(beanId);
+        }
 
         // return the proxy
         switch (proxyType) {

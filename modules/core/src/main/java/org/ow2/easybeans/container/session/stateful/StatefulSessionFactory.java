@@ -82,6 +82,11 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     private BasicClueManager<EasyBeansSFSB, Long> basicClueManager;
 
     /**
+     * Manages the current bean ID being invoked.
+     */
+    private InheritableThreadLocal<Long> currentBeanId = null;
+
+    /**
      * Builds a new factory with a given name and its container.
      * @param className name of this factory (name of class that is managed)
      * @param container the root component of this factory.
@@ -89,6 +94,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      */
     public StatefulSessionFactory(final String className, final EZBContainer container) throws FactoryException {
         super(className, container);
+
+        this.currentBeanId = new InheritableThreadLocal<Long>();
+
 
         // Use of the old pool ?
         if (Boolean.getBoolean(OLD_POOL)) {
@@ -193,7 +201,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
         OperationState oldState = getOperationState();
         getOperationStateThreadLocal().set(BUSINESS_METHOD);
 
-
+        // bean ID being invoked
+        Long oldBeanId = getCurrentBeanIDThreadLocal().get();
+        getCurrentBeanIDThreadLocal().set(id);
 
         // Dispatch the bean invocation begin event.
         String methodEventProviderId = getJ2EEManagedObjectId() + "/" + J2EEManagedObjectNamingHelper.getMethodSignature(m)
@@ -244,6 +254,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
                 getInvokedBusinessInterfaceNameThreadLocal().set(oldInvokedBusinessInterface);
                 getOperationStateThreadLocal().set(oldState);
+                getCurrentBeanIDThreadLocal().set(oldBeanId);
 
                 // send events only if not called remotely
                 if (enabledEvent) {
@@ -316,6 +327,12 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      */
     public void setClue(final EasyBeansSFSB easyBeansSFSB, final Long clue) {
         easyBeansSFSB.setEasyBeansStatefulID(clue);
+    }
 
+    /**
+     * @return the current beanID thread local.
+     */
+    public InheritableThreadLocal<Long> getCurrentBeanIDThreadLocal() {
+        return this.currentBeanId;
     }
 }

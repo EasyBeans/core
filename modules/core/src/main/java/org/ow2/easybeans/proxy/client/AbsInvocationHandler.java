@@ -109,6 +109,7 @@ public abstract class AbsInvocationHandler implements InvocationHandler, Seriali
 
     /**
      * Manages all methods of java.lang.Object class.
+     * @param proxy the proxy instance receiving the call
      * @param method the <code>Method</code> instance corresponding to the
      *        interface method invoked on the proxy instance. The declaring
      *        class of the <code>Method</code> object will be the interface
@@ -119,11 +120,20 @@ public abstract class AbsInvocationHandler implements InvocationHandler, Seriali
      *        passed in the method invocation on the proxy instance
      * @return the value of the called method.
      */
-    protected Object handleObjectMethods(final Method method, final Object[] args) {
+    protected Object handleObjectMethods(final Object proxy, final Method method, final Object[] args) {
         String methodName = method.getName();
 
         if (methodName.equals("equals")) {
-            return Boolean.valueOf(toString().equals(args[0].toString()));
+            if (args != null && args.length > 0) {
+                if (args[0] == null) {
+                    return Boolean.FALSE;
+                }
+                // Needs to compute toString() on both objects
+                String localValue = proxy.toString();
+                String otherValue = args[0].toString();
+                return Boolean.valueOf(localValue.equals(otherValue));
+            }
+            return Boolean.FALSE;
         } else if (methodName.equals("toString")) {
             return toString();
         } else if (methodName.equals("hashCode")) {
@@ -195,7 +205,7 @@ public abstract class AbsInvocationHandler implements InvocationHandler, Seriali
      * Sets the id of the bean.
      * @param beanId the new ID.
      */
-    protected void setBeanId(final Long beanId) {
+    public void setBeanId(final Long beanId) {
         this.beanId = beanId;
     }
 
@@ -323,7 +333,11 @@ public abstract class AbsInvocationHandler implements InvocationHandler, Seriali
         sb.append(this.containerId);
         if (this.useID) {
             sb.append("@");
-            sb.append(System.identityHashCode(this));
+            if (this.beanId != null) {
+                sb.append(this.beanId);
+            } else {
+                sb.append(System.identityHashCode(this));
+            }
         }
         return sb.toString();
     }

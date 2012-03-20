@@ -149,7 +149,7 @@ public class ClientRPCInvocationHandler extends AbsInvocationHandler {
         if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
             // for stateful bean, let the first call to toString go to the remote side in order to initialize the bean ID
             if (!isUsingID() || getBeanId() != null || !method.getName().equals("toString")) {
-                return handleObjectMethods(method, args);
+                return handleObjectMethods(proxy, method, args);
             }
         }
 
@@ -204,7 +204,7 @@ public class ClientRPCInvocationHandler extends AbsInvocationHandler {
         // so we return toString() computing
         if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
             if (getBeanId() != null && method.getName().equals("toString")) {
-                return handleObjectMethods(method, args);
+                return handleObjectMethods(proxy, method, args);
             }
         }
 
