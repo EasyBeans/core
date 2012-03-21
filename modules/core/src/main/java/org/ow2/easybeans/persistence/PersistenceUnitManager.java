@@ -177,4 +177,33 @@ public class PersistenceUnitManager implements EZBPersistenceUnitManager {
         return this.persistenceUnitInfos;
     }
 
+    /**
+     * Add a new property to the persistence unit
+     * @param name property name
+     * @param value property value
+     */
+    public void addProperty (String name, String value) {
+        this.addProperty(name, value, null);
+    }
+
+    /**
+     * Add a new property to the persistence unit
+     * @param name property name
+     * @param value property value
+     * @param persistenceUnitName specific persistenceUnitName. If null, add the property
+     *                            to all persistence units
+     */
+    public void addProperty (String name, String value, String persistenceUnitName) {
+        JPersistenceUnitInfo[] persistenceUnitInfos = this.getPersistenceUnitInfos();
+        for (JPersistenceUnitInfo persistenceUnitInfo : persistenceUnitInfos) {
+            if (persistenceUnitName == null) {
+                persistenceUnitInfo.getProperties().setProperty(name, value);
+            } else {
+                if (persistenceUnitInfo.getPersistenceUnitName().equals(persistenceUnitName)) {
+                    persistenceUnitInfo.getProperties().setProperty(name, value);
+                }
+            }
+        }
+    }
+
 }
