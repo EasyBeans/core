@@ -34,6 +34,7 @@ import org.ow2.easybeans.api.EZBContainerLifeCycleCallback;
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.api.injection.ResourceInjector;
 import org.ow2.easybeans.api.naming.EZBNamingStrategy;
+import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
 import org.ow2.easybeans.resolver.ContainerJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.util.archive.api.IArchive;
@@ -175,6 +176,9 @@ public class JContainerConfig implements EZBContainerConfig {
      * @return JNDI naming strategy in use.
      */
     public List<EZBNamingStrategy> getNamingStrategies() {
+        if (namingStrategies.isEmpty()){
+            namingStrategies.add(new JavaEE6NamingStrategy());
+        }
         return this.namingStrategies;
     }
 

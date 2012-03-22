@@ -62,4 +62,20 @@ public interface EZBPersistenceUnitManager {
      *        that will be merged into this one.
      */
     void merge(final EZBPersistenceUnitManager otherPersistenceUnitManager);
+
+    /**
+     * Add a new property to all persistence units
+     * @param name property name
+     * @param value property value
+     */
+    void addProperty (String name, String value);
+
+    /**
+     * Add a new property to the persistence unit
+     * @param name property name
+     * @param value property value
+     * @param persistenceUnitName specific persistenceUnitName. If null, add the property
+     *                            to all persistence units
+     */
+    void addProperty (String name, String value, String persistenceUnitName);
 }
