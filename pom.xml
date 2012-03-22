@@ -52,7 +52,7 @@
     <easybeans-utils.version>1.0.0</easybeans-utils.version>
 
     <!-- OSGi -->
-    <ow2-bundle.version>1.0.33-SNAPSHOT</ow2-bundle.version>
+    <ow2-bundle.version>1.0.33</ow2-bundle.version>
     <felix.dm.version>2.0.1</felix.dm.version>
     <felix.scr.version>1.6.0</felix.scr.version>
     <ipojo.version>1.4.0</ipojo.version>
