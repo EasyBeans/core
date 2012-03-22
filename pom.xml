@@ -45,7 +45,7 @@
     <ow2-spec.version>1.0.11</ow2-spec.version>
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>
-    <carol.version>3.0.9-SNAPSHOT</carol.version>
+    <carol.version>3.0.9</carol.version>
     <monolog.version>2.1.12</monolog.version>
     <slf4j.version>1.5.8</slf4j.version>
     <testng.version>6.3.1</testng.version>
