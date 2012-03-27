@@ -64,18 +64,20 @@ public interface EZBPersistenceUnitManager {
     void merge(final EZBPersistenceUnitManager otherPersistenceUnitManager);
 
     /**
-     * Add a new property to all persistence units
+     * Set a property in persistence unit. If property does not exists,
+     * add it.
      * @param name property name
      * @param value property value
      */
-    void addProperty (String name, String value);
+    void setProperty (String name, String value);
 
     /**
-     * Add a new property to the persistence unit
+     * Set a property in persistence unit. If property does not exists,
+     * add it.
      * @param name property name
      * @param value property value
-     * @param persistenceUnitName specific persistenceUnitName. If null, add the property
-     *                            to all persistence units
+     * @param persistenceUnitName specific persistenceUnitName. If null, set the property
+     *                            in all persistence units
      */
-    void addProperty (String name, String value, String persistenceUnitName);
+    void setProperty (String name, String value, String persistenceUnitName);
 }
