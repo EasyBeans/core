@@ -29,6 +29,7 @@ package org.ow2.easybeans.persistence.api;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
+import java.util.Map;
 
 /**
  * Allows to get persistence units and allow to return EntityManager or
@@ -80,4 +81,11 @@ public interface EZBPersistenceUnitManager {
      *                            in all persistence units
      */
     void setProperty (String name, String value, String persistenceUnitName);
+
+    /**
+     * Gets property values in each persistence unit info
+     * @param name property name
+     * @return property values in each persistence unit info
+     */
+    Map<String, String> getProperty (String name);
 }

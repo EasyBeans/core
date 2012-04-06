@@ -208,4 +208,20 @@ public class PersistenceUnitManager implements EZBPersistenceUnitManager {
         }
     }
 
+    /**
+     * Gets property values in each persistence unit info
+     * @param name property name
+     * @return property values in each persistence unit info
+     */
+    public Map<String, String> getProperty (String name) {
+        Map<String, String> properties = new HashMap<String, String>();
+        JPersistenceUnitInfo[] persistenceUnitInfos = this.getPersistenceUnitInfos();
+        for (JPersistenceUnitInfo persistenceUnitInfo : persistenceUnitInfos) {
+            if (persistenceUnitInfo.getProperties().getProperty(name) != null){
+                properties.put(persistenceUnitInfo.getPersistenceUnitName(), persistenceUnitInfo.getProperties().getProperty(name));
+            }
+        }
+        return properties;
+    }
+
 }
