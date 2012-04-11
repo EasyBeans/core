@@ -58,7 +58,7 @@
     <ipojo.version>1.4.0</ipojo.version>
 
     <!-- Test properties -->
-    <easybeans-tests-applications.version>2.0.0</easybeans-tests-applications.version>
+    <easybeans-tests-applications.version>2.0.1-SNAPSHOT</easybeans-tests-applications.version>
     <junit4osgi.version>1.0.0</junit4osgi.version>
     <osgi.felix.framework.version>4.0.2</osgi.felix.framework.version> 
   </properties>
