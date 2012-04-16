@@ -47,7 +47,9 @@ import javax.ejb.EJBContext;
 import javax.ejb.EJBException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
+import javax.ejb.ScheduleExpression;
 import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.ejb.TransactionManagementType;
 import javax.naming.InitialContext;
@@ -578,6 +580,143 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          */
         public Collection<Timer> getTimers() throws IllegalStateException, EJBException {
             return Collections.emptyList();
+        }
+
+
+        /**
+         * Create a single-action timer that expires after a specified duration.
+         * @param duration the number of milliseconds that must elapse before
+         *        the timer expires.
+         * @param timerConfig timer configuration.
+         * @return the newly created Timer.
+         * @throws IllegalArgumentException If duration is negative
+         * @throws IllegalStateException If this method is invoked while the
+         *         instance is in a state that does not allow access to this
+         *         method.
+         * @throws EJBException If this method fails due to a system-level
+         *         failure.
+         * @since EJB 3.1 version.
+         */
+        public Timer createSingleActionTimer(final long duration, final TimerConfig timerConfig)
+                throws IllegalArgumentException, IllegalStateException, EJBException {
+            throw new IllegalStateException("No timer component was found in the EasyBeans components");
+        }
+
+        /**
+         * Create a single-action timer that expires at a given point in time.
+         * @param expiration the point in time at which the timer must expire.
+         * @param timerConfig timer configuration.
+         * @return the newly created Timer.
+         * @throws IllegalArgumentException If expiration is null or
+         *         expiration.getTime() is negative.
+         * @throws IllegalStateException If this method is invoked while the
+         *         instance is in a state that does not allow access to this
+         *         method.
+         * @throws EJBException If this method could not complete due to a
+         *         system-level failure.
+         * @since EJB 3.1 version.
+         */
+        public Timer createSingleActionTimer(final Date expiration, final TimerConfig timerConfig)
+                throws IllegalArgumentException, IllegalStateException, EJBException {
+            throw new IllegalStateException("No timer component was found in the EasyBeans components");
+        }
+
+        /**
+         * Create an interval timer whose first expiration occurs after a
+         * specified duration, and whose subsequent expirations occur after a
+         * specified interval.
+         * @param initialDuration The number of milliseconds that must elapse
+         *        before the first timer expiration notification.
+         * @param intervalDuration The number of milliseconds that must elapse
+         *        between timer expiration notifications. Expiration
+         *        notifications are scheduled relative to the time of the first
+         *        expiration. If expiration is delayed (e.g. due to the
+         *        interleaving of other method calls on the bean), two or more
+         *        expiration notifications may occur in close succession to
+         *        "catch up".
+         * @param timerConfig timer configuration
+         * @return the newly created Timer.
+         * @throws IllegalArgumentException If initialDuration is negative or
+         *         intervalDuration is negative.
+         * @throws IllegalStateException If this method is invoked while the
+         *         instance is in a state that does not allow access to this
+         *         method.
+         * @throws EJBException If this method could not complete due to a
+         *         system-level failure.
+         * @since EJB 3.1 version.
+         */
+        public Timer createIntervalTimer(final long initialDuration, final long intervalDuration, final TimerConfig timerConfig)
+                throws IllegalArgumentException, IllegalStateException, EJBException {
+            throw new IllegalStateException("No timer component was found in the EasyBeans components");
+        }
+
+        /**
+         * Create an interval timer whose first expiration occurs at a given
+         * point in time and whose subsequent expirations occur after a
+         * specified interval.
+         * @param initialExpiration the point in time at which the first timer
+         *        expiration must occur.
+         * @param intervalDuration the number of milliseconds that must elapse
+         *        between timer expiration notifications. Expiration
+         *        notifications are scheduled relative to the time of the first
+         *        expiration. If expiration is delayed (e.g. due to the
+         *        interleaving of other method calls on the bean), two or more
+         *        expiration notifications may occur in close succession to
+         *        "catch up".
+         * @param timerConfig timer configuration.
+         * @return the newly created Timer.
+         * @throws IllegalArgumentException If initialExpiration is null, if
+         *         initialExpiration.getTime() is negative, or if
+         *         intervalDuration is negative.
+         * @throws IllegalStateException If this method is invoked while the
+         *         instance is in a state that does not allow access to this
+         *         method.
+         * @throws EJBException If this method could not complete due to a
+         *         system-level failure.
+         * @since EJB 3.1 version.
+         */
+        public Timer createIntervalTimer(final Date initialExpiration, final long intervalDuration,
+                final TimerConfig timerConfig) throws IllegalArgumentException, IllegalStateException, EJBException {
+            throw new IllegalStateException("No timer component was found in the EasyBeans components");
+        }
+
+        /**
+         * Create a calendar-based timer based on the input schedule expression.
+         * @param schedule a schedule expression describing the timeouts for
+         *        this timer.
+         * @return the newly created Timer.
+         * @throws IllegalArgumentException If Schedule represents an invalid
+         *         schedule expression.
+         * @throws IllegalStateException If this method is invoked while the
+         *         instance is in a state that does not allow access to this
+         *         method.
+         * @throws EJBException If this method could not complete due to a
+         *         system-level failure.
+         * @since EJB 3.1 version.
+         */
+        public Timer createCalendarTimer(final ScheduleExpression schedule) throws IllegalArgumentException,
+                IllegalStateException, EJBException {
+            throw new IllegalStateException("No timer component was found in the EasyBeans components");
+        }
+
+        /**
+         * Create a calendar-based timer based on the input schedule expression.
+         * @param schedule a schedule expression describing the timeouts for
+         *        this timer.
+         * @param timerConfig timer configuration.
+         * @return the newly created Timer.
+         * @throws IllegalArgumentException If Schedule represents an invalid
+         *         schedule expression.
+         * @throws IllegalStateException If this method is invoked while the
+         *         instance is in a state that does not allow access to this
+         *         method.
+         * @throws EJBException If this method could not complete due to a
+         *         system-level failure.
+         * @since EJB 3.1 version.
+         */
+        public Timer createCalendarTimer(final ScheduleExpression schedule, final TimerConfig timerConfig)
+                throws IllegalArgumentException, IllegalStateException, EJBException {
+            throw new IllegalStateException("No timer component was found in the EasyBeans components");
         }
 
     }

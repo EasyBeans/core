@@ -29,9 +29,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.ow2.easybeans.api.bean.info.IAccessTimeoutInfo;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.asm.Type;
+import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbAccessTimeout;
 
 
 /**
@@ -65,6 +68,10 @@ public class MethodInfo implements IMethodInfo {
      */
     private String descriptor = null;
 
+    /**
+     * AccessTimeout for the given method ?
+     */
+    private IAccessTimeoutInfo accessTimeout = null;
 
     /**
      * Transacted ?
@@ -107,6 +114,26 @@ public class MethodInfo implements IMethodInfo {
 
         // Transacted ?
         this.transacted = methodMetadata.isTransacted();
+
+        EasyBeansEjbJarClassMetadata classMetadata = null;
+        if (methodMetadata.isInherited()) {
+            classMetadata = methodMetadata.getOriginalClassMetadata();
+        } else {
+            classMetadata = methodMetadata.getClassMetadata();
+        }
+
+        // access timeout ?
+        IJEjbAccessTimeout beanAccessTimeout = classMetadata.getJavaxEjbAccessTimeout();
+        IJEjbAccessTimeout methodAccessTimeout = methodMetadata.getJavaxEjbAccessTimeout();
+
+        // Use Bean Access Timeout if not specified on the method
+        if (methodAccessTimeout == null && beanAccessTimeout != null) {
+            methodAccessTimeout = beanAccessTimeout;
+        }
+        // If specified, add it
+        if (methodAccessTimeout != null) {
+            this.accessTimeout = new AccessTimeoutInfo(methodAccessTimeout.getValue(), methodAccessTimeout.getUnit());
+        }
 
 
     }
@@ -152,6 +179,13 @@ public class MethodInfo implements IMethodInfo {
      */
     public boolean isTransacted() {
         return this.transacted;
+    }
+
+    /**
+     * @return AccessTimeout
+     */
+    public IAccessTimeoutInfo getAccessTimeout() {
+        return this.accessTimeout;
     }
 
 }

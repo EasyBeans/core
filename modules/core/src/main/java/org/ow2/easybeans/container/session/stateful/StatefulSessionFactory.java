@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2006-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -29,7 +29,13 @@ import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import javax.ejb.ConcurrentAccessException;
+import javax.ejb.ConcurrentAccessTimeoutException;
 import javax.ejb.EJBException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
@@ -38,7 +44,9 @@ import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.OperationState;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
+import org.ow2.easybeans.api.bean.info.IAccessTimeoutInfo;
 import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
+import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocation;
 import org.ow2.easybeans.container.session.JPoolWrapperFactory;
 import org.ow2.easybeans.container.session.SessionFactory;
@@ -81,6 +89,12 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      */
     private BasicClueManager<EasyBeansSFSB, Long> basicClueManager;
 
+
+    /**
+     * Locks by beans.
+     */
+    private Map<Long, Lock> locks;
+
     /**
      * Manages the current bean ID being invoked.
      */
@@ -95,6 +109,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     public StatefulSessionFactory(final String className, final EZBContainer container) throws FactoryException {
         super(className, container);
 
+        this.locks = new HashMap<Long, Lock>();
         this.currentBeanId = new InheritableThreadLocal<Long>();
 
 
@@ -154,6 +169,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     public void remove(final EasyBeansSFSB instance) {
         super.remove(instance);
         instance.setEasyBeansRemoved(true);
+
+        // Remove lock for this instance
+        this.locks.remove(instance.getEasyBeansStatefulID());
     }
 
     /**
@@ -164,10 +182,69 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     @Override
     public EJBResponse localCall(final EJBLocalRequest localCallRequest) {
         Long id = getId(localCallRequest.getBeanId());
+        Long methodHash = localCallRequest.getMethodHash();
 
         // build EJB Response and set the id
         EJBResponse ejbResponse = new JEJBResponse();
         ejbResponse.setBeanId(id);
+
+        IMethodInfo methodInfo = getMethodInfoHashes().get(methodHash);
+        IAccessTimeoutInfo accessTimeout = null;
+        if (methodInfo != null) {
+            accessTimeout = methodInfo.getAccessTimeout();
+        }
+
+        // existing lock ?
+        Lock lock = null;
+        synchronized (this.locks) {
+            lock = this.locks.get(id);
+            if (lock == null) {
+                lock = new ReentrantLock();
+                this.locks.put(id, lock);
+            }
+        }
+
+        // getAccess is used if accessTimeout with value >=0 is used
+        boolean getAccess = true;
+        if (accessTimeout != null) {
+            // Infinite wait
+            if (accessTimeout.value() == -1) {
+                lock.lock();
+            } else if (accessTimeout.value() >= 0) {
+                try {
+                    logger.debug("Trying to lock bean with id ''{0}'' with value ''{1}'' and timeunit ''{2}''", id, Long
+                            .valueOf(accessTimeout.value()), accessTimeout.unit());
+                    getAccess = lock.tryLock(accessTimeout.value(), accessTimeout.unit());
+                } catch (InterruptedException e) {
+                    ejbResponse.setRPCException(new RPCException("Cannot get a lock for the stateful instance", e));
+                    return ejbResponse;
+                }
+            }
+        } else {
+            // Serialize concurrent calls, so wait until the lock is liberated
+            lock.lock();
+        }
+
+
+        if (!getAccess) {
+            // Timeout exception
+            if (accessTimeout != null) {
+                RPCException rpcException = null;
+                if (accessTimeout.value() == 0) {
+                    // Concurrent access is denied
+                    rpcException = new RPCException(new ConcurrentAccessException("Unable to get a concurrent access on bean '"
+                            + getClassName() + "' and method '" + getHashes().get(methodHash) + "'."));
+                } else {
+                    // Unable to get access during the elapsed time, so throw a
+                    // ConcurrentAccessTimeoutException
+                    rpcException = new RPCException(new ConcurrentAccessTimeoutException(
+                            "Unable to get a concurrent access with an accessTimeout of '" + accessTimeout + "' on bean '"
+                                    + getClassName() + "' and method '" + getHashes().get(methodHash) + "'."));
+                }
+                ejbResponse.setRPCException(rpcException);
+                return ejbResponse;
+            }
+        }
 
         EasyBeansSFSB bean = null;
         try {
@@ -180,7 +257,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
             return ejbResponse;
         }
 
-        Method m = getHashes().get(localCallRequest.getMethodHash());
+        Method m = getHashes().get(methodHash);
 
         if (m == null) {
             ejbResponse.setRPCException(new RPCException("Cannot find method called on the bean '" + getClassName() + "'.",
@@ -225,60 +302,60 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
             getEventDispatcher().dispatch(event);
         }
 
-        synchronized (bean) {
-            try {
-                value = m.invoke(bean, localCallRequest.getMethodArgs());
-            } catch (IllegalArgumentException e) {
-                ejbResponse.setRPCException(new RPCException(e));
-                if (enabledEvent) {
-                    getEventDispatcher().dispatch(new EventBeanInvocationError(methodEventProviderId, number, e));
-                }
-            } catch (IllegalAccessException e) {
-                ejbResponse.setRPCException(new RPCException(e));
-                if (enabledEvent) {
-                    getEventDispatcher().dispatch(new EventBeanInvocationError(methodEventProviderId, number, e));
-                }
-            } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
-                RPCException rpcException = new RPCException(cause);
-                // ApplicationException ?
-                IApplicationExceptionInfo applicationException = getBeanInfo().getApplicationException(cause);
-                if (applicationException != null) {
-                    rpcException.setApplicationException();
-                }
-                ejbResponse.setRPCException(rpcException);
-                if (enabledEvent) {
-                    getEventDispatcher().dispatch(new EventBeanInvocationError(methodEventProviderId, number, e));
-                }
-            } finally {
-                Thread.currentThread().setContextClassLoader(oldClassLoader);
-                getInvokedBusinessInterfaceNameThreadLocal().set(oldInvokedBusinessInterface);
-                getOperationStateThreadLocal().set(oldState);
-                getCurrentBeanIDThreadLocal().set(oldBeanId);
-
-                // send events only if not called remotely
-                if (enabledEvent) {
-                    getEventDispatcher().dispatch(new EventBeanInvocationEnd(methodEventProviderId, number, value));
-                    // Restore previous ID
-                    if (getCurrentInvocationID() != null) {
-                        getCurrentInvocationID().setAuditID(previousID);
-                    }
-                }
-
-                // push back into the pool
-                try {
-                    getPool().release(bean);
-                } catch (PoolException e) {
-                    ejbResponse.setRPCException(new RPCException("cannot release bean", e));
-                }
-
-                // If the bean has been removed (stateful), flag it as a removed
-                // bean, so the client won't call again any methods.
-                if (bean.getEasyBeansRemoved()) {
-                    ejbResponse.setRemoved(true);
-                }
-
+        try {
+            value = m.invoke(bean, localCallRequest.getMethodArgs());
+        } catch (IllegalArgumentException e) {
+            ejbResponse.setRPCException(new RPCException(e));
+            if (enabledEvent) {
+                getEventDispatcher().dispatch(new EventBeanInvocationError(methodEventProviderId, number, e));
             }
+        } catch (IllegalAccessException e) {
+            ejbResponse.setRPCException(new RPCException(e));
+            if (enabledEvent) {
+                getEventDispatcher().dispatch(new EventBeanInvocationError(methodEventProviderId, number, e));
+            }
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            RPCException rpcException = new RPCException(cause);
+            // ApplicationException ?
+            IApplicationExceptionInfo applicationException = getBeanInfo().getApplicationException(cause);
+            if (applicationException != null) {
+                rpcException.setApplicationException();
+            }
+            ejbResponse.setRPCException(rpcException);
+            if (enabledEvent) {
+                getEventDispatcher().dispatch(new EventBeanInvocationError(methodEventProviderId, number, e));
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldClassLoader);
+            getInvokedBusinessInterfaceNameThreadLocal().set(oldInvokedBusinessInterface);
+            getOperationStateThreadLocal().set(oldState);
+            getCurrentBeanIDThreadLocal().set(oldBeanId);
+
+            // send events only if not called remotely
+            if (enabledEvent) {
+                getEventDispatcher().dispatch(new EventBeanInvocationEnd(methodEventProviderId, number, value));
+                // Restore previous ID
+                if (getCurrentInvocationID() != null) {
+                    getCurrentInvocationID().setAuditID(previousID);
+                }
+            }
+
+            // push back into the pool
+            try {
+                getPool().release(bean);
+            } catch (PoolException e) {
+                ejbResponse.setRPCException(new RPCException("cannot release bean", e));
+            }
+
+            // If the bean has been removed (stateful), flag it as a removed
+            // bean, so the client won't call again any methods.
+            if (bean.getEasyBeansRemoved()) {
+                ejbResponse.setRemoved(true);
+            }
+
+            // Release the lock
+            lock.unlock();
         }
         ejbResponse.setValue(value);
         return ejbResponse;

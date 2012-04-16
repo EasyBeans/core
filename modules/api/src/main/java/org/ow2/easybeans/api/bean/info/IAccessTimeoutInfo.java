@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2010 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,53 +19,27 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: IMethodInfo.java 5643 2010-10-18 15:17:00Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
 package org.ow2.easybeans.api.bean.info;
 
-import java.util.List;
-
+import java.util.concurrent.TimeUnit;
 
 /**
- * Info of a method.
+ * Data about AccessTimeout for a given method.
  * @author Florent Benoit
  */
-public interface IMethodInfo {
+public interface IAccessTimeoutInfo {
 
     /**
-     * @return name of the method
+     * @return value
      */
-    String getName();
+    long value();
 
     /**
-     * @return parameters of the method
+     * @return timeunit
      */
-    List<String> getParameters();
-
-    /**
-     * @return the return type of the method
-     */
-    String getReturnType();
-
-    /**
-     * @return exception of this method.
-     */
-    List<String> getExceptions();
-
-    /**
-     * @return descriptor of the method
-     */
-    String getDescriptor();
-
-    /**
-     * @return true if this method is transacted
-     */
-    boolean isTransacted();
-
-    /**
-     * @return AccessTimeout
-     */
-    IAccessTimeoutInfo getAccessTimeout();
+    TimeUnit unit();
 }

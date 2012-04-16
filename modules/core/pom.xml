@@ -44,6 +44,11 @@
     </dependency>
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-ejb-3.1-spec</artifactId>
+      <version>${ow2-spec.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
       <artifactId>ow2-connector-1.5-spec</artifactId>
     </dependency>
     <dependency>

@@ -40,8 +40,8 @@
 
   <!-- Define properties -->
   <properties>
-    <ow2-util.version>1.0.35</ow2-util.version>
-    <ow2-util-ant-tasks.version>1.0.35</ow2-util-ant-tasks.version>
+    <ow2-util.version>1.0.36-SNAPSHOT</ow2-util.version>
+    <ow2-util-ant-tasks.version>1.0.36-SNAPSHOT</ow2-util-ant-tasks.version>
     <ow2-spec.version>1.0.11</ow2-spec.version>
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>

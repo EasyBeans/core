@@ -26,6 +26,7 @@
 package org.ow2.easybeans.container;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.OperationState;
 import org.ow2.easybeans.api.audit.EZBAuditComponent;
 import org.ow2.easybeans.api.bean.EasyBeansBean;
+import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.components.EZBComponentRegistry;
 import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocationBegin;
 import org.ow2.easybeans.api.injection.EasyBeansInjectionException;
@@ -147,6 +149,12 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
     private Map<Long, Method> hashes = null;
 
     /**
+     * Keep a direct reference to the methodInfo object so that we don't need to compute
+     * each time the method object to invoke.<br>
+     */
+    private Map<Long, IMethodInfo> methodInfoHashes = null;
+
+    /**
      * Id of this container.
      */
     private String id = null;
@@ -214,6 +222,7 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
         }
         setBeanClass(clazz);
         setHashes(Hash.hashClass(clazz));
+        this.methodInfoHashes = new HashMap<Long, IMethodInfo>();
 
         // Use the container event dispatcher.
         this.dispatcher = ((JContainer3) this.container).getEventDispatcher();
@@ -355,6 +364,14 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
     }
 
     /**
+     * Gets the computed method info hashes.
+     * @return computed hashes
+     */
+    protected Map<Long, IMethodInfo> getMethodInfoHashes() {
+        return this.methodInfoHashes;
+    }
+
+    /**
      * Sets the hashes for the current bean class.
      * @param hashes method hashes computed as RMI hashes
      */
@@ -474,6 +491,13 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
         if (auditComponent != null) {
             auditComponent.registerJ2EEManagedObject(this);
             this.currentInvocationID = auditComponent.getCurrentInvocationID();
+        }
+
+        // Init Method Info hashes
+        List<IMethodInfo> methodInfos = getBeanInfo().getBusinessMethodsInfo();
+        for (IMethodInfo methodInfo : methodInfos) {
+            long hashTempMethod = Hash.hashMethod(methodInfo.getName(), methodInfo.getDescriptor());
+            this.methodInfoHashes.put(Long.valueOf(hashTempMethod), methodInfo);
         }
     }
 
