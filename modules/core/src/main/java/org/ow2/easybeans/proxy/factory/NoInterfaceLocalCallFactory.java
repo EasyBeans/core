@@ -111,6 +111,14 @@ public class NoInterfaceLocalCallFactory extends LocalCallFactory implements Obj
             EasyBeansNoInterfaceProxyBean proxyBean = clz.newInstance();
             proxyBean.setInvocationHandler(handler);
 
+
+            // Stateful case ? needs to invoke a method in order to
+            // initialize the ID as the ID needs to be present when the client
+            // performs the lookup.
+            if (useID) {
+                proxyBean.toString();
+            }
+
             return proxyBean;
         }
         throw new IllegalStateException("Can only build object with a reference");

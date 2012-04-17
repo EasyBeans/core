@@ -91,7 +91,19 @@ public class LocalCallFactory implements ObjectFactory {
             // set the interface class
             handler.setInterfaceClass(clz);
 
-            return Proxy.newProxyInstance(classLoader, new Class[] {clz}, handler);
+            // build the proxy
+            Object proxy = Proxy.newProxyInstance(classLoader, new Class[] {clz}, handler);
+
+
+            // Stateful case ? needs to invoke a method in order to
+            // initialize the ID as the ID needs to be present when the client
+            // performs the lookup.
+            if (useID) {
+                proxy.toString();
+            }
+
+            // return the object built.
+            return proxy;
         }
         throw new IllegalStateException("Can only build object with a reference");
     }
