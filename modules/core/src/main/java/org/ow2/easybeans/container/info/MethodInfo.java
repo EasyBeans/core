@@ -30,11 +30,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.ow2.easybeans.api.bean.info.IAccessTimeoutInfo;
+import org.ow2.easybeans.api.bean.info.ILockTypeInfo;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbAccessTimeout;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.ILockType;
 
 
 /**
@@ -72,6 +74,11 @@ public class MethodInfo implements IMethodInfo {
      * AccessTimeout for the given method ?
      */
     private IAccessTimeoutInfo accessTimeout = null;
+
+    /**
+     * LockType.
+     */
+    private ILockTypeInfo lockType = null;
 
     /**
      * Transacted ?
@@ -121,6 +128,20 @@ public class MethodInfo implements IMethodInfo {
         } else {
             classMetadata = methodMetadata.getClassMetadata();
         }
+
+
+        // Lock ?
+        ILockType beanlock = classMetadata.getLockType();
+        ILockType methodLock = methodMetadata.getLockType();
+        // Use Bean Lock if not specified on the method
+        if (methodLock == null && beanlock != null) {
+            methodLock = beanlock;
+        }
+        // If specified, add it
+        if (methodLock != null) {
+            this.lockType = ILockTypeInfo.valueOf(methodLock.toString().toUpperCase());
+        }
+
 
         // access timeout ?
         IJEjbAccessTimeout beanAccessTimeout = classMetadata.getJavaxEjbAccessTimeout();
@@ -186,6 +207,13 @@ public class MethodInfo implements IMethodInfo {
      */
     public IAccessTimeoutInfo getAccessTimeout() {
         return this.accessTimeout;
+    }
+
+    /**
+     * @return locking strategy
+     */
+    public ILockTypeInfo getLockType() {
+        return this.lockType;
     }
 
 }
