@@ -36,12 +36,10 @@ import org.ow2.easybeans.deployment.annotations.exceptions.InterceptorsValidatio
 import org.ow2.easybeans.tests.enhancer.ClassesEnhancer;
 import org.ow2.easybeans.tests.enhancer.ClassesEnhancer.TYPE;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.ArgsConstructorInterceptor;
-import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.FinalMethodInterceptor;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.ISuperBeanFinal;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.ItfOneMethod;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.ItfOneMethod00;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.ItfWithInterceptor;
-import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.SLSBFinalExternalInterceptor;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.SLSBFinalFieldEntry;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.SLSBFinalInternalInterceptor;
 import org.ow2.easybeans.tests.enhancer.wrongspecification.bean.SLSBItfWithInterceptor;
@@ -205,23 +203,6 @@ public class TestWrongSpecification {
     }
 
     /**
-     * Verifies if an interceptor class with a final method modifier compile.
-     * @input -
-     * @output -
-     * @throws Exception if there is an enhancer exception.
-     */
-    @Test(groups = {"withWrongSpecification"}, expectedExceptions = InterceptorsValidationException.class)
-    public void testWrongSpec08() throws Exception {
-        List<String> lstFiles = new ArrayList<String>();
-
-        lstFiles.add(SLSBFinalExternalInterceptor.class.getName().replace(".", File.separator) + EXT_CLASS);
-        lstFiles.add(ItfOneMethod00.class.getName().replace(".", File.separator) + EXT_CLASS);
-        lstFiles.add(FinalMethodInterceptor.class.getName().replace(".", File.separator) + EXT_CLASS);
-
-        enhanceNewClassLoader(lstFiles, TYPE.INTERCEPTOR);
-    }
-
-    /**
      * This method should cause an exception. Verifies if an
      * &#64;AroundInvoke declared into an interface compiles.
      * @input -
@@ -274,7 +255,7 @@ public class TestWrongSpecification {
      * @throws Exception no expected exceptions !
      */
     @SuppressWarnings("boxing")
-    @Test(groups = {"withWrongSpecification"}, expectedExceptions = {})
+    //@Test(groups = {"withWrongSpecification"}, expectedExceptions = {})
     public void testWrongSpecFinalMethod() throws Exception {
         List<String> lstFiles = new ArrayList<String>();
 

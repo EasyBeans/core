@@ -169,11 +169,11 @@ public final class InheritanceMethodResolver {
                     clonedMethodAnnotationMetadata.setInherited(true, superClassMetadata);
 
                     // Final method ? ignore it
-                    if ((method.getAccess() & Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL) {
+                    /*if ((method.getAccess() & Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL) {
                         logger.warn("Ignoring final method ''{0}'' from the class ''{1}''", method.getName(),
                                 beanclassAnnotationMetadata.getClassName());
                         clonedMethodAnnotationMetadata.setIgnored(true);
-                    }
+                    }*/
 
                     // add only if overrided
                     if (beanMethod == null) {
