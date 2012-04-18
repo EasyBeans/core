@@ -26,6 +26,7 @@
 package org.ow2.easybeans.enhancer.interceptors;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
@@ -33,6 +34,7 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadat
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
+import org.ow2.util.scan.api.metadata.structures.JMethod;
 
 /**
  * This Helper class allow to build a list of interceptors that will be used for
@@ -163,5 +165,18 @@ public class MethodInterceptorsBuilder {
                 this.allInterceptors.addAll(userInterceptorslist);
             }
         }
+
+
+        // Check that we're not intercepting ourself as interceptor method could be a business method as well
+        JMethod interceptedMethod = this.methodAnnotationMetadata.getJMethod();
+        String interceptedClassName = this.methodAnnotationMetadata.getClassMetadata().getClassName();
+        Iterator<IJClassInterceptor> itInterceptor = this.allInterceptors.iterator();
+        while (itInterceptor.hasNext()) {
+            IJClassInterceptor interceptor = itInterceptor.next();
+            if (interceptedClassName.equals(interceptor.getClassName()) && interceptedMethod.equals(interceptor.getJMethod())) {
+                itInterceptor.remove();
+            }
+        }
+
     }
 }
