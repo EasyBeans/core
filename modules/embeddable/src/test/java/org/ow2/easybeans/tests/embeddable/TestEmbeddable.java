@@ -117,6 +117,30 @@ public class TestEmbeddable {
     }
 
     /**
+     * Test to call beans that are exposing lifecycle/interceptor methods.
+     * @throws Exception if it fails
+     */
+    @Test
+    public void testLifeCycleMethods() throws Exception {
+        LifeCycleAsBusinessMethodsBean bean = (LifeCycleAsBusinessMethodsBean) this.context
+                .lookup("java:global/test-classes/LifeCycleAsBusinessMethodsBean");
+
+        // Test simple method (interceptor should be applied)
+        Assert.assertEquals(bean.dummyMethod(1), 2);
+
+        // Call interceptor method
+        bean.myInterceptor(null);
+
+        // Call postconstruct method
+        bean.myPostConstruct();
+
+        // Call preDestory method
+        bean.myPreDestroy();
+
+    }
+
+
+    /**
      * Stop the container after all the tests.
      */
     @AfterSuite
