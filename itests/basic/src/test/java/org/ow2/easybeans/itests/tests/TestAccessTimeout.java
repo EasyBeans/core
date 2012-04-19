@@ -37,7 +37,7 @@ import javax.ejb.ConcurrentAccessException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.ow2.easybeans.application.accesstimeout.IStatefulAccessTimeout;
+import org.ow2.easybeans.application.accesstimeout.IAccessTimeout;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,25 +45,51 @@ import org.testng.annotations.Test;
 /**
  * @author Florent Benoit
  */
-public class TestStatefulAccessTimeout {
+public class TestAccessTimeout {
 
     /**
-     * Test Bean.
+     * Stateful test Bean.
      */
-    private IStatefulAccessTimeout annotationStatefulBean = null;
+    private IAccessTimeout annotationStatefulBean = null;
+
+    /**
+     * Singleton test Bean.
+     */
+    private IAccessTimeout annotationSingletonBean = null;
 
     @BeforeClass
-    public void getBean() throws NamingException {
-        this.annotationStatefulBean = (IStatefulAccessTimeout) new InitialContext().lookup("AnnotationStatefulAccessTimeout");
+    public void getBeans() throws NamingException {
+        this.annotationStatefulBean = (IAccessTimeout) new InitialContext().lookup("AnnotationStatefulAccessTimeout");
+        this.annotationSingletonBean = (IAccessTimeout) new InitialContext().lookup("AnnotationSingletonAccessTimeout");
     }
 
     @Test
-    public void testNoConcurrentAccessTimeout() {
+    public void testNoConcurrentStatefulAccessTimeout() {
+        testNoConcurrentAccessTimeout(this.annotationStatefulBean);
+    }
+
+    @Test(dependsOnMethods="testNoConcurrentStatefulAccessTimeout")
+    public void testStatefulDefaultTimeout() {
+        testDefaultTimeout(this.annotationStatefulBean);
+    }
+
+    @Test
+    public void testNoConcurrentSingletonAccessTimeout() {
+        testNoConcurrentAccessTimeout(this.annotationSingletonBean);
+    }
+
+    @Test(dependsOnMethods="testNoConcurrentSingletonAccessTimeout")
+    public void testSingletonDefaultTimeout() {
+        testDefaultTimeout(this.annotationSingletonBean);
+    }
+
+    public void testNoConcurrentAccessTimeout(final IAccessTimeout bean) {
+
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         List<Future<String>> lst = new ArrayList<Future<String>>();
         try {
-            NoTimeoutBeanCallable call1 = new NoTimeoutBeanCallable(this.annotationStatefulBean, "Florent");
-            NoTimeoutBeanCallable call2 = new NoTimeoutBeanCallable(this.annotationStatefulBean, "Benoit");
+            NoTimeoutBeanCallable call1 = new NoTimeoutBeanCallable(bean, "Florent");
+            NoTimeoutBeanCallable call2 = new NoTimeoutBeanCallable(bean, "Benoit");
             lst.add(executorService.submit(call1));
             lst.add(executorService.submit(call2));
             while (executorService.isTerminated()) {
@@ -100,13 +126,15 @@ public class TestStatefulAccessTimeout {
 
     }
 
-    @Test(dependsOnMethods="testNoConcurrentAccessTimeout")
-    public void testDefaultTimeout() {
+
+
+
+    public void testDefaultTimeout(final IAccessTimeout bean) {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         List<Future<String>> lst = new ArrayList<Future<String>>();
         try {
-            DefaultTimeoutBeanCallable call1 = new DefaultTimeoutBeanCallable(this.annotationStatefulBean, "Florent");
-            DefaultTimeoutBeanCallable call2 = new DefaultTimeoutBeanCallable(this.annotationStatefulBean, "Benoit");
+            DefaultTimeoutBeanCallable call1 = new DefaultTimeoutBeanCallable(bean, "Florent");
+            DefaultTimeoutBeanCallable call2 = new DefaultTimeoutBeanCallable(bean, "Benoit");
             lst.add(executorService.submit(call1));
             lst.add(executorService.submit(call2));
             while (executorService.isTerminated()) {
@@ -142,11 +170,11 @@ public class TestStatefulAccessTimeout {
 
     public class DefaultTimeoutBeanCallable implements Callable<String> {
 
-        private IStatefulAccessTimeout bean = null;
+        private IAccessTimeout bean = null;
 
         private String value = null;
 
-        public DefaultTimeoutBeanCallable(final IStatefulAccessTimeout bean, final String value) {
+        public DefaultTimeoutBeanCallable(final IAccessTimeout bean, final String value) {
             this.bean = bean;
             this.value = value;
         }
@@ -159,11 +187,11 @@ public class TestStatefulAccessTimeout {
 
     public class NoTimeoutBeanCallable implements Callable<String> {
 
-        private IStatefulAccessTimeout bean = null;
+        private IAccessTimeout bean = null;
 
         private String value = null;
 
-        public NoTimeoutBeanCallable(final IStatefulAccessTimeout bean, final String value) {
+        public NoTimeoutBeanCallable(final IAccessTimeout bean, final String value) {
             this.bean = bean;
             this.value = value;
         }
