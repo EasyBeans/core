@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.ConcurrentAccessException;
 import javax.naming.InitialContext;
@@ -64,44 +65,37 @@ public class TestAccessTimeout {
     }
 
     @Test
-    public void testNoConcurrentStatefulAccessTimeout() {
+    public void testNoConcurrentStatefulAccessTimeout() throws InterruptedException {
         testNoConcurrentAccessTimeout(this.annotationStatefulBean);
     }
 
     @Test(dependsOnMethods="testNoConcurrentStatefulAccessTimeout")
-    public void testStatefulDefaultTimeout() {
+    public void testStatefulDefaultTimeout() throws InterruptedException {
         testDefaultTimeout(this.annotationStatefulBean);
     }
 
     @Test
-    public void testNoConcurrentSingletonAccessTimeout() {
+    public void testNoConcurrentSingletonAccessTimeout() throws InterruptedException {
         testNoConcurrentAccessTimeout(this.annotationSingletonBean);
     }
 
     @Test(dependsOnMethods="testNoConcurrentSingletonAccessTimeout")
-    public void testSingletonDefaultTimeout() {
+    public void testSingletonDefaultTimeout() throws InterruptedException {
         testDefaultTimeout(this.annotationSingletonBean);
     }
 
-    public void testNoConcurrentAccessTimeout(final IAccessTimeout bean) {
+    public void testNoConcurrentAccessTimeout(final IAccessTimeout bean) throws InterruptedException {
 
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
         List<Future<String>> lst = new ArrayList<Future<String>>();
-        try {
-            NoTimeoutBeanCallable call1 = new NoTimeoutBeanCallable(bean, "Florent");
-            NoTimeoutBeanCallable call2 = new NoTimeoutBeanCallable(bean, "Benoit");
-            lst.add(executorService.submit(call1));
-            lst.add(executorService.submit(call2));
-            while (executorService.isTerminated()) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        } finally {
-            executorService.shutdown();
-        }
+        NoTimeoutBeanCallable call1 = new NoTimeoutBeanCallable(bean, "Florent");
+        NoTimeoutBeanCallable call2 = new NoTimeoutBeanCallable(bean, "Benoit");
+        lst.add(executorService.submit(call1));
+        lst.add(executorService.submit(call2));
+
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+
 
         try {
             Assert.assertEquals(lst.get(0).get(), "Florent");
@@ -129,24 +123,17 @@ public class TestAccessTimeout {
 
 
 
-    public void testDefaultTimeout(final IAccessTimeout bean) {
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+    public void testDefaultTimeout(final IAccessTimeout bean) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
         List<Future<String>> lst = new ArrayList<Future<String>>();
-        try {
-            DefaultTimeoutBeanCallable call1 = new DefaultTimeoutBeanCallable(bean, "Florent");
-            DefaultTimeoutBeanCallable call2 = new DefaultTimeoutBeanCallable(bean, "Benoit");
-            lst.add(executorService.submit(call1));
-            lst.add(executorService.submit(call2));
-            while (executorService.isTerminated()) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        } finally {
-            executorService.shutdown();
-        }
+
+        DefaultTimeoutBeanCallable call1 = new DefaultTimeoutBeanCallable(bean, "Florent");
+        DefaultTimeoutBeanCallable call2 = new DefaultTimeoutBeanCallable(bean, "Benoit");
+        lst.add(executorService.submit(call1));
+        lst.add(executorService.submit(call2));
+
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
 
         try {
             Assert.assertEquals(lst.get(0).get(), "Florent");
