@@ -85,7 +85,7 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
     /**
      * Singleton Bean Instance.
      */
-    private EasyBeansSingletonSB singletonBean = null;
+    private volatile EasyBeansSingletonSB singletonBean = null;
 
 
     /**
@@ -330,7 +330,8 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
     public void start() throws FactoryException {
         super.start();
 
-        if (getSessionBeanInfo().isStartup()) {
+        // Not yet instantiated ?
+        if (getSessionBeanInfo().isStartup() && this.singletonBean == null) {
             try {
                 this.singletonBean = getBean(null);
             } catch (RuntimeException e) {
