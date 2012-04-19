@@ -41,7 +41,6 @@ import javax.naming.NamingException;
 import org.ow2.easybeans.application.accesstimeout.IAccessTimeout;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  * @author Florent Benoit
@@ -49,44 +48,58 @@ import org.testng.annotations.Test;
 public class TestAccessTimeout {
 
     /**
+     * MAX wait time for the executor.
+     */
+    private static final long MAX_WAIT_TIME = 30;
+
+    /**
      * Stateful test Bean.
      */
-    private IAccessTimeout annotationStatefulBean = null;
+    private IAccessTimeout annotationStatefulBean1 = null;
+
+    /**
+     * Stateful test Bean.
+     */
+    private IAccessTimeout annotationStatefulBean2 = null;
 
     /**
      * Singleton test Bean.
      */
-    private IAccessTimeout annotationSingletonBean = null;
+    private IAccessTimeout annotationSingletonBean1 = null;
+
+    /**
+     * Singleton test Bean.
+     */
+    private IAccessTimeout annotationSingletonBean2 = null;
 
     @BeforeClass
     public void getBeans() throws NamingException {
-        this.annotationStatefulBean = (IAccessTimeout) new InitialContext().lookup("AnnotationStatefulAccessTimeout");
-        this.annotationSingletonBean = (IAccessTimeout) new InitialContext().lookup("AnnotationSingletonAccessTimeout");
+        this.annotationStatefulBean1 = (IAccessTimeout) new InitialContext().lookup("AnnotationStatefulAccessTimeout");
+        this.annotationStatefulBean2 = (IAccessTimeout) new InitialContext().lookup("AnnotationStatefulAccessTimeout");
+        this.annotationSingletonBean1 = (IAccessTimeout) new InitialContext().lookup("AnnotationSingletonAccessTimeout");
+        this.annotationSingletonBean2 = (IAccessTimeout) new InitialContext().lookup("AnnotationSingletonAccessTimeout");
     }
 
-    @Test
+
     public void testNoConcurrentStatefulAccessTimeout() throws InterruptedException {
-        testNoConcurrentAccessTimeout(this.annotationStatefulBean);
+        testNoConcurrentAccessTimeout(this.annotationStatefulBean1);
     }
 
-    @Test(dependsOnMethods="testNoConcurrentStatefulAccessTimeout")
     public void testStatefulDefaultTimeout() throws InterruptedException {
-        testDefaultTimeout(this.annotationStatefulBean);
+        testDefaultTimeout(this.annotationStatefulBean2);
     }
 
-    @Test
     public void testNoConcurrentSingletonAccessTimeout() throws InterruptedException {
-        testNoConcurrentAccessTimeout(this.annotationSingletonBean);
+        testNoConcurrentAccessTimeout(this.annotationSingletonBean1);
     }
 
-    @Test(dependsOnMethods="testNoConcurrentSingletonAccessTimeout")
     public void testSingletonDefaultTimeout() throws InterruptedException {
-        testDefaultTimeout(this.annotationSingletonBean);
+        testDefaultTimeout(this.annotationSingletonBean2);
     }
 
     public void testNoConcurrentAccessTimeout(final IAccessTimeout bean) throws InterruptedException {
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future<String>> lst = new ArrayList<Future<String>>();
         NoTimeoutBeanCallable call1 = new NoTimeoutBeanCallable(bean, "Florent");
         NoTimeoutBeanCallable call2 = new NoTimeoutBeanCallable(bean, "Benoit");
@@ -94,7 +107,7 @@ public class TestAccessTimeout {
         lst.add(executorService.submit(call2));
 
         executorService.shutdown();
-        executorService.awaitTermination(60, TimeUnit.SECONDS);
+        executorService.awaitTermination(MAX_WAIT_TIME, TimeUnit.SECONDS);
 
 
         try {
@@ -121,10 +134,13 @@ public class TestAccessTimeout {
     }
 
 
-
-
+    /**
+     * Try to invoke the given bean and check that there is a timeout when there are concurrent threads.
+     * @param bean the bean instance to check
+     * @throws InterruptedException if executor service fails
+     */
     public void testDefaultTimeout(final IAccessTimeout bean) throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future<String>> lst = new ArrayList<Future<String>>();
 
         DefaultTimeoutBeanCallable call1 = new DefaultTimeoutBeanCallable(bean, "Florent");
@@ -133,7 +149,7 @@ public class TestAccessTimeout {
         lst.add(executorService.submit(call2));
 
         executorService.shutdown();
-        executorService.awaitTermination(60, TimeUnit.SECONDS);
+        executorService.awaitTermination(MAX_WAIT_TIME, TimeUnit.SECONDS);
 
         try {
             Assert.assertEquals(lst.get(0).get(), "Florent");
