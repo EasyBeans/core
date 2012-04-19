@@ -33,8 +33,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.ejb.ConcurrentAccessException;
-import javax.ejb.ConcurrentAccessTimeoutException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
 
@@ -50,6 +48,7 @@ import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocation;
 import org.ow2.easybeans.container.session.JPoolWrapperFactory;
 import org.ow2.easybeans.container.session.PoolWrapper;
 import org.ow2.easybeans.container.session.SessionFactory;
+import org.ow2.easybeans.container.session.stateful.ConcurrentBuilderException;
 import org.ow2.easybeans.event.bean.EventBeanInvocationEnd;
 import org.ow2.easybeans.event.bean.EventBeanInvocationError;
 import org.ow2.easybeans.naming.J2EEManagedObjectNamingHelper;
@@ -180,7 +179,8 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
                 lock.lock();
             } else if (accessTimeout.value() >= 0) {
                 try {
-                    LOGGER.debug("Trying to lock bean with value ''{0}'' and timeunit ''{1}''", Long.valueOf(accessTimeout.value()), accessTimeout.unit());
+                    LOGGER.debug("Trying to lock bean with value ''{0}'' and timeunit ''{1}''", Long.valueOf(accessTimeout
+                            .value()), accessTimeout.unit());
                     getAccess = lock.tryLock(accessTimeout.value(), accessTimeout.unit());
                 } catch (InterruptedException e) {
                     ejbResponse.setRPCException(new RPCException("Cannot get a lock for the stateful instance", e));
@@ -200,14 +200,16 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
                 RPCException rpcException = null;
                 if (accessTimeout.value() == 0) {
                     // Concurrent access is denied
-                    rpcException = new RPCException(new ConcurrentAccessException("Unable to get a concurrent access on bean '"
-                            + getClassName() + "' and method '" + getHashes().get(methodHash) + "'."));
+                    rpcException = new RPCException(ConcurrentBuilderException
+                            .buildConcurrentException("Unable to get a concurrent access on bean '" + getClassName()
+                                    + "' and method '" + getHashes().get(methodHash) + "'."));
                 } else {
                     // Unable to get access during the elapsed time, so throw a
                     // ConcurrentAccessTimeoutException
-                    rpcException = new RPCException(new ConcurrentAccessTimeoutException(
-                            "Unable to get a concurrent access with an accessTimeout of '" + accessTimeout + "' on bean '"
-                                    + getClassName() + "' and method '" + getHashes().get(methodHash) + "'."));
+                    rpcException = new RPCException(ConcurrentBuilderException
+                            .buildConcurrentTimeoutException("Unable to get a concurrent access with an accessTimeout of '"
+                                    + accessTimeout + "' on bean '" + getClassName() + "' and method '"
+                                    + getHashes().get(methodHash) + "'."));
                 }
                 ejbResponse.setRPCException(rpcException);
                 return ejbResponse;

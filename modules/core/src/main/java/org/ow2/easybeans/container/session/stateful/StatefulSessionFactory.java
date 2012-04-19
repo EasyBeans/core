@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.ejb.ConcurrentAccessException;
-import javax.ejb.ConcurrentAccessTimeoutException;
 import javax.ejb.EJBException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
@@ -236,12 +234,13 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                 RPCException rpcException = null;
                 if (accessTimeout.value() == 0) {
                     // Concurrent access is denied
-                    rpcException = new RPCException(new ConcurrentAccessException("Unable to get a concurrent access on bean '"
-                            + getClassName() + "' and method '" + getHashes().get(methodHash) + "'."));
+                    rpcException = new RPCException(ConcurrentBuilderException
+                            .buildConcurrentException("Unable to get a concurrent access on bean '" + getClassName()
+                                    + "' and method '" + getHashes().get(methodHash) + "'."));
                 } else {
                     // Unable to get access during the elapsed time, so throw a
                     // ConcurrentAccessTimeoutException
-                    rpcException = new RPCException(new ConcurrentAccessTimeoutException(
+                    rpcException = new RPCException(ConcurrentBuilderException.buildConcurrentTimeoutException(
                             "Unable to get a concurrent access with an accessTimeout of '" + accessTimeout + "' on bean '"
                                     + getClassName() + "' and method '" + getHashes().get(methodHash) + "'."));
                 }
