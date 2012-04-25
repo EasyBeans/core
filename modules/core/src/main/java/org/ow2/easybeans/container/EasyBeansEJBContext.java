@@ -304,10 +304,13 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
                     + " method as it is in BeanManagedTransaction");
         }
 
-        Object value = getContextData().get(CMTSupportsTransactionInterceptor.class.getName());
-        if (value != null && ((Boolean) value).booleanValue()) {
-            throw new IllegalStateException("This bean is not allowed to use getRollbackOnly() "
-                    + " method as it is in a SUPPORTS call");
+        Map<String, Object> contextData = getContextData();
+        if (contextData != null) {
+            Object value = contextData.get(CMTSupportsTransactionInterceptor.class.getName());
+            if (value != null && ((Boolean) value).booleanValue()) {
+                throw new IllegalStateException("This bean is not allowed to use getRollbackOnly() "
+                        + " method as it is in a SUPPORTS call");
+            }
         }
 
         // Check if there is a transaction, as it is mandatory
