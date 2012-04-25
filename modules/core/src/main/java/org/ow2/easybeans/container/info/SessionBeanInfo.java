@@ -25,6 +25,7 @@
 
 package org.ow2.easybeans.container.info;
 
+
 /**
  * This class contains information for a session bean.
  * It is used at the runtime.
@@ -33,24 +34,12 @@ package org.ow2.easybeans.container.info;
 public class SessionBeanInfo extends BeanInfo {
 
     /**
-     * Startup flag (for singleton).
+     * Default constructor.
      */
-    private boolean startup = false;
-
-    /**
-     * Singleton startup ?
-     * @return true if the singleton is a startup singleton
-     */
-    public boolean isStartup() {
-        return this.startup;
+    public SessionBeanInfo() {
+        super();
     }
 
-    /**
-     * Sets the startup mode for the singleton.
-     * @param startup true/false
-     */
-    public void setStartup(final boolean startup) {
-        this.startup = startup;
-    }
+
 
 }

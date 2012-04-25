@@ -162,4 +162,21 @@ public interface IBeanInfo {
      * @param info web services related runtime information.
      */
     void setWebServiceInfo(IWebServiceInfo info);
+
+    /**
+     * @return the list of dependencies of this bean.
+     */
+    List<String> getDependsOn();
+
+    /**
+     * Singleton startup ?
+     * @return true if the singleton is a startup singleton
+     */
+    boolean isStartup();
+
+    /**
+     * Sets the startup mode for the singleton.
+     * @param startup true/false
+     */
+    void setStartup(final boolean startup);
 }
