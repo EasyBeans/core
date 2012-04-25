@@ -136,12 +136,15 @@ import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.easybeans.security.permissions.PermissionManager;
 import org.ow2.easybeans.server.Embedded;
 import org.ow2.easybeans.util.ExtensorSupport;
+import org.ow2.easybeans.util.topological.NodeWrapper;
+import org.ow2.easybeans.util.topological.TopologicalSort;
 import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
 import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IApplicationException;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IDependsOn;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JActivationConfigProperty;
@@ -435,9 +438,8 @@ public class JContainer3 implements EZBContainer {
         // Register resolver
         getEmbedded().getJNDIResolver().addContainerResolver(this.configuration.getContainerJNDIResolver());
 
-        // Start factories
-        // TODO: apply an order for singletons
-        for (Factory<?, ?> factory : this.factories.values()) {
+        // Start ordered factories
+        for (Factory<?, ?> factory : getOrderedFactories()) {
             try {
                 factory.start();
             } catch (FactoryException e) {
@@ -473,6 +475,58 @@ public class JContainer3 implements EZBContainer {
 
 
     }
+
+
+    /**
+     * @return an order of factories based on DependsOn order.
+     */
+    protected List<Factory<?, ?>> getOrderedFactories() {
+
+        // First, for each factory, create a Node wrapper
+        Map<String, NodeWrapper<Factory<?, ?>>> nodeWrappers = new HashMap<String, NodeWrapper<Factory<?, ?>>>();
+
+        // Put for each bean name a wrapper for a factory
+        List<String> beanNames = new ArrayList<String>();
+        for (Factory<?, ?> factory : this.factories.values()) {
+            IBeanInfo beanInfo = factory.getBeanInfo();
+            String beanName = beanInfo.getName();
+            beanNames.add(beanName);
+            nodeWrappers.put(beanName, new NodeWrapper<Factory<?, ?>>(beanInfo.getName(), factory));
+        }
+
+        // Now, for each bean, try to add the depencies for a given wrapper
+        for (NodeWrapper<Factory<?, ?>> nodeWrapper : nodeWrappers.values()) {
+            for (String beanDependency : nodeWrapper.getWrapped().getBeanInfo().getDependsOn()) {
+                NodeWrapper<Factory<?, ?>> dependencyNode = nodeWrappers.get(beanDependency);
+                if (dependencyNode != null) {
+                    logger.info("Add dependency between bean ''{0}'' and bean ''{1}''", nodeWrapper.getName(), dependencyNode
+                            .getName());
+                    // Add dependency
+                    nodeWrapper.addDependency(dependencyNode);
+                    // As there is a dependency from one node to this node, flag the node as startup node
+                    dependencyNode.getWrapped().getBeanInfo().setStartup(true);
+                }
+            }
+        }
+
+        // Now, apply a sort
+        List<NodeWrapper<Factory<?, ?>>> sortedList = TopologicalSort.sort(nodeWrappers.values());
+
+        List<Factory<?, ?>> sortedFactories = new ArrayList<Factory<?, ?>>();
+        List<String> updatedNames = new ArrayList<String>();
+        for (NodeWrapper<Factory<?, ?>> nodeWrapper : sortedList) {
+            sortedFactories.add(nodeWrapper.getWrapped());
+            updatedNames.add(nodeWrapper.getName());
+        }
+
+        logger.info("List transformed from ''{0}'' to ''{1}''", beanNames, updatedNames);
+
+        return sortedFactories;
+
+
+    }
+
+
 
     /**
      * Run the enhancer on the container.
@@ -947,6 +1001,13 @@ public class JContainer3 implements EZBContainer {
         // Only for singleton
         if (sessionBean.isSingleton()) {
             sessionBeanInfo.setStartup(sessionBean.isStartup());
+
+            // DependsOn ?
+            IDependsOn dependsOn = sessionBean.getDependsOn();
+            if (dependsOn != null) {
+                List<String> beanDepencies = dependsOn.getBeans();
+                sessionBeanInfo.setDependsOn(beanDepencies);
+            }
         }
 
         sessionFactory.setSessionBeanInfo(sessionBeanInfo);
