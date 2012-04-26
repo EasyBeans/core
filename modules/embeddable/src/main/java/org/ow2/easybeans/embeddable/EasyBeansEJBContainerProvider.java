@@ -55,6 +55,15 @@ public class EasyBeansEJBContainerProvider implements EJBContainerProvider {
      */
     public EJBContainer createEJBContainer(final Map<?, ?> properties) throws EJBException {
 
+        // Check if there is a provider property
+        if (properties != null) {
+            Object o = properties.get(EJBContainer.PROVIDER);
+            // Only manage the EasyBeans class
+            if (!EasyBeansEJBContainer.class.getName().equals(o)) {
+                return null;
+            }
+        }
+
         // Create an Embedded version of EasyBeans
         Embedded embedded = new Embedded();
 
