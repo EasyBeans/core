@@ -30,7 +30,10 @@ import static org.ow2.easybeans.enhancer.injection.InjectionClassAdapter.JAVA_LA
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,8 @@ import org.ow2.easybeans.enhancer.bean.BeanClassAdapter;
 import org.ow2.easybeans.enhancer.bean.Migration21ClassAdapter;
 import org.ow2.easybeans.enhancer.injection.InjectionClassAdapter;
 import org.ow2.easybeans.enhancer.interceptors.InterceptorClassAdapter;
+import org.ow2.easybeans.util.topological.NodeWrapper;
+import org.ow2.easybeans.util.topological.TopologicalSort;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -80,6 +85,7 @@ public class Enhancer {
      */
     private Map<String, Object> map = null;
 
+
     /**
      * Creates an new enhancer.
      * @param writeLoader classloader where to define enhanced classes.
@@ -93,6 +99,10 @@ public class Enhancer {
         this.map = map;
         if (writeLoader instanceof EZBClassLoader) {
             this.readLoader = ((EZBClassLoader) writeLoader).duplicate();
+        } else if (this.writeLoader instanceof URLClassLoader) {
+            // URL ClassLoader ?
+            URL[] urls = ((URLClassLoader) this.writeLoader).getURLs();
+            this.readLoader = new URLClassLoader(urls, this.writeLoader.getParent());
         } else {
             // Unable to duplicate classloader
             this.readLoader = writeLoader;
@@ -128,6 +138,91 @@ public class Enhancer {
     }
 
 
+
+    /**
+     * Sort beans if there are dependencies between beans.
+     * @return an updated list of beans to use
+     */
+    protected List<String> getSortedListBeans() {
+
+        // Get current list
+        List<String> metadataBeanNames = this.ejbJarAnnotationMetadata.getBeanNames();
+
+        // List that will be returned
+        List<String> beanNames = new ArrayList<String>();
+
+        // map between a class and the bean name
+        Map<String, NodeWrapper<EasyBeansEjbJarClassMetadata>> nodes =
+            new HashMap<String, NodeWrapper<EasyBeansEjbJarClassMetadata>>();
+
+        boolean inheritanceBetweenBeans = false;
+        // Only perform this if we're not using an EasyBeans ClassLoader
+        if (!(this.writeLoader instanceof EZBClassLoader)) {
+
+            // First step : Add for each bean the classmetadata used.
+            for (String beanName : metadataBeanNames) {
+                // Now, search if a bean depends on another bean class.
+                for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
+                        .getClassesForBean(beanName)) {
+                    if (classAnnotationMetadata.isBean()) {
+                        // Check bean name is matching (can happen with super
+                        // class also being beans)
+                        if (!beanName.equals(classAnnotationMetadata.getJCommonBean().getName())) {
+                            continue;
+                        }
+
+                        NodeWrapper<EasyBeansEjbJarClassMetadata> node = new NodeWrapper<EasyBeansEjbJarClassMetadata>(
+                                beanName, classAnnotationMetadata);
+                        nodes.put(classAnnotationMetadata.getClassName(), node);
+                    }
+                }
+            }
+            // Next step : add dependencies between nodes
+            for (NodeWrapper<EasyBeansEjbJarClassMetadata> node : nodes.values()) {
+                EasyBeansEjbJarClassMetadata classMetadata = node.getWrapped();
+                // Analyze parent
+                String superName = classMetadata.getSuperName();
+                while (superName != null && !superName.equals("java/lang/Object")) {
+                    EasyBeansEjbJarClassMetadata scannMetadata = this.ejbJarAnnotationMetadata.getScannedClassMetadata(superName);
+                    if (scannMetadata == null) {
+                        superName = null;
+                    } else {
+
+                        // got something
+                        NodeWrapper<EasyBeansEjbJarClassMetadata> foundNode = nodes.get(scannMetadata.getClassName());
+                        if (foundNode != null) {
+                            // add dependency
+                            logger.debug("Add dependency from ''{0}'' to ''{1}''", node, foundNode);
+                            if (!node.getDependencies().contains(foundNode)) {
+                                node.addDependency(foundNode);
+                                inheritanceBetweenBeans = true;
+                            }
+                        }
+                        superName = scannMetadata.getSuperName();
+
+                    }
+                }
+            }
+        }
+        if (inheritanceBetweenBeans) {
+            beanNames = new ArrayList<String>();
+            List<NodeWrapper<EasyBeansEjbJarClassMetadata>> sortedNodes = TopologicalSort.sort(nodes.values());
+            for (NodeWrapper<EasyBeansEjbJarClassMetadata> node : sortedNodes) {
+                beanNames.add(node.getName());
+            }
+            logger.debug("Beans have been updated from ''{0}'' to ''{1}''", metadataBeanNames, beanNames);
+        } else {
+            // do not sort
+            beanNames = metadataBeanNames;
+        }
+
+
+        return beanNames;
+
+
+    }
+
+
     /**
      * Enhance all classes which match beans, etc.
      * @throws EnhancerException if enhancing fails
@@ -135,8 +230,7 @@ public class Enhancer {
     public void enhance() throws EnhancerException {
 
         // Get list of beans
-        List<String> beanNames = this.ejbJarAnnotationMetadata.getBeanNames();
-
+        List<String> beanNames = getSortedListBeans();
 
         // Search all EJB that needs to be defined
         List<String> ejbClassAndSuperClassMetadatas = new ArrayList<String>();
@@ -153,11 +247,14 @@ public class Enhancer {
         for (String beanName : beanNames) {
             for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
                     .getClassesForBean(beanName)) {
-                if (classAnnotationMetadata.isInterceptor() && !ejbClassAndSuperClassMetadatas.contains(classAnnotationMetadata.getClassName()) && !classAnnotationMetadata.wasModified()) {
+                if (classAnnotationMetadata.isInterceptor()
+                        && !ejbClassAndSuperClassMetadatas.contains(classAnnotationMetadata.getClassName())
+                        && !classAnnotationMetadata.wasModified()) {
                     logger.debug("ClassAdapter on interceptor : {0}", classAnnotationMetadata.getClassName());
 
                     // Try to set as modified the normal metadata
-                    EasyBeansEjbJarClassMetadata classicMetadata = this.ejbJarAnnotationMetadata.getScannedClassMetadata(classAnnotationMetadata.getClassName());
+                    EasyBeansEjbJarClassMetadata classicMetadata = this.ejbJarAnnotationMetadata
+                            .getScannedClassMetadata(classAnnotationMetadata.getClassName());
                     if (classicMetadata != null) {
                         if (classicMetadata.wasModified()) {
                             continue;
@@ -189,7 +286,8 @@ public class Enhancer {
         // Define all interceptors first.
         for (EasyBeansEjbJarClassMetadata classAnnotationMetadata : this.ejbJarAnnotationMetadata
                 .getEjbJarClassMetadataCollection()) {
-            if (classAnnotationMetadata.isInterceptor() && !ejbClassAndSuperClassMetadatas.contains(classAnnotationMetadata.getClassName())
+            if (classAnnotationMetadata.isInterceptor()
+                    && !ejbClassAndSuperClassMetadatas.contains(classAnnotationMetadata.getClassName())
                     && !classAnnotationMetadata.wasModified()) {
                 logger.debug("ClassAdapter on interceptor : {0}", classAnnotationMetadata.getClassName());
 
@@ -225,9 +323,10 @@ public class Enhancer {
                     ClassReader cr = getClassReader(classAnnotationMetadata);
                     ClassWriter cw = new EasyBeansClassWriter(this.readLoader);
                     BeanClassAdapter cv = new BeanClassAdapter(classAnnotationMetadata, cw, this.readLoader);
-                    InterceptorClassAdapter itcpClassAdapter = new InterceptorClassAdapter(classAnnotationMetadata, cv, this.readLoader);
+                    InterceptorClassAdapter itcpClassAdapter = new InterceptorClassAdapter(classAnnotationMetadata, cv,
+                            this.readLoader);
                     InjectionClassAdapter cv2 = new InjectionClassAdapter(classAnnotationMetadata, itcpClassAdapter, this.map,
-                            classAnnotationMetadata, false);
+  classAnnotationMetadata, false);
 
                     ClassVisitor beanVisitor = cv2;
                     // EJb 2.1 view ?
@@ -251,6 +350,7 @@ public class Enhancer {
                 }
             }
         }
+
     }
 
 
@@ -333,6 +433,10 @@ public class Enhancer {
         return cr;
     }
 
+
+
+
+
     /**
      * Loads/defines a class in the current class loader.
      * @param loader classloader to use.
@@ -344,6 +448,7 @@ public class Enhancer {
         if (loader instanceof EZBClassLoader) {
             ((EZBClassLoader) loader).addClassDefinition(className, b);
         } else {
+
             // use other way of loading class.
             // override classDefine (as it is protected) and define the class.
             try {
@@ -371,7 +476,6 @@ public class Enhancer {
                 throw new RuntimeException(e);
             }
         }
-
 
     }
 
