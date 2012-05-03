@@ -103,6 +103,7 @@ import org.ow2.easybeans.enhancer.Enhancer;
 import org.ow2.easybeans.enhancer.EnhancerException;
 import org.ow2.easybeans.enhancer.interceptors.EasyBeansInvocationContextFactory;
 import org.ow2.easybeans.enhancer.lib.ProxyClassEncoder;
+import org.ow2.easybeans.event.bean.EventMessageDrivenInfo;
 import org.ow2.easybeans.event.container.EventContainerStarted;
 import org.ow2.easybeans.event.container.EventContainerStarting;
 import org.ow2.easybeans.event.container.EventContainerStopped;
@@ -898,6 +899,10 @@ public class JContainer3 implements EZBContainer {
 
         messageDrivenInfo.setActivationConfigProperties(messageDrivenBean.getJMessageDriven()
                 .getActivationConfigProperties());
+
+        // Dispatch message driven info before continuing
+        this.dispatcher.dispatch(new EventMessageDrivenInfo(this.j2eeManagedObjectId, messageDrivenInfo), 10000);
+
         mdbMessageEndPointFactory.setMessageDrivenInfo(messageDrivenInfo);
 
 

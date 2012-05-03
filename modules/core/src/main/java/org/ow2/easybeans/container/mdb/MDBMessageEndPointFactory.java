@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJBException;
 import javax.ejb.Timer;
 import javax.resource.ResourceException;
@@ -56,6 +55,7 @@ import org.ow2.easybeans.component.itf.JMSComponent;
 import org.ow2.easybeans.container.info.MessageDrivenInfo;
 import org.ow2.easybeans.resolver.api.EZBJNDIResolverException;
 import org.ow2.easybeans.rpc.util.Hash;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IActivationConfigProperty;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JActivationConfigProperty;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -177,10 +177,10 @@ public class MDBMessageEndPointFactory extends MDBFactory implements MessageEndp
     private void initActivationSpec() throws FactoryException {
 
         // Get activation properties
-        List<ActivationConfigProperty> properties = getMessageDrivenInfo().getActivationConfigProperties();
+        List<IActivationConfigProperty> properties = getMessageDrivenInfo().getActivationConfigProperties();
         // Init if null
         if (properties == null) {
-            properties = new ArrayList<ActivationConfigProperty>();
+            properties = new ArrayList<IActivationConfigProperty>();
         }
 
         // Message Destination Link to resolve ?
@@ -202,7 +202,7 @@ public class MDBMessageEndPointFactory extends MDBFactory implements MessageEndp
         // Check that there is a destination-type, if not, add the default
         boolean destinationFound = false;
         boolean destinationTypeFound = false;
-        for (ActivationConfigProperty property : properties) {
+        for (IActivationConfigProperty property : properties) {
             if (DESTINATION_TYPE_PROPERTY.equals(property.propertyName())) {
                 destinationTypeFound = true;
             }
@@ -211,7 +211,7 @@ public class MDBMessageEndPointFactory extends MDBFactory implements MessageEndp
             }
         }
         if (!destinationTypeFound && destinationFound) {
-            ActivationConfigProperty jActivationConfigProperty = new JActivationConfigProperty(DESTINATION_TYPE_PROPERTY,
+            IActivationConfigProperty jActivationConfigProperty = new JActivationConfigProperty(DESTINATION_TYPE_PROPERTY,
                     DEFAULT_DESTINATION_TYPE);
             properties.add(jActivationConfigProperty);
             logger.warn("No ''{0}'' property found in the activation config, adding default value ''{1}'' for bean ''{2}''",
@@ -220,7 +220,7 @@ public class MDBMessageEndPointFactory extends MDBFactory implements MessageEndp
 
         // Create a map with the given activation spec properties
         Map<String, String> activationConfigProperties = new HashMap<String, String>();
-        for (ActivationConfigProperty property : properties) {
+        for (IActivationConfigProperty property : properties) {
             activationConfigProperties.put(property.propertyName(), property.propertyValue());
         }
 

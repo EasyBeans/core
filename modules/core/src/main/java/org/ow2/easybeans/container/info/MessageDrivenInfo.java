@@ -25,10 +25,10 @@
 
 package org.ow2.easybeans.container.info;
 
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IActivationConfigProperty;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.ejb.ActivationConfigProperty;
 
 /**
  * This class contains runtime information about Message driven beans.
@@ -39,7 +39,7 @@ public class MessageDrivenInfo extends BeanInfo {
     /**
      * List of ActivationConfigProperty.
      */
-    private List<ActivationConfigProperty> activationConfigProperties = null;
+    private List<IActivationConfigProperty> activationConfigProperties = null;
 
     /**
      * Message listener Interface.
@@ -55,14 +55,14 @@ public class MessageDrivenInfo extends BeanInfo {
      * Default constructor for MessageDriven Bean info.
      */
     public MessageDrivenInfo() {
-        this.activationConfigProperties = new ArrayList<ActivationConfigProperty>();
+        this.activationConfigProperties = new ArrayList<IActivationConfigProperty>();
     }
 
     /**
      * Gets the activation config properties.
      * @return the list of activation config properties
      */
-    public List<ActivationConfigProperty> getActivationConfigProperties() {
+    public List<IActivationConfigProperty> getActivationConfigProperties() {
         return this.activationConfigProperties;
     }
 
@@ -71,7 +71,7 @@ public class MessageDrivenInfo extends BeanInfo {
      * @param activationConfigProperties the list of activation config
      *        properties
      */
-    public void setActivationConfigProperties(final List<ActivationConfigProperty> activationConfigProperties) {
+    public void setActivationConfigProperties(final List<IActivationConfigProperty> activationConfigProperties) {
         this.activationConfigProperties = activationConfigProperties;
     }
 

@@ -89,6 +89,11 @@
       <groupId>org.ow2.util</groupId>
       <artifactId>util-jmx-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.ow2.util</groupId>
+      <artifactId>util-ee-metadata-ejbjar-api</artifactId>
+      <version>${ow2-util.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
