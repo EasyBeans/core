@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,27 +19,29 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: SessionBeanInfo.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.container.info;
-
+package org.ow2.easybeans.util.topological;
 
 /**
- * This class contains information for a session bean.
- * It is used at the runtime.
+ * Exception thrown where is a cycle in a graph.
  * @author Florent Benoit
  */
-public class SessionBeanInfo extends BeanInfo {
+public class GraphCycleException extends RuntimeException {
 
     /**
-     * Default constructor.
+     * Serial Version UID.
      */
-    public SessionBeanInfo() {
-        super();
+    private static final long serialVersionUID = 1205383543870579073L;
+
+    /**
+     * Build a new exception.
+     * @param message the given message
+     */
+    public GraphCycleException(final String message) {
+        super(message);
     }
-
-
 
 }

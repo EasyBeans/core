@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,27 +19,40 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: SessionBeanInfo.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.container.info;
-
+package org.ow2.easybeans.util.topological;
 
 /**
- * This class contains information for a session bean.
- * It is used at the runtime.
+ * Defines a wrapper around a given object wrapped on a node.
+ * This allows to wrap objects and use the topological sort
+ * @param <T> the type of the object wrapped
  * @author Florent Benoit
  */
-public class SessionBeanInfo extends BeanInfo {
+public class NodeWrapper<T> extends NodeImpl {
 
     /**
-     * Default constructor.
+     * Object wrapped.
      */
-    public SessionBeanInfo() {
-        super();
+    private T wrappedObject = null;
+
+    /**
+     * Build a new wrapper with the given name and wrapped object.
+     * @param name the given node name
+     * @param wrappedObject the wrapped object
+     */
+    public NodeWrapper(final String name, final T wrappedObject) {
+        super(name);
+        this.wrappedObject = wrappedObject;
     }
 
 
-
+    /**
+     * @return the wrapped Object.
+     */
+    public T getWrapped() {
+        return this.wrappedObject;
+    }
 }

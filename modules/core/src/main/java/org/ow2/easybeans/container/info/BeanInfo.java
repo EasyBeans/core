@@ -98,12 +98,23 @@ public class BeanInfo implements IBeanInfo {
     private List<IMethodInfo> businessMethodsInfo = null;
 
     /**
+     * Depends On ?
+     */
+    private List<String> dependsOn = null;
+
+    /**
+     * Startup flag (for singleton).
+     */
+    private boolean startup = false;
+
+    /**
      * Default constructor.
      */
     public BeanInfo() {
         this.localInterfaces = new ArrayList<String>();
         this.remoteInterfaces = new ArrayList<String>();
         this.businessMethodsInfo = new ArrayList<IMethodInfo>();
+        this.dependsOn = new ArrayList<String>();
     }
 
 
@@ -358,5 +369,35 @@ public class BeanInfo implements IBeanInfo {
         return list;
     }
 
+    /**
+     * Defines the list of dependencies of this bean.
+     * @param dependsOn the given list
+     */
+    public void setDependsOn(final List<String> dependsOn) {
+        this.dependsOn = dependsOn;
+    }
+
+    /**
+     * @return the list of dependencies of this bean.
+     */
+    public List<String> getDependsOn() {
+        return this.dependsOn;
+    }
+
+    /**
+     * Singleton startup ?
+     * @return true if the singleton is a startup singleton
+     */
+    public boolean isStartup() {
+        return this.startup;
+    }
+
+    /**
+     * Sets the startup mode for the singleton.
+     * @param startup true/false
+     */
+    public void setStartup(final boolean startup) {
+        this.startup = startup;
+    }
 
 }

@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,27 +19,34 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: SessionBeanInfo.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.container.info;
+package org.ow2.easybeans.util.topological;
 
+import java.util.List;
 
 /**
- * This class contains information for a session bean.
- * It is used at the runtime.
+ * Represents a Node that can have dependencies on other nodes.
  * @author Florent Benoit
  */
-public class SessionBeanInfo extends BeanInfo {
+public interface Node {
 
     /**
-     * Default constructor.
+     * @return name of the node
      */
-    public SessionBeanInfo() {
-        super();
-    }
+    String getName();
 
+    /**
+     * Add a dependency on another node.
+     * @param node the node on which we're requiring a dependency
+     */
+    void addDependency(Node node);
 
+    /**
+     * @return list of dependencies.
+     */
+    List<Node> getDependencies();
 
 }
