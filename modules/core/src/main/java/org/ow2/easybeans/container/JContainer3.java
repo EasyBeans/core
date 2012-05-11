@@ -520,7 +520,7 @@ public class JContainer3 implements EZBContainer {
             updatedNames.add(nodeWrapper.getName());
         }
 
-        logger.info("List transformed from ''{0}'' to ''{1}''", beanNames, updatedNames);
+        logger.debug("List transformed from ''{0}'' to ''{1}''", beanNames, updatedNames);
 
         return sortedFactories;
 
