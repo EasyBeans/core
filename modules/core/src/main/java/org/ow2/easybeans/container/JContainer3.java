@@ -586,9 +586,7 @@ public class JContainer3 implements EZBContainer {
             } else {
                 // merge old and new.
                 if (analyzedPersistenceUnitManager != null) {
-                    analyzedPersistenceUnitManager.merge(this.persistenceUnitManager);
-                    // update persistence manager with the merged one.
-                    this.persistenceUnitManager = analyzedPersistenceUnitManager;
+                    this.persistenceUnitManager.merge(analyzedPersistenceUnitManager);
                 }
             }
 
