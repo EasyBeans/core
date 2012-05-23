@@ -54,7 +54,7 @@ public class DynamicInvocationContextImpl implements EasyBeansInvocationContext 
     /**
      * Map shared between all interceptors.
      */
-    private Map<String, Object> contextData;
+    private volatile Map<String, Object> contextData;
 
     /**
      * Parameters of the method invocation.
@@ -98,6 +98,11 @@ public class DynamicInvocationContextImpl implements EasyBeansInvocationContext 
     private boolean isLifeCycleMode = false;
 
     /**
+     * Context Data previously stored on the current thread.
+     */
+    private volatile Map<String, Object> oldContextData = null;
+
+    /**
      * Build a new invocation context for the given method.
      * @param instance the bean's instance that will act as the target object.
      * @param interceptorInvokerList the list of the invokers to call
@@ -132,14 +137,19 @@ public class DynamicInvocationContextImpl implements EasyBeansInvocationContext 
             this.index = this.interceptorInvokerList.size() - 1;
         }
 
-        try {
+        // At the first proceed(), set the context data
+        if (this.index == 0) {
             if (getFactory() != null) {
+                this.oldContextData = getFactory().getContextDataThreadLocal().get();
                 getFactory().getContextDataThreadLocal().set(getContextData());
-            }
+          }
+        }
+
+        try {
             return this.interceptorInvokerList.get(this.index++).invoke(this, this.interceptorManager);
         } finally {
-            if (getFactory() != null) {
-                getFactory().getContextDataThreadLocal().set(null);
+            if (this.index == this.interceptorInvokerList.size() && getFactory() != null) {
+                getFactory().getContextDataThreadLocal().set(this.oldContextData);
             }
         }
     }
