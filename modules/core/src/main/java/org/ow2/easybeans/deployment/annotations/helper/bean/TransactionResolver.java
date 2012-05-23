@@ -74,14 +74,12 @@ public final class TransactionResolver {
     /**
      * CMT Required transaction interceptor.
      */
-    private static final String CMT_REQUIRED_INTERCEPTOR = Type
-            .getInternalName(CMTRequiredTransactionInterceptor.class);
+    private static final String CMT_REQUIRED_INTERCEPTOR = Type.getInternalName(CMTRequiredTransactionInterceptor.class);
 
     /**
      * CMT Mandatory transaction interceptor.
      */
-    private static final String CMT_MANDATORY_INTERCEPTOR = Type
-            .getInternalName(CMTMandatoryTransactionInterceptor.class);
+    private static final String CMT_MANDATORY_INTERCEPTOR = Type.getInternalName(CMTMandatoryTransactionInterceptor.class);
 
     /**
      * CMT Never transaction interceptor.
@@ -97,14 +95,12 @@ public final class TransactionResolver {
     /**
      * CMT Supports transaction interceptor.
      */
-    private static final String CMT_SUPPORTS_INTERCEPTOR = Type
-            .getInternalName(CMTSupportsTransactionInterceptor.class);
+    private static final String CMT_SUPPORTS_INTERCEPTOR = Type.getInternalName(CMTSupportsTransactionInterceptor.class);
 
     /**
      * CMT RequiresNew transaction interceptor.
      */
-    private static final String CMT_REQUIRES_NEW_INTERCEPTOR = Type
-            .getInternalName(CMTRequiresNewTransactionInterceptor.class);
+    private static final String CMT_REQUIRES_NEW_INTERCEPTOR = Type.getInternalName(CMTRequiresNewTransactionInterceptor.class);
 
     /**
      * BMT transaction interceptor.
@@ -121,19 +117,16 @@ public final class TransactionResolver {
      */
     private static final String BMT_STATELESS_INTERCEPTOR = Type.getInternalName(BMTStatelessTransactionInterceptor.class);
 
-
     /**
      * MDB enlist resource interceptor.
      */
     private static final String MDB_CMT_REQUIRED_INTERCEPTOR = Type.getInternalName(MDBCMTRequiredTransactionInterceptor.class);
-
 
     /**
      * ListenerSessionSynchronizationInterceptor transaction interceptor.
      */
     private static final String LISTENER_SESSION_SYNCHRO_INTERCEPTOR = Type
             .getInternalName(ListenerSessionSynchronizationInterceptor.class);
-
 
     /**
      * javax.ejb.SessionSynchronization interface.
@@ -152,135 +145,141 @@ public final class TransactionResolver {
      * @param bean the given bean on which set the transactional interceptor.
      */
     public static void resolve(final EasyBeansEjbJarClassMetadata bean) {
-        TransactionAttributeType beanTxType = bean.getTransactionAttributeType();
-        TransactionManagementType beanTxManaged = bean.getTransactionManagementType();
+        for (EasyBeansEjbJarMethodMetadata method : bean.getMethodMetadataCollection()) {
+            resolveMethod(bean, method);
+        }
+    }
 
+    /**
+     * Adds the right transaction interceptor depending of the transactional
+     * attribute set by the user.
+     * @param bean the given bean on which set the transactional interceptor.
+     */
+    public static void resolveMethod(final EasyBeansEjbJarClassMetadata bean, final EasyBeansEjbJarMethodMetadata method) {
 
         // Checks if Synchronization is needed for this stateful bean
         boolean addSynchro = false;
         if (bean.isStateful()) {
-                String[] interfaces = bean.getInterfaces();
-                if (interfaces != null) {
-                        for (String itf : interfaces) {
-                            if (SESSION_SYNCHRONIZATION_INTERFACE.equals(itf)) {
-                                addSynchro = true;
-                                break;
-                            }
-                        }
+            String[] interfaces = bean.getInterfaces();
+            if (interfaces != null) {
+                for (String itf : interfaces) {
+                    if (SESSION_SYNCHRONIZATION_INTERFACE.equals(itf)) {
+                        addSynchro = true;
+                        break;
+                    }
                 }
+            }
 
         }
 
-        for (EasyBeansEjbJarMethodMetadata method : bean.getMethodMetadataCollection()) {
+        TransactionAttributeType beanTxType = bean.getTransactionAttributeType();
+        TransactionManagementType beanTxManaged = bean.getTransactionManagementType();
 
-            List<? extends IJClassInterceptor> previousInterceptors = method.getInterceptors();
+        List<? extends IJClassInterceptor> previousInterceptors = method.getInterceptors();
 
-            List<IJClassInterceptor> interceptors = new ArrayList<IJClassInterceptor>();
-            if (previousInterceptors != null) {
-                interceptors.addAll(previousInterceptors);
+        List<IJClassInterceptor> interceptors = new ArrayList<IJClassInterceptor>();
+        if (previousInterceptors != null) {
+            interceptors.addAll(previousInterceptors);
+        }
+
+        // Bean managed or container managed ?
+        if (beanTxManaged.equals(BEAN)) {
+            // BMT
+            if (bean.isStateful()) {
+                interceptors.add(new JClassInterceptor(BMT_STATEFUL_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+            } else if (bean.isStateless()) {
+                interceptors.add(new JClassInterceptor(BMT_STATELESS_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+            } else {
+                interceptors.add(new JClassInterceptor(BMT_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+            }
+        } else {
+            // CMT
+            TransactionAttributeType methodTx = method.getTransactionAttributeType();
+
+            // Set method tx attribute to the class tx attribute if none was
+            // set.
+            if (methodTx == null) {
+                if (!method.isInherited()) {
+                    methodTx = beanTxType;
+                } else {
+                    // inherited method, take value of the original class
+                    methodTx = method.getOriginalClassMetadata().getTransactionAttributeType();
+                }
             }
 
-            // Bean managed or container managed ?
-            if (beanTxManaged.equals(BEAN)) {
-                // BMT
-                if (bean.isStateful()) {
-                    interceptors.add(new JClassInterceptor(BMT_STATEFUL_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                } else if (bean.isStateless()) {
-                    interceptors.add(new JClassInterceptor(BMT_STATELESS_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                } else {
-                    interceptors.add(new JClassInterceptor(BMT_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+            // Apply MDB interceptors and performs checks for authorized modes
+            if (bean.isMdb()) {
+                switch (methodTx) {
+                case REQUIRED:
+                case NOT_SUPPORTED:
+                    break;
+                case MANDATORY:
+                case NEVER:
+                case REQUIRES_NEW:
+                case SUPPORTS:
+                default:
+                    logger.error("For MDB, the TX attribute '" + methodTx
+                            + "' is not a valid attribute (only Required or Not supported is available). "
+                            + "The error is on the method '" + method.getMethodName() + "' of class '"
+                            + method.getClassMetadata().getClassName() + "' for the bean '"
+                            + method.getClassMetadata().getLinkedBean() + "'. Sets to the default REQUIRED mode.");
+                    methodTx = TransactionAttributeType.REQUIRED;
+                    break;
                 }
+
+                if (TransactionAttributeType.NOT_SUPPORTED == methodTx) {
+                    interceptors.add(new JClassInterceptor(CMT_NOT_SUPPORTED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                } else if (TransactionAttributeType.REQUIRED == methodTx) {
+                    method.setTransacted(true);
+                    interceptors.add(new JClassInterceptor(MDB_CMT_REQUIRED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                } else {
+                    // invalid case
+                    throw new IllegalStateException("Shouldn't be in another mode. Expected NOT_Supported/Required and got '"
+                            + methodTx + "' for the method '" + method.getMethodName() + "' of class '"
+                            + method.getClassMetadata().getClassName() + "' for the bean '"
+                            + method.getClassMetadata().getLinkedBean() + "'. Sets to the default REQUIRED mode.");
+                }
+
             } else {
-                // CMT
-                TransactionAttributeType methodTx = method.getTransactionAttributeType();
-
-                // Set method tx attribute to the class tx attribute if none was
-                // set.
-                if (methodTx == null) {
-                    if (!method.isInherited()) {
-                        methodTx = beanTxType;
-                    } else {
-                        // inherited method, take value of the original class
-                        methodTx = method.getOriginalClassMetadata().getTransactionAttributeType();
-                    }
-                }
-
-                // Apply MDB interceptors and performs checks for authorized modes
-                if (bean.isMdb()) {
-                    switch (methodTx) {
-                    case REQUIRED:
-                    case NOT_SUPPORTED:
-                        break;
-                    case MANDATORY:
-                    case NEVER:
-                    case REQUIRES_NEW:
-                    case SUPPORTS:
-                    default:
-                        logger.error("For MDB, the TX attribute '" + methodTx
-                                + "' is not a valid attribute (only Required or Not supported is available). "
-                                + "The error is on the method '" + method.getMethodName() + "' of class '"
-                                + method.getClassMetadata().getClassName() + "' for the bean '"
-                                + method.getClassMetadata().getLinkedBean() + "'. Sets to the default REQUIRED mode.");
-                        methodTx = TransactionAttributeType.REQUIRED;
-                        break;
-                    }
-
-                    if (TransactionAttributeType.NOT_SUPPORTED == methodTx) {
-                        interceptors.add(new JClassInterceptor(CMT_NOT_SUPPORTED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                    } else if (TransactionAttributeType.REQUIRED == methodTx) {
-                        method.setTransacted(true);
-                        interceptors.add(new JClassInterceptor(MDB_CMT_REQUIRED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                    } else {
-                        // invalid case
-                        throw new IllegalStateException(
-                                "Shouldn't be in another mode. Expected NOT_Supported/Required and got '" + methodTx
-                                        + "' for the method '" + method.getMethodName() + "' of class '"
-                                        + method.getClassMetadata().getClassName() + "' for the bean '"
-                                        + method.getClassMetadata().getLinkedBean() + "'. Sets to the default REQUIRED mode.");
-                    }
-
-
-                } else {
 
                 switch (methodTx) {
-                    case MANDATORY:
-                        method.setTransacted(true);
-                        interceptors.add(new JClassInterceptor(CMT_MANDATORY_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                        break;
-                    case NEVER:
-                        interceptors.add(new JClassInterceptor(CMT_NEVER_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                        break;
-                    case NOT_SUPPORTED:
-                        interceptors.add(new JClassInterceptor(CMT_NOT_SUPPORTED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                        break;
-                    case REQUIRED:
-                        method.setTransacted(true);
-                        interceptors.add(new JClassInterceptor(CMT_REQUIRED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                        break;
-                    case REQUIRES_NEW:
-                        method.setTransacted(true);
-                        interceptors.add(new JClassInterceptor(CMT_REQUIRES_NEW_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                        break;
-                    case SUPPORTS:
-                        method.setTransacted(true);
-                        interceptors.add(new JClassInterceptor(CMT_SUPPORTS_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                        break;
-                    default:
-                        throw new IllegalStateException("Invalid tx attribute on method '" + method.getMethodName()
-                                + "', value = '" + methodTx + "'.");
+                case MANDATORY:
+                    method.setTransacted(true);
+                    interceptors.add(new JClassInterceptor(CMT_MANDATORY_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                    break;
+                case NEVER:
+                    interceptors.add(new JClassInterceptor(CMT_NEVER_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                    break;
+                case NOT_SUPPORTED:
+                    interceptors.add(new JClassInterceptor(CMT_NOT_SUPPORTED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                    break;
+                case REQUIRED:
+                    method.setTransacted(true);
+                    interceptors.add(new JClassInterceptor(CMT_REQUIRED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                    break;
+                case REQUIRES_NEW:
+                    method.setTransacted(true);
+                    interceptors.add(new JClassInterceptor(CMT_REQUIRES_NEW_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                    break;
+                case SUPPORTS:
+                    method.setTransacted(true);
+                    interceptors.add(new JClassInterceptor(CMT_SUPPORTS_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+                    break;
+                default:
+                    throw new IllegalStateException("Invalid tx attribute on method '" + method.getMethodName()
+                            + "', value = '" + methodTx + "'.");
                 }
 
-                }
-
-                // Add listener interceptor for stateul bean only if the bean implements SessionSynchronization interface
-                if (addSynchro) {
-                    interceptors.add(new JClassInterceptor(LISTENER_SESSION_SYNCHRO_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                }
-                // End CMT
             }
 
-
-            method.setInterceptors(interceptors);
+            // Add listener interceptor for stateul bean only if the bean
+            // implements SessionSynchronization interface
+            if (addSynchro) {
+                interceptors.add(new JClassInterceptor(LISTENER_SESSION_SYNCHRO_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+            }
+            // End CMT
         }
+
+        method.setInterceptors(interceptors);
     }
 }

@@ -54,6 +54,7 @@ import org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterface
 import org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceMethodResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.InterfaceAnnotatedHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.SessionBeanHelper;
+import org.ow2.easybeans.deployment.annotations.helper.bean.TransactionResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBBeanHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBListenerBusinessMethodResolver;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
@@ -1045,6 +1046,51 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                 break;
             default:
                     throw new RuntimeException("No generated method name found for interceptorType '" + interceptorType + "'");
+        }
+
+        if (classMetaData.isSingleton()) {
+            /**
+             * The PostConstruct lifecycle callback interceptor methods for
+             * singleton beans execute in a transaction context determined by
+             * the bean's transaction management type and any applicable
+             * transaction attribute.
+             */
+            /**
+             * The PreDestroy lifecycle callback interceptor methods for
+             * singleton beans execute in a transaction context determined by
+             * the bean's transaction management type and any applicable
+             * transaction attribute.
+             */
+
+            /**
+             * PostConstruct and PreDestroy methods of Singletons with
+             * container-managed transactions are transactional. From the bean
+             * developer's view there is no client of a PostConstruct or
+             * PreDestroy method. A PostConstruct or PreDestroy method of a
+             * Singleton with container-managed transactions has transaction
+             * attribute REQUIRED, REQUIRES_NEW, or NOT_SUPPORTED (Required ,
+             * RequiresNew, or NotSupported if the deployment descriptor is used
+             * to specify the transaction attribute). Note that the container
+             * must start a new transaction if the REQUIRED (Required)
+             * transaction attribute is used. This guarantees, for example, that
+             * the transactional behavior of the PostConstruct method is the
+             * same regardless of whether it is initialized eagerly at container
+             * startup time or as a side effect of a first client invocation on
+             * the Singleton. The REQUIRED transaction attribute value is
+             * allowed so that specification of a transaction attribute for the
+             * Singleton PostConstruct/PreDestroy methods can be defaulted.
+             */
+
+            if (POST_CONSTRUCT == interceptorType || PRE_DESTROY == interceptorType) {
+                // Is there already some interceptors ?
+                if (classMetaData.getPostConstructMethodsMetadata().size() > 0) {
+                    generatedMetadata.setInterceptors(classMetaData.getPostConstructMethodsMetadata().getFirst().getInterceptors());
+                } else {
+                    // Add default transaction on this method
+                    TransactionResolver.resolveMethod(classMetaData, generatedMetadata);
+                }
+
+            }
         }
 
         classMetaData.addStandardMethodMetadata(generatedMetadata);
