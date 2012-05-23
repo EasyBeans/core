@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" output="plugins/artifact-filename/target/classes" path="plugins/artifact-filename/src/main/java"/>
 	<classpathentry kind="src" output="modules/util/target/classes" path="modules/util/src/main/java"/>
+	<classpathentry kind="src" output="modules/util/target/test-classes" path="modules/util/src/test/java"/>
 	<classpathentry kind="src" output="modules/api/target/classes" path="modules/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/jacc-provider/target/classes" path="modules/jacc-provider/src/main/java"/>
 	<classpathentry kind="src" output="modules/jndi-resolver/target/classes" path="modules/jndi-resolver/src/main/java"/>
