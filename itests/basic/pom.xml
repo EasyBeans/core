@@ -115,6 +115,13 @@
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-statefulsync</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
+      <scope>test</scope>
+    </dependency>
 
 
   </dependencies>
@@ -228,13 +235,19 @@
                     </version>
                   </artifact>                  
 
-
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-accesstimeout</artifactId>
                     <version>${easybeans-tests-applications.version}
                     </version>
                   </artifact>                  
+
+                  <artifact>
+                    <groupId>org.ow2.easybeans.tests</groupId>
+                    <artifactId>easybeans-tests-applications-ejbjars-statefulsync</artifactId>
+                    <version>${easybeans-tests-applications.version}
+                    </version>
+                  </artifact>    
 
                 </artifacts>
               </deployables>
