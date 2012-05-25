@@ -102,6 +102,7 @@ public class BeanInfo implements IBeanInfo {
      */
     private List<IMethodInfo> sessionSynchronizationMethodsInfo = null;
 
+
     /**
      * Depends On ?
      */
@@ -406,7 +407,6 @@ public class BeanInfo implements IBeanInfo {
         this.startup = startup;
     }
 
-
     /**
      * Gets the Session Synchronization methods.
      * @return the list of Session Synchronization methods
@@ -422,6 +422,5 @@ public class BeanInfo implements IBeanInfo {
     public void setSessionSynchronizationMethodsInfo(final List<IMethodInfo> sessionSynchronizationMethodsInfo) {
         this.sessionSynchronizationMethodsInfo = sessionSynchronizationMethodsInfo;
     }
-
 
 }

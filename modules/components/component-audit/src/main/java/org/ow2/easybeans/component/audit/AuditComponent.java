@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2010 Bull S.A.S.
+ * Copyright (C) 2010-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ public class AuditComponent implements EZBAuditComponent {
         }
         this.auditedObjects.add(object);
         this.eventComponent.registerEventListener(new Auditor(object.getJ2EEManagedObjectId(), this.jmxNotifier,
-                this.invocationAuditReportFactory));
+                this.invocationAuditReportFactory, this.eventComponent.getEventService()));
     }
 
     /**
@@ -158,7 +158,7 @@ public class AuditComponent implements EZBAuditComponent {
         if (this.auditedObjects.contains(object)) {
             this.auditedObjects.remove(object);
             this.eventComponent.unregisterEventListener(new Auditor(object.getJ2EEManagedObjectId(), this.jmxNotifier,
-                    this.invocationAuditReportFactory));
+                    this.invocationAuditReportFactory, this.eventComponent.getEventService()));
         }
     }
 
