@@ -213,6 +213,13 @@ public class EasyBeansEjbJarMethodMetadata
     }
 
     /**
+     * @return true if this method is a session synchronization interface.
+     */
+    public boolean isSessionSynchronization() {
+        return isAfterBegin() || isAfterCompletion() || isBeforeCompletion();
+    }
+
+    /**
      * Inheritance Level.
      * @return inheritance level
      */

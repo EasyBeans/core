@@ -31,14 +31,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.ejb.EJBException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
+import javax.transaction.Synchronization;
+import javax.transaction.Transaction;
 
 import org.ow2.easybeans.api.EZBContainer;
+import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.OperationState;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
@@ -70,7 +74,8 @@ import org.ow2.util.pool.impl.enhanced.manager.clue.optional.IPoolItemRemoveClue
  * @author Florent Benoit
  */
 public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implements
-        IPoolItemRemoveClueManager<EasyBeansSFSB, Long>, IClueAccessor<EasyBeansSFSB, Long> {
+        EZBStatefulSessionFactory<EasyBeansSFSB, Long>, IPoolItemRemoveClueManager<EasyBeansSFSB, Long>,
+        IClueAccessor<EasyBeansSFSB, Long> {
 
     /**
      * Logger.
@@ -99,6 +104,12 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     private InheritableThreadLocal<Long> currentBeanId = null;
 
     /**
+     * Synchronization Listener which will receive event of the transaction manager.
+     */
+    private Map<Transaction, Synchronization> sessionSynchronizationListeners = null;
+
+
+    /**
      * Builds a new factory with a given name and its container.
      * @param className name of this factory (name of class that is managed)
      * @param container the root component of this factory.
@@ -109,6 +120,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
         this.locks = new HashMap<Long, Lock>();
         this.currentBeanId = new InheritableThreadLocal<Long>();
+
+        // Init Stateful session synchronization
+        this.sessionSynchronizationListeners = new WeakHashMap<Transaction, Synchronization>();
 
 
         // Use of the old pool ?
@@ -420,4 +434,32 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     public InheritableThreadLocal<Long> getCurrentBeanIDThreadLocal() {
         return this.currentBeanId;
     }
+
+
+    /**
+     * Gets the current session synchronization listener on the given transaction if any.
+     * @param tx the given transaction
+     * @return the current session synchronization listener
+     */
+    public Synchronization getSessionSynchronizationListener(final Transaction tx) {
+        return this.sessionSynchronizationListeners.get(tx);
+    }
+
+    /**
+     * Sets the current session synchronization listener on the given transaction.
+     * @param tx the given transaction
+     * @param sessionSynchronizationListener the session synchronization listener
+     */
+    public void setSessionSynchronizationListener(final Transaction tx, final Synchronization sessionSynchronizationListener) {
+        this.sessionSynchronizationListeners.put(tx, sessionSynchronizationListener);
+    }
+
+    /**
+     * Unsets the current session synchronization listener on the given transaction.
+     * @param tx the given transaction
+     */
+    public void unsetSessionSynchronizationListener(final Transaction tx) {
+        this.sessionSynchronizationListeners.remove(tx);
+    }
+
 }

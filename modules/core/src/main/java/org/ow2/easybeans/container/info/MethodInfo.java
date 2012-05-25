@@ -85,6 +85,22 @@ public class MethodInfo implements IMethodInfo {
      */
     private boolean transacted = false;
 
+
+    /**
+     * @return true if this method is afterBeginMethod
+     */
+    private boolean isAfterBegin = false;
+
+    /**
+     * @return true if this method is beforeCompletionMethod
+     */
+    private boolean isBeforeCompletion = false;
+
+    /**
+     * @return true if this method is afterCompletionMethod
+     */
+    private boolean isAfterCompletion = false;
+
     /**
      * Build a new method Info based on the given metadata.
      * @param methodMetadata the metadata
@@ -214,6 +230,48 @@ public class MethodInfo implements IMethodInfo {
      */
     public ILockTypeInfo getLockType() {
         return this.lockType;
+    }
+
+    /**
+     * @return true if this method is afterBeginMethod
+     */
+    public boolean isAfterBegin() {
+        return this.isAfterBegin;
+    }
+
+    /**
+     * Sets this method as a afterBeginMethod.
+     */
+    public void setAfterBegin() {
+        this.isAfterBegin = true;
+    }
+
+    /**
+     * @return true if this method is beforeCompletionMethod
+     */
+    public boolean isBeforeCompletion() {
+        return this.isBeforeCompletion;
+    }
+
+    /**
+     * Sets this method as a beforeCompletionMethod.
+     */
+    public void setBeforeCompletion() {
+        this.isBeforeCompletion = true;
+    }
+
+    /**
+     * @return true if this method is afterCompletionMethod
+     */
+    public boolean isAfterCompletion() {
+        return this.isAfterCompletion;
+    }
+
+    /**
+     * Sets this method as a afterCompletionMethod.
+     */
+    public void setAfterCompletion() {
+        this.isAfterCompletion = true;
     }
 
 }

@@ -32,8 +32,9 @@ import java.rmi.RemoteException;
 import javax.ejb.EJBException;
 import javax.ejb.SessionSynchronization;
 import javax.transaction.Synchronization;
+import javax.transaction.Transaction;
 
-import org.ow2.easybeans.api.Factory;
+import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.OperationState;
 
 /**
@@ -49,18 +50,21 @@ public class SessionSynchronizationListener implements Synchronization {
     private SessionSynchronization synchronizedBean = null;
 
     /**
-     * Factory of the bean.
+     * Stateful session Factory of the bean.
      */
-    private Factory<?, ?> factory = null;
+    private EZBStatefulSessionFactory factory = null;
+
+    private Transaction tx = null;
 
     /**
      * Creates a listener which will act on the given bean.
      * @param synchronizedBean bean on which call synchronization methods.
      * @param factory the EasyBeans factory.
      */
-    public SessionSynchronizationListener(final SessionSynchronization synchronizedBean, final Factory<?, ?> factory) {
+    public SessionSynchronizationListener(final SessionSynchronization synchronizedBean, final EZBStatefulSessionFactory factory, final Transaction tx) {
         this.synchronizedBean = synchronizedBean;
         this.factory = factory;
+        this.tx = tx;
     }
 
     /**
@@ -87,6 +91,8 @@ public class SessionSynchronizationListener implements Synchronization {
             this.factory.getOperationStateThreadLocal().set(oldState);
         }
 
+        this.factory.unsetSessionSynchronizationListener(this.tx);
+
     }
 
     /**
@@ -106,32 +112,8 @@ public class SessionSynchronizationListener implements Synchronization {
             throw new EJBException("Error in afterCompletion()", e);
         } finally {
             this.factory.getOperationStateThreadLocal().set(oldState);
-            this.ready = true;
         }
 
     }
-
-    /**
-     * This listener is ready to receive event from the transaction manager.
-     */
-    private boolean ready = true;
-
-
-    /**
-     * Gets the ready state of this listener.
-     * @return true/false
-     */
-    public boolean isReady() {
-        return this.ready;
-    }
-
-    /**
-     * Sets the ready state to false as the transaction is in progress.
-     */
-    public void inTX() {
-        this.ready = false;
-    }
-
-
 
 }

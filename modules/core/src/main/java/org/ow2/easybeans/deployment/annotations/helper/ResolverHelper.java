@@ -45,6 +45,7 @@ import org.ow2.easybeans.deployment.annotations.helper.bean.TransactionResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.checks.TimerBeanValidator;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBBeanHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBListenerBusinessMethodResolver;
+import org.ow2.easybeans.deployment.annotations.helper.bean.session.SessionSynchronizationResolver;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
@@ -97,6 +98,11 @@ public final class ResolverHelper {
 
                     // Security
                     SecurityResolver.resolve(classMetaData);
+
+                    // Stateful session synchronization
+                    if (classMetaData.isStateful()) {
+                        SessionSynchronizationResolver.resolve(classMetaData);
+                    }
 
                     // Transaction
                     TransactionResolver.resolve(classMetaData);

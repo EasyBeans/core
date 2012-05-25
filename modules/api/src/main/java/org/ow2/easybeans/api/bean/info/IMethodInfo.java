@@ -73,4 +73,21 @@ public interface IMethodInfo {
      * @return locking strategy
      */
     ILockTypeInfo getLockType();
+
+    /**
+     * @return true if this method is afterBeginMethod
+     */
+    boolean isAfterBegin();
+
+    /**
+     * @return true if this method is beforeCompletionMethod
+     */
+    boolean isBeforeCompletion();
+
+    /**
+     * @return true if this method is afterCompletionMethod
+     */
+    boolean isAfterCompletion();
+
+
 }

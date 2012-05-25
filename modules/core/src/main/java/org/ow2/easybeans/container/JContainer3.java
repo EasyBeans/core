@@ -79,6 +79,7 @@ import org.ow2.easybeans.container.info.BusinessMethodsInfoHelper;
 import org.ow2.easybeans.container.info.EJBJarInfo;
 import org.ow2.easybeans.container.info.MessageDrivenInfo;
 import org.ow2.easybeans.container.info.SessionBeanInfo;
+import org.ow2.easybeans.container.info.SessionSynchronizationInfoHelper;
 import org.ow2.easybeans.container.info.security.SecurityInfoHelper;
 import org.ow2.easybeans.container.info.ws.WebServiceInfo;
 import org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory;
@@ -688,6 +689,9 @@ public class JContainer3 implements EZBContainer {
 
                             // Adds Business method info.
                             beanInfo.setBusinessMethodsInfo(BusinessMethodsInfoHelper.getMethods(classAnnotationMetadata));
+
+                            // Adds Business method info.
+                            beanInfo.setSessionSynchronizationMethodsInfo(SessionSynchronizationInfoHelper.getMethods(classAnnotationMetadata));
 
                             // Cluster config
                             beanInfo.setCluster(classAnnotationMetadata.getCluster());

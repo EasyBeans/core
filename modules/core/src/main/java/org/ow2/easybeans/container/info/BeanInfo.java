@@ -98,6 +98,11 @@ public class BeanInfo implements IBeanInfo {
     private List<IMethodInfo> businessMethodsInfo = null;
 
     /**
+     * Session synchronization methods.
+     */
+    private List<IMethodInfo> sessionSynchronizationMethodsInfo = null;
+
+    /**
      * Depends On ?
      */
     private List<String> dependsOn = null;
@@ -114,6 +119,7 @@ public class BeanInfo implements IBeanInfo {
         this.localInterfaces = new ArrayList<String>();
         this.remoteInterfaces = new ArrayList<String>();
         this.businessMethodsInfo = new ArrayList<IMethodInfo>();
+        this.sessionSynchronizationMethodsInfo = new ArrayList<IMethodInfo>();
         this.dependsOn = new ArrayList<String>();
     }
 
@@ -399,5 +405,23 @@ public class BeanInfo implements IBeanInfo {
     public void setStartup(final boolean startup) {
         this.startup = startup;
     }
+
+
+    /**
+     * Gets the Session Synchronization methods.
+     * @return the list of Session Synchronization methods
+     */
+    public List<IMethodInfo> getSessionSynchronizationMethodsInfo() {
+        return this.sessionSynchronizationMethodsInfo;
+    }
+
+    /**
+     * Sets the list of Session Synchronization methods.
+     * @param sessionSynchronizationMethodsInfo the list of Session Synchronization methods
+     */
+    public void setSessionSynchronizationMethodsInfo(final List<IMethodInfo> sessionSynchronizationMethodsInfo) {
+        this.sessionSynchronizationMethodsInfo = sessionSynchronizationMethodsInfo;
+    }
+
 
 }

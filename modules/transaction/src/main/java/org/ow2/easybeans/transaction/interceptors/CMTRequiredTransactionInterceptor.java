@@ -36,6 +36,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
+import org.ow2.easybeans.api.OperationState;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -70,7 +71,16 @@ public class CMTRequiredTransactionInterceptor extends AbsTransactionInterceptor
      */
     @Override
     public Object intercept(final EasyBeansInvocationContext invocationContext) throws Exception {
-        logger.debug("Calling Required TX interceptor");
+        this.logger.debug("Calling Required TX interceptor");
+
+        // Needs to ignore the transaction part if this interceptor is
+        // called through a SessionSynchronization
+        OperationState state = invocationContext.getFactory().getOperationState();
+        if (OperationState.AFTER_BEGIN == state || OperationState.BEFORE_COMPLETION == state
+                || OperationState.AFTER_COMPLETION == state) {
+            return invocationContext.proceed();
+        }
+
 
         // Get current transaction
         Transaction transaction;
@@ -80,7 +90,7 @@ public class CMTRequiredTransactionInterceptor extends AbsTransactionInterceptor
             throw new EJBException("Cannot get the current transaction on transaction manager.", se);
         }
 
-        logger.debug("Transaction found = {0}", transaction);
+        this.logger.debug("Transaction found = {0}", transaction);
 
         /*
          * If the client invokes the enterprise bean's method while the client
@@ -160,6 +170,8 @@ public class CMTRequiredTransactionInterceptor extends AbsTransactionInterceptor
                             throw new RuntimeException("Unexpected transaction status" + getTransactionManager().getStatus());
                         }
                     } catch (RollbackException e) {
+                        // Needs to discard the instance
+                        discard(invocationContext);
                         throw new TransactionRolledbackLocalException("Could not commit transaction", e);
                     } catch (Exception e) {
                         throw new EJBException("Container exception", e);

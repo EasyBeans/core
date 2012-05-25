@@ -129,11 +129,6 @@ public final class TransactionResolver {
             .getInternalName(ListenerSessionSynchronizationInterceptor.class);
 
     /**
-     * javax.ejb.SessionSynchronization interface.
-     */
-    private static final String SESSION_SYNCHRONIZATION_INTERFACE = "javax/ejb/SessionSynchronization";
-
-    /**
      * Helper class, no public constructor.
      */
     private TransactionResolver() {
@@ -156,21 +151,6 @@ public final class TransactionResolver {
      * @param bean the given bean on which set the transactional interceptor.
      */
     public static void resolveMethod(final EasyBeansEjbJarClassMetadata bean, final EasyBeansEjbJarMethodMetadata method) {
-
-        // Checks if Synchronization is needed for this stateful bean
-        boolean addSynchro = false;
-        if (bean.isStateful()) {
-            String[] interfaces = bean.getInterfaces();
-            if (interfaces != null) {
-                for (String itf : interfaces) {
-                    if (SESSION_SYNCHRONIZATION_INTERFACE.equals(itf)) {
-                        addSynchro = true;
-                        break;
-                    }
-                }
-            }
-
-        }
 
         TransactionAttributeType beanTxType = bean.getTransactionAttributeType();
         TransactionManagementType beanTxManaged = bean.getTransactionManagementType();
@@ -271,14 +251,16 @@ public final class TransactionResolver {
                 }
 
             }
-
-            // Add listener interceptor for stateul bean only if the bean
-            // implements SessionSynchronization interface
-            if (addSynchro) {
-                interceptors.add(new JClassInterceptor(LISTENER_SESSION_SYNCHRO_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-            }
             // End CMT
         }
+
+        // Add listener interceptor for stateul bean only if the bean
+        // implements SessionSynchronization interface
+        if (bean.hasSessionSynchronization() && !method.isSessionSynchronization()) {
+            interceptors.add(new JClassInterceptor(LISTENER_SESSION_SYNCHRO_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+        }
+
+
 
         method.setInterceptors(interceptors);
     }

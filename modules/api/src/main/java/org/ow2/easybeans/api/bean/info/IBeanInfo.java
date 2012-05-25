@@ -101,6 +101,18 @@ public interface IBeanInfo {
     void setBusinessMethodsInfo(final List<IMethodInfo> businessMethodsInfo);
 
     /**
+     * Gets the Session Synchronization methods.
+     * @return the list of Session Synchronization methods
+     */
+    List<IMethodInfo> getSessionSynchronizationMethodsInfo();
+
+    /**
+     * Sets the list of Session Synchronization methods.
+     * @param sessionSynchronizationMethodsInfo the list of Session Synchronization methods
+     */
+    void setSessionSynchronizationMethodsInfo(final List<IMethodInfo> sessionSynchronizationMethodsInfo);
+
+    /**
      * Gets the name of the bean.
      * @return the name of the bean.
      */

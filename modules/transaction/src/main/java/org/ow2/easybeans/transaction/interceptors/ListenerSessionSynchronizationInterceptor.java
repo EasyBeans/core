@@ -26,17 +26,21 @@
 package org.ow2.easybeans.transaction.interceptors;
 
 import java.rmi.RemoteException;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.List;
 
 import javax.ejb.EJBException;
 import javax.ejb.SessionSynchronization;
 import javax.ejb.TransactionRolledbackLocalException;
 import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 
+import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
+import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.OperationState;
+import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.transaction.SessionSynchronizationListener;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -54,11 +58,6 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
     private Log logger = LogFactory.getLog(ListenerSessionSynchronizationInterceptor.class);
 
     /**
-     * Listener which will receive event of the transaction manager.
-     */
-    private Map<Object, SessionSynchronizationListener> listeners = new WeakHashMap<Object, SessionSynchronizationListener>();
-
-    /**
      * Adds a listener object receiving calls from the transaction manager.
      * @param invocationContext context with useful attributes on the current
      *        invocation
@@ -69,11 +68,14 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
      */
     @Override
     public Object intercept(final EasyBeansInvocationContext invocationContext) throws Exception {
+
+        Transaction tx = getTransactionManager().getTransaction();
+
         this.logger.debug("Calling ListenerSessionSynchronizationInterceptor interceptor");
-        if (getTransactionManager().getTransaction() != null) {
-            addSynchronization(invocationContext);
+        if (tx != null) {
+            addSynchronization(tx, invocationContext);
         } else {
-            this.logger.warn("No transaction but the bean is implementing session synchonization interface.");
+            this.logger.debug("No transaction but the bean is implementing session synchonization interface.");
         }
         return invocationContext.proceed();
     }
@@ -84,13 +86,19 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
      * transaction is completed.
      * @param invocationContext the context on the current invocation.
      */
-    private void addSynchronization(final EasyBeansInvocationContext invocationContext) {
+    private void addSynchronization(final Transaction tx, final EasyBeansInvocationContext invocationContext) {
         Object o = invocationContext.getTarget();
-        if (!(o instanceof SessionSynchronization)) {
-            throw new IllegalArgumentException("This interceptor should not have been added on this "
-                    + "bean which doesn't implement SessionSynchronization interface.");
+
+        SessionSynchronization bean = null;
+        if (o instanceof SessionSynchronization) {
+            bean =  (SessionSynchronization) o;
+        } else {
+            // Needs to wrap the bean on a SessionSynchronization object
+            List<IMethodInfo> synchroMethodsInfoList = invocationContext.getFactory().getBeanInfo()
+                    .getSessionSynchronizationMethodsInfo();
+            bean = new SessionSynchronizationWrapper(o, synchroMethodsInfoList);
         }
-        SessionSynchronization bean = (SessionSynchronization) o;
+
 
         /**
          * 4.3.11 Interceptors for Session Beans.<br>
@@ -104,16 +112,19 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
          * is being committed.
          */
 
-        // TODO: THE COMPLETED information should be retrieved on the bean
-        // context, not on the session listener.
-        SessionSynchronizationListener sessionSynchronizationListener = this.listeners.get(bean);
-        if (sessionSynchronizationListener == null) {
-            sessionSynchronizationListener =  new SessionSynchronizationListener(bean, invocationContext.getFactory());
-            this.listeners.put(bean, sessionSynchronizationListener);
+        Factory<?, ?> factory = invocationContext.getFactory();
+        EZBStatefulSessionFactory<?, ?> statefulSessionFactory = null;
+        if (factory instanceof EZBStatefulSessionFactory<?, ?>) {
+            statefulSessionFactory = (EZBStatefulSessionFactory<?, ?>) factory;
         }
 
+        Synchronization sessionSynchronizationListener = statefulSessionFactory.getSessionSynchronizationListener(tx);
+        if (sessionSynchronizationListener == null) {
+            sessionSynchronizationListener =  new SessionSynchronizationListener(bean, statefulSessionFactory, tx);
+            statefulSessionFactory.setSessionSynchronizationListener(tx, sessionSynchronizationListener);
+
+
         // add only once until
-        if (sessionSynchronizationListener.isReady()) {
 
             try {
                 getTransactionManager().getTransaction().registerSynchronization(sessionSynchronizationListener);
@@ -139,8 +150,8 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
             } finally {
                 invocationContext.getFactory().getOperationStateThreadLocal().set(oldState);
             }
-            sessionSynchronizationListener.inTX();
         }
+
 
     }
 }
