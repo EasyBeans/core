@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" output="plugins/artifact-filename/target/classes" path="plugins/artifact-filename/src/main/java"/>
 	<classpathentry kind="src" output="modules/util/target/classes" path="modules/util/src/main/java"/>
+	<classpathentry kind="src" output="modules/util/target/test-classes" path="modules/util/src/test/java"/>
 	<classpathentry kind="src" output="modules/api/target/classes" path="modules/api/src/main/java"/>
 	<classpathentry kind="src" output="modules/jacc-provider/target/classes" path="modules/jacc-provider/src/main/java"/>
 	<classpathentry kind="src" output="modules/jndi-resolver/target/classes" path="modules/jndi-resolver/src/main/java"/>
@@ -75,7 +76,7 @@
 	<classpathentry excluding="**" kind="src" output="modules/osgi/components/smartclient/target/classes" path="modules/osgi/components/smartclient/src/main/resources"/>
 	<classpathentry kind="src" output="itests/basic/target/test-classes" path="itests/basic/src/test/java"/>
 	<classpathentry excluding="**" kind="src" output="itests/basic/target/test-classes" path="itests/basic/src/test/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
