@@ -51,6 +51,7 @@ import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
 import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
+import org.ow2.util.url.URLUtils;
 
 
 /**
@@ -58,6 +59,12 @@ import org.ow2.util.log.LogFactory;
  * @author Florent Benoit
  */
 public class EasyBeansEJBContainer extends EJBContainer {
+
+    /**
+     * System config file.
+     */
+    public static final String EASYBEANS_SYSTEM_FILE_PROPERTY = "easybeans.embeddable.config.path";
+
 
     /**
      * Default XML file.
@@ -94,10 +101,15 @@ public class EasyBeansEJBContainer extends EJBContainer {
      */
     public void start() {
 
-
-        //TODO: user configuration ?
         URL xmlConfigurationURL = null;
-        xmlConfigurationURL = Thread.currentThread().getContextClassLoader().getResource(DEFAULT_XML_FILE);
+
+        // User system configuration ?
+        String systemPath = System.getProperty(EASYBEANS_SYSTEM_FILE_PROPERTY);
+        if (systemPath != null) {
+            xmlConfigurationURL = URLUtils.fileToURL(new File(systemPath));
+        } else {
+            xmlConfigurationURL = Thread.currentThread().getContextClassLoader().getResource(DEFAULT_XML_FILE);
+        }
 
 
         // Add the configuration URL to the existing list
