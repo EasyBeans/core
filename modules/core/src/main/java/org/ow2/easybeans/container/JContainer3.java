@@ -532,6 +532,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Run the enhancer on the container.
+     * @param createBeanFactories if needs to create bean factories or only perform classic enhancement
      * @throws EZBContainerException if enhancement fails
      */
     public void enhance(final boolean createBeanFactories) throws EZBContainerException {
@@ -561,38 +562,40 @@ public class JContainer3 implements EZBContainer {
                 logger.debug("Enhancement elapsed during : " + (System.currentTimeMillis() - tStartEnhancing) + " ms");
             }
 
-            // Check if there is META-INF/persistence.xml file
-            PersistenceUnitManager analyzedPersistenceUnitManager = null;
-            try {
-                JPersistenceUnitInfo[] persistenceUnitInfos =
-                        PersistenceXmlFileAnalyzer.analyzePersistenceXmlFile(getArchive());
-
-                // Dispatch life cycle event.
-                if (this.dispatcher != null) {
-                    this.dispatcher.dispatch(new EventContainerStarting(this.j2eeManagedObjectId, getArchive(),
-                            persistenceUnitInfos, this.configuration));
-                }
-
-                if (persistenceUnitInfos != null) {
-                    analyzedPersistenceUnitManager =
-                            PersistenceXmlFileAnalyzer.loadPersistenceProvider(persistenceUnitInfos, getClassLoader());
-                }
-            } catch (PersistenceXmlFileAnalyzerException e) {
-                throw new EZBContainerException("Cannot analyze the persistence.xml file in the archive", e);
-            }
-
-            // No previous manager
-            if (this.persistenceUnitManager == null) {
-                this.persistenceUnitManager = analyzedPersistenceUnitManager;
-            } else {
-                // merge old and new.
-                if (analyzedPersistenceUnitManager != null) {
-                    this.persistenceUnitManager.merge(analyzedPersistenceUnitManager);
-                }
-            }
-
             // Create Beans Factories
             if (createBeanFactories) {
+
+                // Check if there is META-INF/persistence.xml file
+                PersistenceUnitManager analyzedPersistenceUnitManager = null;
+                try {
+                    JPersistenceUnitInfo[] persistenceUnitInfos =
+                            PersistenceXmlFileAnalyzer.analyzePersistenceXmlFile(getArchive());
+
+                    // Dispatch life cycle event.
+                    if (this.dispatcher != null) {
+                        this.dispatcher.dispatch(new EventContainerStarting(this.j2eeManagedObjectId, getArchive(),
+                                persistenceUnitInfos, this.configuration));
+                    }
+
+                    if (persistenceUnitInfos != null) {
+                        analyzedPersistenceUnitManager =
+                                PersistenceXmlFileAnalyzer.loadPersistenceProvider(persistenceUnitInfos, getClassLoader());
+                    }
+                } catch (PersistenceXmlFileAnalyzerException e) {
+                    throw new EZBContainerException("Cannot analyze the persistence.xml file in the archive", e);
+                }
+
+                // No previous manager
+                if (this.persistenceUnitManager == null) {
+                    this.persistenceUnitManager = analyzedPersistenceUnitManager;
+                } else {
+                    // merge old and new.
+                    if (analyzedPersistenceUnitManager != null) {
+                        this.persistenceUnitManager.merge(analyzedPersistenceUnitManager);
+                    }
+                }
+
+
                 if (this.dispatcher == null) {
                     this.dispatcher = new EventDispatcher();
                 }
