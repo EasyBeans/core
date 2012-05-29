@@ -43,6 +43,10 @@
     </dependency>
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jpa-2.0-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
       <artifactId>ow2-ejb-3.1-spec</artifactId>
     </dependency>
     <dependency>
@@ -87,6 +91,11 @@
     <dependency>
        <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-component-event</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans</groupId>
+      <artifactId>easybeans-component-jdbcpool</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
