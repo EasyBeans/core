@@ -63,8 +63,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>jotm</groupId>
-      <artifactId>jotm</artifactId>
+      <groupId>org.ow2.jotm</groupId>
+      <artifactId>jotm-core</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

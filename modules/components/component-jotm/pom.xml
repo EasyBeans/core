@@ -52,8 +52,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>jotm</groupId>
-      <artifactId>jotm</artifactId>
+      <groupId>org.ow2.jotm</groupId>
+      <artifactId>jotm-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.jotm</groupId>
+      <artifactId>jotm-interceptor-jrmp</artifactId>
     </dependency>
   </dependencies>
 </project>

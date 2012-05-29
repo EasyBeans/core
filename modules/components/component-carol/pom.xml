@@ -52,9 +52,12 @@
       <artifactId>carol</artifactId>
     </dependency>
     <dependency>
-      <groupId>jotm</groupId>
-      <artifactId>jotm</artifactId>
-      <scope>provided</scope>
+      <groupId>org.ow2.jotm</groupId>
+      <artifactId>jotm-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.jotm</groupId>
+      <artifactId>jotm-interceptor-jrmp</artifactId>
     </dependency>
     <dependency>
         <groupId>org.ow2.easybeans</groupId>

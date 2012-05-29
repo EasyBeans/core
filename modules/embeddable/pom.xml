@@ -94,6 +94,11 @@
       <artifactId>easybeans-component-quartz</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.ow2.jotm</groupId>
+      <artifactId>jotm-interceptor-jrmp</artifactId>
+    </dependency>
     
     <!-- For the tests -->
     <dependency>

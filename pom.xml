@@ -46,6 +46,7 @@
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>
     <carol.version>3.0.9</carol.version>
+    <jotm.version>2.2.3</jotm.version>
     <monolog.version>2.1.12</monolog.version>
     <slf4j.version>1.5.8</slf4j.version>
     <testng.version>6.3.1</testng.version>
@@ -228,43 +229,14 @@
       </dependency>
 
       <dependency>
-        <groupId>jotm</groupId>
-        <artifactId>jotm</artifactId>
-        <version>2.0.10</version>
-        <!-- Exclude the connector as it is a too old version -->
-        <exclusions>
-          <exclusion>
-            <groupId>javax.resource</groupId>
-            <artifactId>connector</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-          </exclusion>
-          <exclusion>
-            <!-- Exclude non POA enabled IIOP Stubs -->
-            <groupId>jotm</groupId>
-            <artifactId>jotm_iiop_stubs</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.objectweb.carol</groupId>
-            <artifactId>carol</artifactId>
-          </exclusion>
-        </exclusions>
+        <groupId>org.ow2.jotm</groupId>
+        <artifactId>jotm-core</artifactId>
+        <version>${jotm.version}</version>
       </dependency>
       <dependency>
-        <groupId>jotm</groupId>
-        <artifactId>jotm_jrmp_stubs</artifactId>
-        <version>2.0.10</version>
-      </dependency>
-      <dependency>
-        <groupId>howl</groupId>
-        <artifactId>howl-logger</artifactId>
-        <version>0.1.11</version>
+        <groupId>org.ow2.jotm</groupId>
+        <artifactId>jotm-interceptor-jrmp</artifactId>
+        <version>${jotm.version}</version>
       </dependency>
 
       <dependency>
