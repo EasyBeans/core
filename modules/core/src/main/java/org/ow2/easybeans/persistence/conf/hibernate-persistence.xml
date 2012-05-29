@@ -33,6 +33,7 @@
    <properties>
      <property name="hibernate.cache.provider_class" value="org.hibernate.cache.HashtableCacheProvider"/>
      <property name="hibernate.transaction.manager_lookup_class" value="org.hibernate.transaction.JOTMTransactionManagerLookup"/>
+     <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.JOTMJtaPlatform" />
    </properties>
 </persistence-unit>
 </persistence>
