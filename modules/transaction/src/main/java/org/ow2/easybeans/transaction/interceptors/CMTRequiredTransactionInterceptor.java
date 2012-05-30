@@ -170,8 +170,6 @@ public class CMTRequiredTransactionInterceptor extends AbsTransactionInterceptor
                             throw new RuntimeException("Unexpected transaction status" + getTransactionManager().getStatus());
                         }
                     } catch (RollbackException e) {
-                        // Needs to discard the instance
-                        discard(invocationContext);
                         throw new TransactionRolledbackLocalException("Could not commit transaction", e);
                     } catch (Exception e) {
                         throw new EJBException("Container exception", e);
