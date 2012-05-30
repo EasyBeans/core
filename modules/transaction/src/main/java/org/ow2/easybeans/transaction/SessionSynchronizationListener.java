@@ -36,6 +36,9 @@ import javax.transaction.Transaction;
 
 import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.OperationState;
+import org.ow2.easybeans.api.bean.EasyBeansSFSB;
+import org.ow2.util.pool.api.Pool;
+import org.ow2.util.pool.api.PoolException;
 
 /**
  * This listener will be notified by the transaction manager and will call
@@ -45,26 +48,39 @@ import org.ow2.easybeans.api.OperationState;
 public class SessionSynchronizationListener implements Synchronization {
 
     /**
-     * Bean on which synchonization will be done.
+     * Bean or wrapper on which synchonization will be done.
      */
     private SessionSynchronization synchronizedBean = null;
 
     /**
+     * Stateful session bean that is used to manage Session syncrhonization.
+     */
+    private EasyBeansSFSB statefulBean = null;
+
+    /**
      * Stateful session Factory of the bean.
      */
-    private EZBStatefulSessionFactory factory = null;
+    private EZBStatefulSessionFactory<EasyBeansSFSB, Long> factory = null;
 
+    /**
+     * Transaction on which this listener is associated.
+     */
     private Transaction tx = null;
 
     /**
      * Creates a listener which will act on the given bean.
      * @param synchronizedBean bean on which call synchronization methods.
      * @param factory the EasyBeans factory.
+     * @param tx the given transaction
+     * @param statefulBean the stateful session bean
      */
-    public SessionSynchronizationListener(final SessionSynchronization synchronizedBean, final EZBStatefulSessionFactory factory, final Transaction tx) {
+    public SessionSynchronizationListener(final SessionSynchronization synchronizedBean,
+            final EZBStatefulSessionFactory<EasyBeansSFSB, Long> factory,
+            final Transaction tx, final EasyBeansSFSB statefulBean) {
         this.synchronizedBean = synchronizedBean;
         this.factory = factory;
         this.tx = tx;
+        this.statefulBean = statefulBean;
     }
 
     /**
@@ -84,6 +100,15 @@ public class SessionSynchronizationListener implements Synchronization {
         try {
             this.synchronizedBean.beforeCompletion();
         } catch (EJBException e) {
+            // get pool
+            Pool<EasyBeansSFSB, Long> pool = this.factory.getPool();
+
+            // discard instance
+            try {
+                pool.discard(this.statefulBean);
+            } catch (PoolException pe) {
+                throw new EJBException("Unable to discard the instance", pe);
+            }
             throw e;
         } catch (RemoteException e) {
             throw new EJBException("Error in beforeCompletion()", e);

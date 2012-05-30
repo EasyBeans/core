@@ -40,6 +40,7 @@ import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.OperationState;
+import org.ow2.easybeans.api.bean.EasyBeansSFSB;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.transaction.SessionSynchronizationListener;
 import org.ow2.util.log.Log;
@@ -113,14 +114,14 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
          */
 
         Factory<?, ?> factory = invocationContext.getFactory();
-        EZBStatefulSessionFactory<?, ?> statefulSessionFactory = null;
-        if (factory instanceof EZBStatefulSessionFactory<?, ?>) {
-            statefulSessionFactory = (EZBStatefulSessionFactory<?, ?>) factory;
+        EZBStatefulSessionFactory<EasyBeansSFSB, Long> statefulSessionFactory = null;
+        if (factory instanceof EZBStatefulSessionFactory) {
+            statefulSessionFactory = (EZBStatefulSessionFactory<EasyBeansSFSB, Long>) factory;
         }
 
         Synchronization sessionSynchronizationListener = statefulSessionFactory.getSessionSynchronizationListener(tx);
         if (sessionSynchronizationListener == null) {
-            sessionSynchronizationListener =  new SessionSynchronizationListener(bean, statefulSessionFactory, tx);
+            sessionSynchronizationListener =  new SessionSynchronizationListener(bean, statefulSessionFactory, tx, (EasyBeansSFSB) o);
             statefulSessionFactory.setSessionSynchronizationListener(tx, sessionSynchronizationListener);
 
 
