@@ -36,12 +36,14 @@ import org.ow2.easybeans.api.event.lifecycle.EZBEventLifeCycleStopped;
 import org.ow2.easybeans.api.event.lifecycle.EZBEventLifeCycleStopping;
 import org.ow2.easybeans.component.audit.jmx.JMXNotifier;
 import org.ow2.easybeans.component.audit.report.InvocationAuditReportFactory;
-import org.ow2.util.auditreport.impl.InvocationAuditReport;
+import org.ow2.util.auditreport.impl.GenericAuditReport;
 import org.ow2.util.auditreport.impl.LifeCycleAuditReport;
 import org.ow2.util.auditreport.impl.LifeCycleAuditReport.STEP;
+import org.ow2.util.auditreport.impl.event.Event;
 import org.ow2.util.event.api.EventPriority;
 import org.ow2.util.event.api.IEvent;
 import org.ow2.util.event.api.IEventService;
+import org.ow2.util.event.impl.EventDispatcher;
 
 /**
  * This class listen to every event comming from its audited bean.
@@ -95,7 +97,16 @@ public class Auditor implements EZBEventListener {
     public void handle(final IEvent event) {
         String eventOn = ((EZBEvent) event).getEventProviderId();
         String methodName = eventOn.substring(eventOn.lastIndexOf("/") + 1, eventOn.length());
-        this.eventService.getDispatcher("EJB");
+        Event eventReport;
+        EventDispatcher dispatcherEJB = (EventDispatcher) this.eventService.getDispatcher("EJB");
+        if(dispatcherEJB == null) {
+            dispatcherEJB = new EventDispatcher();
+            dispatcherEJB.setNbWorkers(2);
+            dispatcherEJB.start();
+            this.eventService.registerDispatcher("EJB", dispatcherEJB);
+            dispatcherEJB = (EventDispatcher) this.eventService.getDispatcher("EJB");
+        }
+
         if (EZBEventBeanInvocationBegin.class.isAssignableFrom(event.getClass())) {
             EZBEventBeanInvocationBegin e = (EZBEventBeanInvocationBegin) event;
             if (e.getEventProviderId().contains(this.eventProviderFilter)) {
@@ -105,41 +116,42 @@ public class Auditor implements EZBEventListener {
         if (EZBEventBeanInvocationEnd.class.isAssignableFrom(event.getClass())) {
             EZBEventBeanInvocationEnd eventEnd = (EZBEventBeanInvocationEnd) event;
             if (eventEnd.getEventProviderId().contains(this.eventProviderFilter)) {
-                this.jmxNotifier.sendAuditNotification(InvocationAuditReport.class.getName(), this.invocationAuditReportFactory.getAuditReport(eventEnd.getTime(), eventEnd, eventEnd.getEventProviderId()).toString());
+                eventReport = new Event((GenericAuditReport)this.invocationAuditReportFactory.getAuditReport(eventEnd.getTime(), eventEnd,eventEnd.getEventProviderId()));
+            	dispatcherEJB.dispatch(eventReport);
             }
         }
         if (EZBEventBeanInvocationError.class.isAssignableFrom(event.getClass())) {
             EZBEventBeanInvocationError eventEnd = (EZBEventBeanInvocationError) event;
             if (eventEnd.getEventProviderId().contains(this.eventProviderFilter)) {
-                this.jmxNotifier.sendAuditNotification(InvocationAuditReport.class.getName(), this.invocationAuditReportFactory
-                        .getAuditReport(eventEnd.getTime(), eventEnd, eventEnd.getEventProviderId()).toString());
+            	eventReport = new Event((GenericAuditReport)this.invocationAuditReportFactory.getAuditReport(eventEnd.getTime(), eventEnd,eventEnd.getEventProviderId()));
+            	dispatcherEJB.dispatch(eventReport);
             }
         }
         if (this.lifecycleEnabled) {
             if (EZBEventLifeCycleStarted.class.isAssignableFrom(event.getClass())) {
                 EZBEventLifeCycleStarted eventEnd = (EZBEventLifeCycleStarted) event;
-                this.jmxNotifier.sendAuditNotification(LifeCycleAuditReport.class.getName(),
-                        getLifeCycleAuditReport(eventEnd, this.eventProviderFilter, STEP.STARTED, Thread.currentThread())
-                                .toString());
+                eventReport = new Event((GenericAuditReport)getLifeCycleAuditReport(eventEnd,
+                        this.eventProviderFilter, STEP.STARTED, Thread.currentThread()));
+            	dispatcherEJB.dispatch(eventReport);
             }
             if (EZBEventLifeCycleStarting.class.isAssignableFrom(event.getClass())) {
                 EZBEventLifeCycleStarting eventEnd = (EZBEventLifeCycleStarting) event;
-                this.jmxNotifier.sendAuditNotification(LifeCycleAuditReport.class.getName(),
-                        getLifeCycleAuditReport(eventEnd, this.eventProviderFilter, STEP.STARTING, Thread.currentThread())
-                                .toString());
-            }
+                eventReport = new Event((GenericAuditReport)getLifeCycleAuditReport(eventEnd,
+                        this.eventProviderFilter, STEP.STARTING, Thread.currentThread()));
+            	dispatcherEJB.dispatch(eventReport);
+           }
             if (EZBEventLifeCycleStopped.class.isAssignableFrom(event.getClass())) {
                 EZBEventLifeCycleStopped eventEnd = (EZBEventLifeCycleStopped) event;
-                this.jmxNotifier.sendAuditNotification(LifeCycleAuditReport.class.getName(),
-                        getLifeCycleAuditReport(eventEnd, this.eventProviderFilter, STEP.STOPPED, Thread.currentThread())
-                                .toString());
-            }
+                eventReport = new Event((GenericAuditReport)getLifeCycleAuditReport(eventEnd,
+                        this.eventProviderFilter, STEP.STOPPED, Thread.currentThread()));
+            	dispatcherEJB.dispatch(eventReport);
+           }
             if (EZBEventLifeCycleStopping.class.isAssignableFrom(event.getClass())) {
                 EZBEventLifeCycleStopping eventEnd = (EZBEventLifeCycleStopping) event;
-                this.jmxNotifier.sendAuditNotification(LifeCycleAuditReport.class.getName(),
-                        getLifeCycleAuditReport(eventEnd, this.eventProviderFilter, STEP.STOPPING, Thread.currentThread())
-                                .toString());
-            }
+                eventReport = new Event((GenericAuditReport)getLifeCycleAuditReport(eventEnd,
+                        this.eventProviderFilter, STEP.STOPPING, Thread.currentThread()));
+            	dispatcherEJB.dispatch(eventReport);
+           }
         }
     }
 
