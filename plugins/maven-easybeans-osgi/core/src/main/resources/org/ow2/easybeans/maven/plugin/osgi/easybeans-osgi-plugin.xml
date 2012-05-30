@@ -54,6 +54,7 @@
  javax.sound.midi.spi; \
  javax.sound.sampled; \
  javax.sound.sampled.spi; \
+ javax.script; \
  javax.sql; \
  javax.sql.rowset; \
  javax.sql.rowset.serial; \
@@ -131,7 +132,7 @@
  sun.rmi.server; \
  sun.rmi.transport; \
  sun.rmi.registry; \
- version=1.5.0
+ version=1.6.0
  
 org.osgi.framework.bootdelegation=sun.*,com.sun.*
 org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.api
