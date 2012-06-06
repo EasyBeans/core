@@ -120,7 +120,10 @@ public class PersistenceUnitManager implements EZBPersistenceUnitManager {
      * @return entity manager corresponding to arguments
      */
     public EntityManager getEntityManager(final String unitName, final PersistenceContextType type) {
-        // TODO: Manage also extended persistence context;
+        if (PersistenceContextType.EXTENDED == type) {
+            return getPersistenceContext(unitName).getExtendedEntityManager();
+        }
+        // Else return a transaction scoped entity manager
         return getPersistenceContext(unitName).getTxEntityManager();
     }
 
@@ -183,7 +186,7 @@ public class PersistenceUnitManager implements EZBPersistenceUnitManager {
      * @param name property name
      * @param value property value
      */
-    public void setProperty (String name, String value) {
+    public void setProperty (final String name, final String value) {
         this.setProperty(name, value, null);
     }
 
@@ -195,8 +198,8 @@ public class PersistenceUnitManager implements EZBPersistenceUnitManager {
      * @param persistenceUnitName specific persistenceUnitName. If null, set the property
      *                            in all persistence units
      */
-    public void setProperty (String name, String value, String persistenceUnitName) {
-        JPersistenceUnitInfo[] persistenceUnitInfos = this.getPersistenceUnitInfos();
+    public void setProperty (final String name, final String value, final String persistenceUnitName) {
+        JPersistenceUnitInfo[] persistenceUnitInfos = getPersistenceUnitInfos();
         for (JPersistenceUnitInfo persistenceUnitInfo : persistenceUnitInfos) {
             if (persistenceUnitName == null) {
                 persistenceUnitInfo.getProperties().setProperty(name, value);
@@ -213,9 +216,9 @@ public class PersistenceUnitManager implements EZBPersistenceUnitManager {
      * @param name property name
      * @return property values in each persistence unit info
      */
-    public Map<String, String> getProperty (String name) {
+    public Map<String, String> getProperty (final String name) {
         Map<String, String> properties = new HashMap<String, String>();
-        JPersistenceUnitInfo[] persistenceUnitInfos = this.getPersistenceUnitInfos();
+        JPersistenceUnitInfo[] persistenceUnitInfos = getPersistenceUnitInfos();
         for (JPersistenceUnitInfo persistenceUnitInfo : persistenceUnitInfos) {
             if (persistenceUnitInfo.getProperties().getProperty(name) != null){
                 properties.put(persistenceUnitInfo.getPersistenceUnitName(), persistenceUnitInfo.getProperties().getProperty(name));

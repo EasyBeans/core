@@ -29,7 +29,9 @@ import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
@@ -55,6 +57,7 @@ import org.ow2.easybeans.container.session.SessionFactory;
 import org.ow2.easybeans.event.bean.EventBeanInvocationEnd;
 import org.ow2.easybeans.event.bean.EventBeanInvocationError;
 import org.ow2.easybeans.naming.J2EEManagedObjectNamingHelper;
+import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
 import org.ow2.easybeans.rpc.JEJBResponse;
 import org.ow2.easybeans.rpc.api.EJBLocalRequest;
 import org.ow2.easybeans.rpc.api.EJBResponse;
@@ -99,6 +102,12 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     private Map<Long, Lock> locks;
 
     /**
+     * Extended Persistence contexts for a given bean.
+     */
+    private Map<EasyBeansSFSB, List<EZBExtendedEntityManager>> extendedPersistenceContexts = null;
+
+
+    /**
      * Manages the current bean ID being invoked.
      */
     private InheritableThreadLocal<Long> currentBeanId = null;
@@ -108,7 +117,6 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      */
     private Map<Transaction, Synchronization> sessionSynchronizationListeners = null;
 
-
     /**
      * Builds a new factory with a given name and its container.
      * @param className name of this factory (name of class that is managed)
@@ -116,6 +124,18 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      * @throws FactoryException if class can't be loaded.
      */
     public StatefulSessionFactory(final String className, final EZBContainer container) throws FactoryException {
+        this(className, container, false);
+    }
+
+    /**
+     * Builds a new factory with a given name and its container.
+     * @param className name of this factory (name of class that is managed)
+     * @param container the root component of this factory.
+     * @param useExtendedPersistenceContext if the SFSB is using an extended Persistence context
+     * @throws FactoryException if class can't be loaded.
+     */
+    public StatefulSessionFactory(final String className, final EZBContainer container,
+            final boolean useExtendedPersistenceContext) throws FactoryException {
         super(className, container);
 
         this.locks = new HashMap<Long, Lock>();
@@ -124,9 +144,14 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
         // Init Stateful session synchronization
         this.sessionSynchronizationListeners = new WeakHashMap<Transaction, Synchronization>();
 
+        // Extended persistence contexts
+        this.extendedPersistenceContexts = new HashMap<EasyBeansSFSB, List<EZBExtendedEntityManager>>();
 
         // Use of the old pool ?
-        if (Boolean.getBoolean(OLD_POOL)) {
+        // If we're using extended persistence context, we need to use lazy
+        // initialization so that we can track creation of new stateful beans
+        // from a stateful session bean
+        if (Boolean.getBoolean(OLD_POOL) || useExtendedPersistenceContext) {
             setPool(new JPool<EasyBeansSFSB, Long>(new JPoolWrapperFactory<EasyBeansSFSB, Long>(this)));
         } else {
             // new pool
@@ -179,14 +204,55 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      */
     @Override
     public void remove(final EasyBeansSFSB instance) {
-        super.remove(instance);
-        instance.setEasyBeansRemoved(true);
 
-        // Remove lock for this instance
-        synchronized (this.locks) {
-            this.locks.remove(instance.getEasyBeansStatefulID());
+        // Close any extended persistence context that are associated to the current instance
+        List<EZBExtendedEntityManager> extendedEntityManagers = getExtendedPersistenceContexts(instance);
+        try {
+            if (extendedEntityManagers != null) {
+                for (EZBExtendedEntityManager extendedEntityManager : extendedEntityManagers) {
+                    extendedEntityManager.close();
+                }
+            }
+        } finally {
+
+            super.remove(instance);
+            instance.setEasyBeansRemoved(true);
+
+            // Remove lock for this instance
+            synchronized (this.locks) {
+                this.locks.remove(instance.getEasyBeansStatefulID());
+            }
         }
     }
+
+
+    /**
+     * before set for the current container the extended persistence contexts.
+     * Injects Resources into the Bean.
+     * @param instance The Bean instance to be injected.
+     * @throws PoolException if resources cannot be injected.
+     */
+    @Override
+    protected void injectResources(final EasyBeansSFSB instance) throws PoolException {
+
+        // Get current Map of Extended Persistence context for this current
+        // instance and linked instance
+        Map<String, EZBExtendedEntityManager> oldExtendedPersistenceContexts = getContainer()
+                .getCurrentExtendedPersistenceContexts();
+        if (oldExtendedPersistenceContexts == null) {
+            // It means that we're the first stateful in the chain
+            Map<String, EZBExtendedEntityManager> extendedPersistenceContexts = new HashMap<String, EZBExtendedEntityManager>();
+            getContainer().setCurrentExtendedPersistenceContexts(extendedPersistenceContexts);
+        }
+        try {
+            super.injectResources(instance);
+        } finally {
+            // Reset with the old persistence contexts (if any)
+            getContainer().setCurrentExtendedPersistenceContexts(oldExtendedPersistenceContexts);
+        }
+
+    }
+
 
     /**
      * Do a local call on a method of this factory.
@@ -284,6 +350,8 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                         new NoSuchMethodException("The method is not found on the bean")));
                 return ejbResponse;
             }
+
+
 
             Object value = null;
 
@@ -460,6 +528,44 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      */
     public void unsetSessionSynchronizationListener(final Transaction tx) {
         this.sessionSynchronizationListeners.remove(tx);
+    }
+
+    /**
+     * Gets the list of extended persistence context for the given stateful session bean.
+     * @param statefulSessionBean the given bean
+     * @return the list of extended persistence contexts
+     */
+    public List<EZBExtendedEntityManager> getExtendedPersistenceContexts(final EasyBeansSFSB statefulSessionBean) {
+        return this.extendedPersistenceContexts.get(statefulSessionBean);
+    }
+
+    /**
+     * Adds the given extended persistence context for the given stateful
+     * session bean.
+     * @param statefulSessionBean the given bean
+     * @param extendedEntityManager the given persistence context
+     */
+    public void addExtendedPersistenceContext(final EasyBeansSFSB statefulSessionBean,
+            final EZBExtendedEntityManager extendedEntityManager) {
+        List<EZBExtendedEntityManager> list = this.extendedPersistenceContexts.get(statefulSessionBean);
+        if (list == null) {
+            list = new ArrayList<EZBExtendedEntityManager>();
+            this.extendedPersistenceContexts.put(statefulSessionBean, list);
+        }
+        list.add(extendedEntityManager);
+    }
+
+
+    /**
+     * Stops the factory.
+     */
+    @Override
+    public void stop() {
+        super.stop();
+
+        // Cleanup extended persistence contexts
+        this.extendedPersistenceContexts.clear();
+
     }
 
 }

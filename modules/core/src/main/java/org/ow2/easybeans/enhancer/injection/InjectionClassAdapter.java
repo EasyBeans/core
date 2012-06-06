@@ -1322,6 +1322,7 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
      * @param mv the method visitor on which instructions are added
      */
     private void addCallEntityManagerHelper(final IJavaxPersistenceContext javaxPersistenceContext, final MethodVisitor mv) {
+
         // get EasyBeansContext
         addCallGetEasyBeansContext(mv, null);
 
@@ -1331,6 +1332,11 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         // Transaction Type
         mv.visitFieldInsn(GETSTATIC, "javax/persistence/PersistenceContextType", javaxPersistenceContext.getType().toString(),
                 "Ljavax/persistence/PersistenceContextType;");
+
+        // this
+        mv.visitVarInsn(ALOAD, 0);
+
+
         // Call EntityManagerHelper
         mv
         .visitMethodInsn(
@@ -1338,7 +1344,8 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                 "org/ow2/easybeans/injection/EntityManagerHelper",
                 "getEntityManager",
                 "(" + EZB_EJBCONTEXT_DESC
-                + "Ljava/lang/String;Ljavax/persistence/PersistenceContextType;)"
+                + "Ljava/lang/String;Ljavax/persistence/PersistenceContextType;"
+                + "Lorg/ow2/easybeans/api/bean/EasyBeansBean;)"
                 + "Ljavax/persistence/EntityManager;");
     }
 

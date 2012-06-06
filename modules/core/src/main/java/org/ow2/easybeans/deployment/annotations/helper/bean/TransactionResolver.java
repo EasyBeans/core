@@ -45,6 +45,7 @@ import org.ow2.easybeans.transaction.interceptors.CMTNotSupportedTransactionInte
 import org.ow2.easybeans.transaction.interceptors.CMTRequiredTransactionInterceptor;
 import org.ow2.easybeans.transaction.interceptors.CMTRequiresNewTransactionInterceptor;
 import org.ow2.easybeans.transaction.interceptors.CMTSupportsTransactionInterceptor;
+import org.ow2.easybeans.transaction.interceptors.ExtendedPersistenceContextInterceptor;
 import org.ow2.easybeans.transaction.interceptors.ListenerSessionSynchronizationInterceptor;
 import org.ow2.easybeans.transaction.interceptors.MDBCMTRequiredTransactionInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
@@ -129,6 +130,14 @@ public final class TransactionResolver {
             .getInternalName(ListenerSessionSynchronizationInterceptor.class);
 
     /**
+     * Interceptor used to join the current TX for extended persistence contexts.
+     */
+    private static final String EXTENDED_PERSISTENCECONTEXT_INTERCEPTOR = Type
+            .getInternalName(ExtendedPersistenceContextInterceptor.class);
+
+
+
+    /**
      * Helper class, no public constructor.
      */
     private TransactionResolver() {
@@ -149,6 +158,7 @@ public final class TransactionResolver {
      * Adds the right transaction interceptor depending of the transactional
      * attribute set by the user.
      * @param bean the given bean on which set the transactional interceptor.
+     * @param method the method on which to add the interceptors
      */
     public static void resolveMethod(final EasyBeansEjbJarClassMetadata bean, final EasyBeansEjbJarMethodMetadata method) {
 
@@ -258,6 +268,11 @@ public final class TransactionResolver {
         // implements SessionSynchronization interface
         if (bean.hasSessionSynchronization() && !method.isSessionSynchronization()) {
             interceptors.add(new JClassInterceptor(LISTENER_SESSION_SYNCHRO_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+        }
+
+        // Add stateful interceptor in order to synchronize the extended persistence contexts on the current transaction
+        if (bean.isStateful() && bean.hasExtendedPersistenceContext()) {
+            interceptors.add(new JClassInterceptor(EXTENDED_PERSISTENCECONTEXT_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
         }
 
 

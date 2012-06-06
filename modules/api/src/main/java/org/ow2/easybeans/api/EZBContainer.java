@@ -27,7 +27,9 @@ package org.ow2.easybeans.api;
 
 
 import java.util.List;
+import java.util.Map;
 
+import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
 import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
 import org.ow2.util.archive.api.IArchive;
 
@@ -94,8 +96,22 @@ public interface EZBContainer extends EZBManageableContainer, EZBExtensor, EZBJ2
 
     /**
      * Run the enhancer on the selected container.
+     * @param createBeanFactories if needs to enhance class or also create/bind factories
      * @throws EZBContainerException if enhancement fails
      */
     void enhance(boolean createBeanFactories) throws EZBContainerException;
+
+    /**
+     * @return the extended persistence context for the current container.
+     * This return the current map from a thread local so the data is only on a current thread.
+     * The key of the returned map is the name of the persistence unit
+     */
+    Map<String, EZBExtendedEntityManager> getCurrentExtendedPersistenceContexts();
+
+    /**
+     * Sets the data on the current thread.
+     * @param extendedPersistenceContexts a map between the persistence unit name and the associated extended persistence context.
+     */
+    void setCurrentExtendedPersistenceContexts(Map<String, EZBExtendedEntityManager> extendedPersistenceContexts);
 
 }

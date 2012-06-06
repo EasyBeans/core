@@ -84,6 +84,14 @@ public class JPersistenceContext {
     }
 
     /**
+     * Gets the EntityManager used for Extended mode.
+     * @return the EntityManager used for Extended mode
+     */
+    public EntityManager getExtendedEntityManager() {
+        return new ContainerManagedExtendedEntityManager(this.entityManagerFactory.createEntityManager());
+    }
+
+    /**
      * Gets the EntityManager factory.
      * @return the EntityManager factory
      */

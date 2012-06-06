@@ -26,12 +26,16 @@
 package org.ow2.easybeans.deployment.metadata.ejbjar;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.persistence.PersistenceContextType;
 
 import org.ow2.easybeans.asm.Opcodes;
 import org.ow2.easybeans.deployment.annotations.exceptions.InterceptorsValidationException;
 import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
+import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceContext;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
 import org.ow2.util.ee.metadata.ejbjar.impl.EjbJarClassMetadata;
 import org.ow2.util.pool.api.IPoolConfiguration;
@@ -395,5 +399,49 @@ public class EasyBeansEjbJarClassMetadata
 
     public void setWebServiceHttpMethods(final List<String> webServiceHttpMethods) {
         this.webServiceHttpMethods = webServiceHttpMethods;
+    }
+
+    /**
+     * @return true if the class and attributes or setter methods have an extended persistence context.
+     */
+    public boolean hasExtendedPersistenceContext() {
+
+        // Compute a list of persistence contexts
+        List<IJavaxPersistenceContext> persistenceContexts = new ArrayList<IJavaxPersistenceContext>();
+
+        // On the class
+        if (getJavaxPersistenceContext() != null) {
+            persistenceContexts.add(getJavaxPersistenceContext());
+        }
+        if (getJavaxPersistencePersistenceContexts() != null && getJavaxPersistencePersistenceContexts().size() > 0) {
+            persistenceContexts.addAll(getJavaxPersistencePersistenceContexts());
+        }
+
+        // Now, for all methods
+        Collection<EasyBeansEjbJarMethodMetadata> methods = getMethodMetadataCollection();
+        for (EasyBeansEjbJarMethodMetadata method : methods) {
+            if (method.getJavaxPersistenceContext() != null) {
+                persistenceContexts.add(method.getJavaxPersistenceContext());
+            }
+        }
+
+        // Now, for all attributes
+        Collection<EasyBeansEjbJarFieldMetadata> fields = getStandardFieldMetadataCollection();
+        for (EasyBeansEjbJarFieldMetadata field : fields) {
+            if (field.getJavaxPersistenceContext() != null) {
+                persistenceContexts.add(field.getJavaxPersistenceContext());
+            }
+        }
+
+        boolean hasExtendedPersistenceContext = false;
+        for (IJavaxPersistenceContext persistenceContext : persistenceContexts) {
+            if (PersistenceContextType.EXTENDED == persistenceContext.getType()) {
+                hasExtendedPersistenceContext = true;
+                break;
+            }
+        }
+
+        return hasExtendedPersistenceContext;
+
     }
 }

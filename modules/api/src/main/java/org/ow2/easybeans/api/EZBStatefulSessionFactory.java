@@ -25,8 +25,13 @@
 
 package org.ow2.easybeans.api;
 
+import java.util.List;
+
 import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
+
+import org.ow2.easybeans.api.bean.EasyBeansSFSB;
+import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
 
 /**
  * Interface for Stateful session factory.
@@ -56,4 +61,21 @@ public interface EZBStatefulSessionFactory<PoolType, Clue> extends Factory<PoolT
      * @param tx the given transaction
      */
     void unsetSessionSynchronizationListener(Transaction tx);
+
+    /**
+     * Gets the extended persistence context registered for the given stateful session bean.
+     * @param statefulSessionBean the given bean
+     * @return the extended persistence contexts
+     */
+    List<EZBExtendedEntityManager> getExtendedPersistenceContexts(final EasyBeansSFSB statefulSessionBean);
+
+    /**
+     * Adds the given extended persistence context for the given stateful
+     * session bean.
+     * @param statefulSessionBean the given bean
+     * @param extendedEntityManager the given extended persistence context
+     */
+    void addExtendedPersistenceContext(final EasyBeansSFSB statefulSessionBean,
+            final EZBExtendedEntityManager extendedEntityManager);
+
 }

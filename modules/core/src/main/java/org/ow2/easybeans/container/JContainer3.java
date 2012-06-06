@@ -124,6 +124,7 @@ import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.easybeans.naming.strategy.EasyBeansV1NamingStrategy;
 import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
 import org.ow2.easybeans.persistence.PersistenceUnitManager;
+import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
 import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
 import org.ow2.easybeans.persistence.api.PersistenceXmlFileAnalyzerException;
 import org.ow2.easybeans.persistence.xml.JPersistenceUnitInfo;
@@ -256,6 +257,12 @@ public class JContainer3 implements EZBContainer {
     private String j2eeManagedObjectId = null;
 
     /**
+     * The key of the returned map is the name of the persistence unit.
+     */
+    private InheritableThreadLocal<Map<String, EZBExtendedEntityManager>> currentExtendedPersistenceContexts
+        = new InheritableThreadLocal<Map<String, EZBExtendedEntityManager>>();
+
+    /**
      * Build a new container on the given archive.
      * @param config The JContainer configuration storing the archive (jar file
      *        or exploded).
@@ -263,7 +270,6 @@ public class JContainer3 implements EZBContainer {
     public JContainer3(final EZBContainerConfig config) {
         setContainerConfig(config);
         this.bindingReferences = new ArrayList<EZBRef>();
-
     }
 
     /**
@@ -990,7 +996,7 @@ public class JContainer3 implements EZBContainer {
             }
         } else if (sessionBean.isStateful()) {
             try {
-                sessionFactory = new StatefulSessionFactory(className, this);
+                sessionFactory = new StatefulSessionFactory(className, this, sessionBean.hasExtendedPersistenceContext());
             } catch (FactoryException fe) {
                 throw new EZBContainerException("Cannot build the stateful factory", fe);
             }
@@ -1720,5 +1726,24 @@ public class JContainer3 implements EZBContainer {
     public IEventDispatcher getEventDispatcher() {
         return this.dispatcher;
     }
+
+
+    /**
+     * @return the extended persistence context for the current container.
+     * This return the current map from a thread local so the data is only on a current thread.
+     * The key of the returned map is the name of the persistence unit
+     */
+    public Map<String, EZBExtendedEntityManager> getCurrentExtendedPersistenceContexts() {
+        return this.currentExtendedPersistenceContexts.get();
+    }
+
+    /**
+     * Sets the data on the current thread.
+     * @param extendedPersistenceContexts a map between the persistence unit name and the associated extended persistence context.
+     */
+    public void setCurrentExtendedPersistenceContexts(final Map<String, EZBExtendedEntityManager> extendedPersistenceContexts) {
+        this.currentExtendedPersistenceContexts.set(extendedPersistenceContexts);
+    }
+
 
 }

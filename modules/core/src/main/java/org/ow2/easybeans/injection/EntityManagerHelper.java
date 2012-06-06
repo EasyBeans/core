@@ -25,12 +25,18 @@
 
 package org.ow2.easybeans.injection;
 
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
 
+import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.Factory;
+import org.ow2.easybeans.api.bean.EasyBeansBean;
+import org.ow2.easybeans.api.bean.EasyBeansSFSB;
 import org.ow2.easybeans.api.container.EZBEJBContext;
+import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
 import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -61,12 +67,60 @@ public final class EntityManagerHelper {
      * @return instance of an entity manager which will be used by the
      *         bean/interceptor.
      */
+    @SuppressWarnings("unchecked")
     public static EntityManager getEntityManager(final EZBEJBContext ejbContext, final String unitName,
-            final PersistenceContextType type) {
+            final PersistenceContextType type, final EasyBeansBean bean) {
         // get bean's factory
         Factory factory = ejbContext.getFactory();
         EZBPersistenceUnitManager persistenceUnitManager = factory.getContainer().getPersistenceUnitManager();
         if (persistenceUnitManager != null) {
+
+            // Check type
+            if (PersistenceContextType.EXTENDED == type) {
+                // Check that this is for StatefulSession Bean
+                if (factory instanceof EZBStatefulSessionFactory) {
+
+                    // Do we have an existing persistence contexts ?
+                    Map<String, EZBExtendedEntityManager> extendedPersistenceContexts = factory.getContainer()
+                            .getCurrentExtendedPersistenceContexts();
+
+                    if (extendedPersistenceContexts == null) {
+                        throw new IllegalStateException(
+                                "Extended PersistenceContexts map shouldn't be empty for stateful on factory + "
+                                        + factory.getClassName() + "'.");
+                    }
+
+                    // We have extended persistence contexts ?
+                    EZBExtendedEntityManager extendedEntityManager = extendedPersistenceContexts.get(unitName);
+
+                    if (extendedEntityManager != null) {
+
+                        // close() will occur only at the last ejb.remove() call
+                        // so needs to add a new usage on this extended
+                        // persistence context
+                        extendedEntityManager.addUsage();
+                    } else {
+                        // We didn't have found any previous Extended Entity
+                        // Manager, create a new one
+                        // Cast as EZBExtendedEntityManager as the type is
+                        // extended
+                        extendedEntityManager = (EZBExtendedEntityManager) persistenceUnitManager.getEntityManager(unitName,
+                                type);
+                        extendedPersistenceContexts.put(unitName, extendedEntityManager);
+                    }
+
+                    // Get the SFSB
+                    EasyBeansSFSB statefulSessionBean = (EasyBeansSFSB) bean;
+
+                    // Get the factory
+                    EZBStatefulSessionFactory statefulFactory = (EZBStatefulSessionFactory) factory;
+
+                    // Add extended Persistence context for the given bean.
+                    statefulFactory.addExtendedPersistenceContext(statefulSessionBean, extendedEntityManager);
+                    return extendedEntityManager;
+                }
+                logger.warn("Requested an EntityManager with an extended mode but factory {0} is not a stateful so no extended mode available.", factory);
+            }
             return persistenceUnitManager.getEntityManager(unitName, type);
         }
         logger.warn("Requested an EntityManager object but there is no persistenceUnitManager associated"
