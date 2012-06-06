@@ -85,6 +85,7 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
      * Add a synchronization listener to the transaction manager in order to be
      * notified and send actions on the bean. It should be done only once until
      * transaction is completed.
+     * @param tx the transaction on which to register the session synchronization object
      * @param invocationContext the context on the current invocation.
      */
     private void addSynchronization(final Transaction tx, final EasyBeansInvocationContext invocationContext) {
@@ -121,12 +122,11 @@ public class ListenerSessionSynchronizationInterceptor extends AbsTransactionInt
 
         Synchronization sessionSynchronizationListener = statefulSessionFactory.getSessionSynchronizationListener(tx);
         if (sessionSynchronizationListener == null) {
-            sessionSynchronizationListener =  new SessionSynchronizationListener(bean, statefulSessionFactory, tx, (EasyBeansSFSB) o);
+            sessionSynchronizationListener = new SessionSynchronizationListener(bean, statefulSessionFactory, tx,
+                    (EasyBeansSFSB) o);
             statefulSessionFactory.setSessionSynchronizationListener(tx, sessionSynchronizationListener);
 
-
-        // add only once until
-
+            // add only once until
             try {
                 getTransactionManager().getTransaction().registerSynchronization(sessionSynchronizationListener);
             } catch (IllegalStateException e) {
