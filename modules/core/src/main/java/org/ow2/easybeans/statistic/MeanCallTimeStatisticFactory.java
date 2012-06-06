@@ -27,6 +27,7 @@ package org.ow2.easybeans.statistic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.management.j2ee.statistics.CountStatistic;
 
@@ -169,13 +170,14 @@ public class MeanCallTimeStatisticFactory extends AbstractStatisticFactory {
             /**
              * The event provider filter.
              */
-            private String eventProviderFilter;
+            private Pattern eventProviderFilter;
 
             /**
              * The MeanCallTimeEventListener constructor.
              */
             public MeanCallTimeEventListener() {
-                this.eventProviderFilter = J2EEManagedObjectNamingHelper.getAllRelativeMethodsFilter(getStatisticProviderId());
+                this.eventProviderFilter = Pattern.compile(
+                        J2EEManagedObjectNamingHelper.getAllRelativeMethodsFilter(getStatisticProviderId()));
             }
 
             /**
@@ -184,7 +186,7 @@ public class MeanCallTimeStatisticFactory extends AbstractStatisticFactory {
              * @return The event provider filter.
              */
             public String getEventProviderFilter() {
-                return this.eventProviderFilter;
+                return this.eventProviderFilter.pattern();
             }
 
             /**
@@ -194,7 +196,8 @@ public class MeanCallTimeStatisticFactory extends AbstractStatisticFactory {
              */
             public boolean accept(final IEvent event) {
                 try {
-                    return ((EZBEventBeanInvocation) event).getEventProviderId().matches(getEventProviderFilter());
+                    return this.eventProviderFilter.matcher(
+                            ((EZBEventBeanInvocation) event).getEventProviderId()).matches();
                 } catch (Throwable error) {
                     return false;
                 }

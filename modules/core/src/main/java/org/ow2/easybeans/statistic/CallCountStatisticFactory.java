@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.statistic;
 
+import java.util.regex.Pattern;
+
 import javax.management.j2ee.statistics.CountStatistic;
 
 import org.ow2.easybeans.api.event.EZBEventListener;
@@ -146,13 +148,14 @@ public class CallCountStatisticFactory extends AbstractStatisticFactory {
             /**
              * The event provider filter.
              */
-            private String eventProviderFilter;
+            private Pattern eventProviderFilter;
 
             /**
              * The CallCountEventListener constructor.
              */
             public CallCountEventListener() {
-                this.eventProviderFilter = J2EEManagedObjectNamingHelper.getAllRelativeMethodsFilter(getStatisticProviderId());
+                this.eventProviderFilter = Pattern.compile(
+                        J2EEManagedObjectNamingHelper.getAllRelativeMethodsFilter(getStatisticProviderId()));
             }
 
             /**
@@ -161,7 +164,7 @@ public class CallCountStatisticFactory extends AbstractStatisticFactory {
              * @return The event provider filter.
              */
             public String getEventProviderFilter() {
-                return this.eventProviderFilter;
+                return this.eventProviderFilter.pattern();
             }
 
             /**
@@ -171,7 +174,8 @@ public class CallCountStatisticFactory extends AbstractStatisticFactory {
              */
             public boolean accept(final IEvent event) {
                 try {
-                    return ((EZBEventBeanInvocationEnd) event).getEventProviderId().matches(getEventProviderFilter());
+                    return this.eventProviderFilter.matcher(
+                            ((EZBEventBeanInvocationEnd) event).getEventProviderId()).matches();
                 } catch (Throwable error) {
                     return false;
                 }
