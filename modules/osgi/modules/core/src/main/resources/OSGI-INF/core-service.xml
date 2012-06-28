@@ -34,11 +34,12 @@
     <provide interface="org.ow2.easybeans.osgi.core.EZBCoreService" />
   </service>
 
-  <!-- Mandatory reference because Core needs carol to start -->
+
+  <!-- Mandatory reference because Core needs carol to start
   <reference name="carolComponent"
              cardinality="1..1"
              interface="org.ow2.easybeans.component.carol.CarolComponent"
-             policy="static" />
+             policy="static" /> -->
 
   <!-- Mandatory reference because Core needs event to start -->
   <reference name="eventComponent"

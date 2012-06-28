@@ -203,13 +203,28 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <artifactId>org.apache.felix.log</artifactId>
         <version>1.0.1</version>
       </bundle>
-
+      
       <!-- Java EE API -->
       <bundle>
         <groupId>org.ow2.spec.ee</groupId>
         <artifactId>ow2-jpa-2.0-spec</artifactId>
         <version>${ow2-spec.version}</version>
       </bundle>
+      <bundle>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-ejb-3.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-interceptor-1.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-annotation-1.1-spec</artifactId>
+        <version>${ow2-spec.version}</version>
+      </bundle>      
       <bundle>
         <groupId>org.ow2.spec.ee</groupId>
         <artifactId>ow2-javaee-5-spec</artifactId>
@@ -566,10 +581,8 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${project.version}</version>
       </bundle>
 
-
-
       <!-- For a GUI console -->
-      <!-- 
+      <!--
       <bundle>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.main</artifactId>
@@ -600,7 +613,8 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <artifactId>org.osgi.service.obr</artifactId>
         <version>1.0.2</version>
       </bundle>
-       -->
+      -->
+
 
 
     </bundles>

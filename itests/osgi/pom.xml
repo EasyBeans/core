@@ -75,6 +75,12 @@
 
             <module>
               <groupId>org.ow2.easybeans.tests</groupId>
+              <artifactId>easybeans-tests-osgi-applications-dummyejb</artifactId>
+              <version>${easybeans-tests-applications.version}</version>
+            </module>
+
+            <module>
+              <groupId>org.ow2.easybeans.tests</groupId>
               <artifactId>easybeans-tests-osgi-simple</artifactId>
               <version>${easybeans-tests-applications.version}</version>
             </module>
