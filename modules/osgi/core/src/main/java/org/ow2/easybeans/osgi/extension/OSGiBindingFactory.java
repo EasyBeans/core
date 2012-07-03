@@ -40,6 +40,7 @@ import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.binding.BindingException;
 import org.ow2.easybeans.api.binding.EZBBindingFactory;
 import org.ow2.easybeans.api.binding.EZBRef;
+import org.ow2.easybeans.container.session.singleton.SingletonSessionFactory;
 import org.ow2.easybeans.container.session.stateless.StatelessSessionFactory;
 import org.ow2.easybeans.osgi.handler.ManagedServiceEJBLocalHomeInvocationHandler;
 import org.ow2.easybeans.osgi.handler.ManagedServiceLocalCallInvocationHandler;
@@ -64,7 +65,7 @@ public class OSGiBindingFactory implements EZBBindingFactory {
     }
 
     public OSGiBindingFactory() {
-        registrations = new HashMap<EZBRef, ServiceRegistration>();
+        this.registrations = new HashMap<EZBRef, ServiceRegistration>();
     }
 
     /**
@@ -73,7 +74,7 @@ public class OSGiBindingFactory implements EZBBindingFactory {
      */
     public void bind(final EZBRef ref) throws BindingException {
         Factory<?, ?> factory = ref.getFactory();
-        if (factory instanceof StatelessSessionFactory) {
+        if (factory instanceof StatelessSessionFactory || factory instanceof SingletonSessionFactory) {
             EZBContainer container = factory.getContainer();
 
             // Get the BundleContext of the EjbJar
@@ -118,7 +119,7 @@ public class OSGiBindingFactory implements EZBBindingFactory {
                 // Register all local interfaces as services
                 Object proxy = Proxy.newProxyInstance(loader, new Class[] {clz, ManagedService.class}, handler);
                 ServiceRegistration registration = ((Registrable) handler).registerService(proxy, context);
-                registrations.put(ref, registration);
+                this.registrations.put(ref, registration);
             }
 
         }
@@ -129,7 +130,7 @@ public class OSGiBindingFactory implements EZBBindingFactory {
      * @see org.ow2.easybeans.api.binding.EZBBindingFactory#unbind(org.ow2.easybeans.api.binding.EZBRef)
      */
     public void unbind(final EZBRef ref) throws BindingException {
-        ServiceRegistration reg = registrations.get(ref);
+        ServiceRegistration reg = this.registrations.get(ref);
         if (reg != null) {
             reg.unregister();
         }
