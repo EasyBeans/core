@@ -461,17 +461,20 @@ public class JContainer3 implements EZBContainer {
             int sfsb = 0;
             int slsb = 0;
             int mdb = 0;
+            int singletons = 0;
             for (Factory<?, ?> factory : this.factories.values()) {
                 if (factory instanceof StatelessSessionFactory) {
                     slsb++;
                 } else if (factory instanceof StatefulSessionFactory) {
                     sfsb++;
+                } else if (factory instanceof SingletonSessionFactory) {
+                    singletons++;
                 } else if (factory instanceof MDBMessageEndPointFactory) {
                     mdb++;
                 }
             }
-            logger.info("Container ''{0}'' [{1} SLSB, {2} SFSB, {3} MDB] started in {4} ms", getArchive().getName(),
-                    Integer.valueOf(slsb), Integer.valueOf(sfsb), Integer.valueOf(mdb), Long.valueOf((System
+            logger.info("Container ''{0}'' [{1} SLSB, {2} SFSB, {3} Sing, {4} MDB] started in {5} ms", getArchive().getName(),
+                    Integer.valueOf(slsb), Integer.valueOf(sfsb), Integer.valueOf(singletons), Integer.valueOf(mdb), Long.valueOf((System
                             .currentTimeMillis() - tStart)));
         }
 
