@@ -31,6 +31,7 @@ import java.util.List;
 import javax.naming.Context;
 
 import org.ow2.easybeans.api.Factory;
+import org.ow2.easybeans.api.event.naming.EZBJavaContextNamingEvent;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.event.AbstractEvent;
 
@@ -38,7 +39,7 @@ import org.ow2.easybeans.event.AbstractEvent;
  * A JavaContextNamingEvent is an IEvent fired/dispatched during bean's context building phase.
  * @author Guillaume Sauthier
  */
-public class JavaContextNamingEvent extends AbstractEvent {
+public class JavaContextNamingEvent extends AbstractEvent implements EZBJavaContextNamingEvent {
 
     /**
      * The EJB factory for which the context will be filled.
