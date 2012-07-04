@@ -226,12 +226,6 @@ public class Embedded implements EZBServer {
      */
      private List<Class<? extends EasyBeansInterceptor>> globalInterceptorsClasses = null;
 
-    /**
-     * This is the topic where naming events will be send.
-     * Interested IEventListeners should register to this topic.
-     */
-    public static final String NAMING_EXTENSION_POINT = "/easybeans/container/factory/context";
-
     private InitialContext context = null;
 
     /**

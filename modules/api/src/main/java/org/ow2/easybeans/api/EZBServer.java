@@ -164,4 +164,10 @@ public interface EZBServer extends EZBJ2EEManagedObject {
      */
     <T extends EZBComponent> T getComponent(final Class<T> itf);
 
+    /**
+     * This is the topic where naming events will be send.
+     * Interested IEventListeners should register to this topic.
+     */
+    static final String NAMING_EXTENSION_POINT = "/easybeans/container/factory/context";
+
 }
