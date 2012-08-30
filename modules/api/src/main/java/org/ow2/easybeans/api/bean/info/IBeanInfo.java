@@ -31,6 +31,8 @@ import java.util.Map;
 
 import javax.ejb.TransactionManagementType;
 
+import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
+
 /**
  * This interface is used for containing a description for a bean.
  * It is used at the runtime.
@@ -191,4 +193,7 @@ public interface IBeanInfo {
      * @param startup true/false
      */
     void setStartup(final boolean startup);
+
+    List<IJAnnotationSqlDataSourceDefinition> getDataSourceDefinitions();
+
 }

@@ -80,7 +80,7 @@
             password="easybeans"
             url="jdbc:hsqldb:hsql://localhost:9001/jdbc_1"
             driver="org.hsqldb.jdbcDriver"
-            tm="#tm" />
+            tm="#tm" event="#event"/>
 
         <!-- Start smartclient server with a link to the rmi component-->
         <smart-server port="2503" rmi="#rmi" />

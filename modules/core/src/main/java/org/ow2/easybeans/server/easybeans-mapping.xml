@@ -81,6 +81,7 @@
         name="org.ow2.easybeans.component.jdbcpool.JDBCPoolComponent"
         alias="jdbcpool">
         <attribute name="transactionComponent" alias="tm" />
+        <attribute name="eventComponent" alias="event" />
     </class>
       
     <class

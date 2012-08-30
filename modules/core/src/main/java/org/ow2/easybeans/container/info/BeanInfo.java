@@ -25,8 +25,6 @@
 
 package org.ow2.easybeans.container.info;
 
-import static javax.ejb.TransactionManagementType.CONTAINER;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +36,9 @@ import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.bean.info.ISecurityInfo;
 import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
+import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
+
+import static javax.ejb.TransactionManagementType.CONTAINER;
 
 /**
  * This class contains description for a bean.
@@ -113,6 +114,8 @@ public class BeanInfo implements IBeanInfo {
      */
     private boolean startup = false;
 
+
+    private List<IJAnnotationSqlDataSourceDefinition> dataSourceDefinitions = new ArrayList<IJAnnotationSqlDataSourceDefinition>();
     /**
      * Default constructor.
      */
@@ -405,6 +408,10 @@ public class BeanInfo implements IBeanInfo {
      */
     public void setStartup(final boolean startup) {
         this.startup = startup;
+    }
+
+    public List<IJAnnotationSqlDataSourceDefinition> getDataSourceDefinitions() {
+        return this.dataSourceDefinitions;
     }
 
     /**
