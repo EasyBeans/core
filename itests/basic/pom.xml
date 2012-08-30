@@ -24,7 +24,8 @@
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.ow2.easybeans.itests</groupId>
     <artifactId>easybeans-itests</artifactId>
@@ -115,7 +116,7 @@
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.ow2.easybeans.tests</groupId>
       <artifactId>easybeans-tests-applications-ejbjars-statefulsync</artifactId>
@@ -123,6 +124,11 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-data-sources-definitions</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
+    </dependency>
 
   </dependencies>
 
@@ -227,27 +233,34 @@
                     <version>${easybeans-tests-applications.version}
                     </version>
                   </artifact>
-                  
+
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-bean-inheritance</artifactId>
                     <version>${easybeans-tests-applications.version}
                     </version>
-                  </artifact>                  
+                  </artifact>
 
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-accesstimeout</artifactId>
                     <version>${easybeans-tests-applications.version}
                     </version>
-                  </artifact>                  
+                  </artifact>
 
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-statefulsync</artifactId>
                     <version>${easybeans-tests-applications.version}
                     </version>
-                  </artifact>    
+                  </artifact>
+
+                  <artifact>
+                    <groupId>org.ow2.easybeans.tests</groupId>
+                    <artifactId>easybeans-tests-applications-ejbjars-data-sources-definitions</artifactId>
+                    <version>${easybeans-tests-applications.version}
+                    </version>
+                  </artifact>
 
                 </artifacts>
               </deployables>
