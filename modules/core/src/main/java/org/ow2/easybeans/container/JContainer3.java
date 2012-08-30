@@ -25,10 +25,6 @@
 
 package org.ow2.easybeans.container;
 
-import static org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory.DEFAULT_ACTIVATION_SPEC_NAME;
-import static org.ow2.util.marshalling.Serialization.loadObject;
-import static org.ow2.util.marshalling.Serialization.storeObject;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
@@ -41,8 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.ejb.ScheduleExpression;
 import javax.ejb.TimerConfig;
@@ -153,6 +149,7 @@ import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
 import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
+import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IApplicationException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IDependsOn;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbSchedule;
@@ -170,11 +167,16 @@ import org.ow2.util.pool.api.IPoolConfiguration;
 import org.ow2.util.pool.api.Pool;
 import org.ow2.util.scan.api.ScanException;
 
+import static org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory.DEFAULT_ACTIVATION_SPEC_NAME;
+import static org.ow2.util.marshalling.Serialization.loadObject;
+import static org.ow2.util.marshalling.Serialization.storeObject;
+
 /**
  * Defines an EJB3 container.
+ *
  * @author Florent Benoit
  *         Contributors:
- *             S. Ali Tokmen (JNDI naming strategy)
+ *         S. Ali Tokmen (JNDI naming strategy)
  */
 public class JContainer3 implements EZBContainer {
 
@@ -268,12 +270,13 @@ public class JContainer3 implements EZBContainer {
      * The key of the returned map is the name of the persistence unit.
      */
     private InheritableThreadLocal<Map<String, EZBExtendedEntityManager>> currentExtendedPersistenceContexts
-        = new InheritableThreadLocal<Map<String, EZBExtendedEntityManager>>();
+            = new InheritableThreadLocal<Map<String, EZBExtendedEntityManager>>();
 
     /**
      * Build a new container on the given archive.
+     *
      * @param config The JContainer configuration storing the archive (jar file
-     *        or exploded).
+     *               or exploded).
      */
     public JContainer3(final EZBContainerConfig config) {
         setContainerConfig(config);
@@ -289,6 +292,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Configure this JContainer. Must be called before start().
+     *
      * @param config ContainerConfiguration instance.
      */
     protected void setContainerConfig(final EZBContainerConfig config) {
@@ -303,6 +307,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the id of this container.
+     *
      * @return string id.
      */
     public String getId() {
@@ -313,6 +318,7 @@ public class JContainer3 implements EZBContainer {
      * Resolve the metadata and analyze deployment descriptors. May be called
      * before the start method. If not already called, it will be called inside
      * the start method.
+     *
      * @throws EZBContainerException if resolve step has failed
      */
     public void resolve() throws EZBContainerException {
@@ -364,6 +370,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Start this container.
+     *
      * @throws EZBContainerException if starting fails.
      */
     public void start() throws EZBContainerException {
@@ -414,7 +421,7 @@ public class JContainer3 implements EZBContainer {
         if (this.classLoader == null) {
             PrivilegedAction<EasyBeansClassLoader> privilegedAction = new PrivilegedAction<EasyBeansClassLoader>() {
                 public EasyBeansClassLoader run() {
-                    return new EasyBeansClassLoader(new URL[] {url}, old);
+                    return new EasyBeansClassLoader(new URL[]{url}, old);
                 }
             };
             this.classLoader = AccessController.doPrivileged(privilegedAction);
@@ -483,11 +490,11 @@ public class JContainer3 implements EZBContainer {
             }
             logger.info("Container ''{0}'' [{1} SLSB, {2} SFSB, {3} Sing, {4} MDB] started in {5} ms", getArchive().getName(),
                     Integer.valueOf(slsb), Integer.valueOf(sfsb), Integer.valueOf(singletons), Integer.valueOf(mdb), Long.valueOf((System
-                            .currentTimeMillis() - tStart)));
+                    .currentTimeMillis() - tStart)));
         }
 
         this.dispatcher.dispatch(new EventContainerStarted(this.j2eeManagedObjectId, getArchive(),
-                                                           this.persistenceUnitManager, this.configuration));
+                this.persistenceUnitManager, this.configuration));
         this.dispatcher.dispatch(new EventLifeCycleStarted(this.j2eeManagedObjectId));
 
         this.available = true;
@@ -546,10 +553,11 @@ public class JContainer3 implements EZBContainer {
     }
 
 
-
     /**
      * Run the enhancer on the container.
+     *
      * @param createBeanFactories if needs to create bean factories or only perform classic enhancement
+     *
      * @throws EZBContainerException if enhancement fails
      */
     public void enhance(final boolean createBeanFactories) throws EZBContainerException {
@@ -632,6 +640,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Create the factories of the beans (session and MDB).
+     *
      * @throws EZBContainerException if binding fails.
      */
     protected void createBeanFactories() throws EZBContainerException {
@@ -662,7 +671,7 @@ public class JContainer3 implements EZBContainer {
 
         // The topic is common for all EZBContainer and Factory
         eventComponent.getEventService().registerDispatcher(Embedded.NAMING_EXTENSION_POINT,
-                                                            eventDispatcher);
+                eventDispatcher);
 
         logger.debug("EventService instance {0}", eventComponent.getEventService());
 
@@ -711,16 +720,23 @@ public class JContainer3 implements EZBContainer {
                             beanInfo.setBusinessMethodsInfo(BusinessMethodsInfoHelper.getMethods(classAnnotationMetadata));
 
                             // Adds Business method info.
-                            beanInfo.setSessionSynchronizationMethodsInfo(SessionSynchronizationInfoHelper.getMethods(classAnnotationMetadata));
+                            beanInfo.setSessionSynchronizationMethodsInfo(
+                                    SessionSynchronizationInfoHelper.getMethods(classAnnotationMetadata));
 
                             // Cluster config
                             beanInfo.setCluster(classAnnotationMetadata.getCluster());
 
+                            if (classAnnotationMetadata.getJAnnotationSqlDataSourceDefinitions() != null) {
+                                for (IJAnnotationSqlDataSourceDefinition annotationSqlDataSourceDefinition : classAnnotationMetadata
+                                        .getJAnnotationSqlDataSourceDefinitions()) {
+                                    beanInfo.getDataSourceDefinitions().add(annotationSqlDataSourceDefinition);
+                                }
+                            }
                             // Set invocation context factor
 
                             if (Boolean.getBoolean("easybeans.dynamicinterceptors")) {
-                              factory.setInvocationContextFactory(new EasyBeansInvocationContextFactory(classAnnotationMetadata,
-                                   this.classLoader));
+                                factory.setInvocationContextFactory(new EasyBeansInvocationContextFactory(classAnnotationMetadata,
+                                        this.classLoader));
                             }
                             // Sets the bean info
                             this.ejbJarInfo.addBeanInfo(beanInfo);
@@ -789,8 +805,9 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Bind the collected EZBRef using the registered BindingFactories.
+     *
      * @throws EZBContainerException If the beforeBind() callbacks or
-     *         the BindingFactory.bind() methods thrown Exceptions
+     *                               the BindingFactory.bind() methods thrown Exceptions
      */
     protected void bindReferences() throws EZBContainerException {
 
@@ -799,7 +816,7 @@ public class JContainer3 implements EZBContainer {
         for (EZBRef reference : this.bindingReferences) {
 
             // Invoke callbacks
-            List<EZBContainerLifeCycleCallback>  lifeCycleCallbacks = getCallbacksLifeCycle();
+            List<EZBContainerLifeCycleCallback> lifeCycleCallbacks = getCallbacksLifeCycle();
             if (!lifeCycleCallbacks.isEmpty()) {
                 EZBContainerCallbackInfo info = getContainer3CallbackInfo();
                 for (EZBContainerLifeCycleCallback lifeCycleCallback : lifeCycleCallbacks) {
@@ -828,7 +845,8 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Configure pool on the bean factory.
-     * @param factory the given factory to configure
+     *
+     * @param factory      the given factory to configure
      * @param beanMetadata the metadata of the bean
      */
     protected void poolConfiguration(final Factory<?, ?> factory, final EasyBeansEjbJarClassMetadata beanMetadata) {
@@ -847,7 +865,9 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the activation spec object.
+     *
      * @param mdbMetadata the metadata of the MDB
+     *
      * @return the activation spec value or the default one if no activation spec was specified
      */
     protected String getActivationSpec(final EasyBeansEjbJarClassMetadata mdbMetadata) {
@@ -884,10 +904,13 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates the given message driven bean factory.
+     *
      * @param messageDrivenBean the message driven bean class metadata.
-     * @throws EZBContainerException if the message driven bean cannot be
-     *         created.
+     *
      * @return the build factory.
+     *
+     * @throws EZBContainerException if the message driven bean cannot be
+     *                               created.
      */
     protected Factory<?, ?> createMessageDrivenBeanFactory(final EasyBeansEjbJarClassMetadata messageDrivenBean)
             throws EZBContainerException {
@@ -919,7 +942,7 @@ public class JContainer3 implements EZBContainer {
             try {
                 activationSpec = (ActivationSpec) loadObject(byteArgs);
             } catch (IOException e) {
-               throw new EZBContainerException("Cannot load activation spec from the serialized object.", e);
+                throw new EZBContainerException("Cannot load activation spec from the serialized object.", e);
             } catch (ClassNotFoundException e) {
                 throw new EZBContainerException("Cannot load activation spec from the serialized object.", e);
             }
@@ -959,7 +982,8 @@ public class JContainer3 implements EZBContainer {
 
         // build runtime information
         MessageDrivenInfo messageDrivenInfo = new MessageDrivenInfo();
-        messageDrivenInfo.setApplicationExceptions(convertApplicationExceptionInfo(messageDrivenBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
+        messageDrivenInfo.setApplicationExceptions(
+                convertApplicationExceptionInfo(messageDrivenBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
         messageDrivenInfo.setTransactionManagementType(messageDrivenBean.getTransactionManagementType());
         messageDrivenInfo.setMessageListenerInterface(messageDrivenBean.getJMessageDriven()
                 .getMessageListenerInterface());
@@ -983,16 +1007,18 @@ public class JContainer3 implements EZBContainer {
         mdbMessageEndPointFactory.setMessageDrivenInfo(messageDrivenInfo);
 
 
-
         return mdbMessageEndPointFactory;
 
     }
 
     /**
      * Creates the given session bean and bind it.
+     *
      * @param sessionBean the session bean class metadata.
-     * @throws EZBContainerException if the session bean cannot be created
+     *
      * @return the build factory.
+     *
+     * @throws EZBContainerException if the session bean cannot be created
      */
     protected Factory<?, ?> createSessionBeanFactory(final EasyBeansEjbJarClassMetadata sessionBean) throws EZBContainerException {
         String className = sessionBean.getClassName().replace('/', '.');
@@ -1027,6 +1053,7 @@ public class JContainer3 implements EZBContainer {
         sessionBeanInfo.setTransactionManagementType(sessionBean.getTransactionManagementType());
         sessionBeanInfo.setTimersInfo(convertTimersInfo(sessionBean));
         sessionBeanInfo.setApplicationExceptions(convertApplicationExceptionInfo(sessionBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
+
         // Only for singleton
         if (sessionBean.isSingleton()) {
             sessionBeanInfo.setStartup(sessionBean.isStartup());
@@ -1052,11 +1079,11 @@ public class JContainer3 implements EZBContainer {
         if (sessionBean.isLocalBean()) {
             sessionBeanInfo.setNoInterfaceViewInterface(sessionBean.getClassName());
             this.bindingReferences.add(createNoInterfaceViewRef(sessionBean.getClassName(),
-                                                             getEmbedded().getID(),
-                                                             getId(),
-                                                             factoryName,
-                                                             sessionBean,
-                                                             sessionFactory));
+                    getEmbedded().getID(),
+                    getId(),
+                    factoryName,
+                    sessionBean,
+                    sessionFactory));
         }
 
 
@@ -1068,21 +1095,21 @@ public class JContainer3 implements EZBContainer {
             sessionBeanInfo.setLocalInterfaces(localItfs.getInterfaces());
             for (String itf : localItfs.getInterfaces()) {
                 this.bindingReferences.add(createLocalItfRef(itf,
-                                                             getEmbedded().getID(),
-                                                             getId(),
-                                                             factoryName,
-                                                             sessionBean,
-                                                             sessionFactory));
+                        getEmbedded().getID(),
+                        getId(),
+                        factoryName,
+                        sessionBean,
+                        sessionFactory));
             }
         }
         if (remoteItfs != null) {
             sessionBeanInfo.setRemoteInterfaces(remoteItfs.getInterfaces());
             for (String itf : remoteItfs.getInterfaces()) {
                 this.bindingReferences.add(createRemoteItfRef(itf,
-                                                              getId(),
-                                                              factoryName,
-                                                              sessionBean,
-                                                              sessionFactory));
+                        getId(),
+                        factoryName,
+                        sessionBean,
+                        sessionFactory));
             }
         }
 
@@ -1091,18 +1118,18 @@ public class JContainer3 implements EZBContainer {
         String localHome = sessionBean.getLocalHome();
         if (remoteHome != null) {
             this.bindingReferences.add(createRemoteHomeRef(remoteHome,
-                                                           getId(),
-                                                           factoryName,
-                                                           sessionBean,
-                                                           sessionFactory));
+                    getId(),
+                    factoryName,
+                    sessionBean,
+                    sessionFactory));
         }
         if (localHome != null) {
             this.bindingReferences.add(createLocalHomeRef(localHome,
-                                                          getEmbedded().getID(),
-                                                          getId(),
-                                                          factoryName,
-                                                          sessionBean,
-                                                          sessionFactory));
+                    getEmbedded().getID(),
+                    getId(),
+                    factoryName,
+                    sessionBean,
+                    sessionFactory));
         }
 
         return sessionFactory;
@@ -1156,7 +1183,9 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Convert metadata infos into runtime info.
+     *
      * @param applicationExceptions the given metadata application exceptions
+     *
      * @return the converted list
      */
     protected Map<String, IApplicationExceptionInfo> convertApplicationExceptionInfo(
@@ -1177,12 +1206,14 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates the WebServiceinfo structure holding data from the XML descriptors.
+     *
      * @param sessionBean the session bean metadata
-     * @param beanName the bean's name
+     * @param beanName    the bean's name
+     *
      * @return a webservice info structure (or null is there was no XML available)
      */
     protected IWebServiceInfo createWebServiceInfo(final EasyBeansEjbJarClassMetadata sessionBean,
-                                                 final String beanName) {
+            final String beanName) {
 
         // Get the WS marker
         IWebServiceMarker marker = sessionBean.getWebServiceMarker();
@@ -1211,7 +1242,7 @@ public class JContainer3 implements EZBContainer {
             if ((webservices != null) && (webservices.getWebserviceEndpoints() != null)) {
 
                 Iterator<WebserviceEndpoint> i = webservices.getWebserviceEndpoints().iterator();
-                for (; i.hasNext() && (endpoint == null);) {
+                for (; i.hasNext() && (endpoint == null); ) {
                     WebserviceEndpoint browsed = i.next();
 
                     if (browsed.getPortComponentName().equals(name)) {
@@ -1244,7 +1275,7 @@ public class JContainer3 implements EZBContainer {
                 info.setMTOMEnabled(portComponent.isMTOMEnabled());
 
                 // Read service-endpoint-interface
-                if  (!marker.isWebServiceProvider()) {
+                if (!marker.isWebServiceProvider()) {
                     info.setServiceEndpointInterface(portComponent.getServiceEndpointInterface());
                 }
 
@@ -1383,7 +1414,6 @@ public class JContainer3 implements EZBContainer {
         }
 
 
-
         // Destroy the event dispatcher.
         this.dispatcher.stop();
         this.dispatcher = null;
@@ -1394,6 +1424,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * Gets information on the container that can be given to container
      * callbacks.
+     *
      * @return information on the managed container.
      */
     protected EZBContainerCallbackInfo getContainer3CallbackInfo() {
@@ -1407,20 +1438,23 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates an EJBHome reference and return it.
-     * @param remoteHome the name of the remote home interface that object will have.
+     *
+     * @param remoteHome  the name of the remote home interface that object will have.
      * @param containerID the ID of the container.
      * @param factoryName the name of the factory.
-     * @param bean the bean class associated to given interface.
-     * @param factory this bean's factory
+     * @param bean        the bean class associated to given interface.
+     * @param factory     this bean's factory
+     *
      * @return the reference.
+     *
      * @throws EZBContainerException if interface cannot be loaded or if the
-     *         bind fails
+     *                               bind fails
      */
     protected EJBHomeCallRef createRemoteHomeRef(final String remoteHome,
-                                               final String containerID,
-                                               final String factoryName,
-                                               final EasyBeansEjbJarClassMetadata bean,
-                                               final SessionFactory<?> factory) throws EZBContainerException {
+            final String containerID,
+            final String factoryName,
+            final EasyBeansEjbJarClassMetadata bean,
+            final SessionFactory<?> factory) throws EZBContainerException {
         String itfClsName = remoteHome.replace('/', '.');
         try {
             this.classLoader.loadClass(itfClsName);
@@ -1449,22 +1483,25 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates an EJB Local Home reference and return it.
-     * @param itf the name of the interface that object will have.
-     * @param embeddedId the ID of the embedded server.
+     *
+     * @param itf         the name of the interface that object will have.
+     * @param embeddedId  the ID of the embedded server.
      * @param containerID the ID of the container.
      * @param factoryName the name of the factory.
-     * @param bean the bean class associated to given interface.
-     * @param factory this bean's factory
+     * @param bean        the bean class associated to given interface.
+     * @param factory     this bean's factory
+     *
      * @return the reference.
+     *
      * @throws EZBContainerException if interface cannot be loaded or if the
-     *         bind fails
+     *                               bind fails
      */
     protected EJBLocalHomeCallRef createLocalHomeRef(final String itf,
-                                                   final Integer embeddedId,
-                                                   final String containerID,
-                                                   final String factoryName,
-                                                   final EasyBeansEjbJarClassMetadata bean,
-                                                   final SessionFactory<?> factory) throws EZBContainerException {
+            final Integer embeddedId,
+            final String containerID,
+            final String factoryName,
+            final EasyBeansEjbJarClassMetadata bean,
+            final SessionFactory<?> factory) throws EZBContainerException {
         String itfClsName = itf.replace('/', '.');
         try {
             this.classLoader.loadClass(itfClsName);
@@ -1489,22 +1526,25 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates a no-interface local view reference and return it.
-     * @param itf the name of the interface that object will have.
-     * @param embeddedId the ID of the embedded server.
+     *
+     * @param itf         the name of the interface that object will have.
+     * @param embeddedId  the ID of the embedded server.
      * @param containerID the ID of the container.
      * @param factoryName the name of the factory.
-     * @param bean the bean class associated to given interface.
-     * @param factory this EJB Factory
+     * @param bean        the bean class associated to given interface.
+     * @param factory     this EJB Factory
+     *
      * @return the reference.
+     *
      * @throws EZBContainerException if interface cannot be loaded or if the
-     *         bind fails
+     *                               bind fails
      */
     protected LocalCallRef createNoInterfaceViewRef(final String itf,
-                                           final Integer embeddedId,
-                                           final String containerID,
-                                           final String factoryName,
-                                           final EasyBeansEjbJarClassMetadata bean,
-                                           final SessionFactory<?> factory) throws EZBContainerException {
+            final Integer embeddedId,
+            final String containerID,
+            final String factoryName,
+            final EasyBeansEjbJarClassMetadata bean,
+            final SessionFactory<?> factory) throws EZBContainerException {
         // Name of the interface is the name of the bean class
         String beanClassName = itf.replace('/', '.');
         String beanProxyClassName = ProxyClassEncoder.getProxyClassName(itf).replace('/', '.');
@@ -1526,22 +1566,25 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates an EJB Local interface reference and return it.
-     * @param itf the name of the interface that object will have.
-     * @param embeddedId the ID of the embedded server.
+     *
+     * @param itf         the name of the interface that object will have.
+     * @param embeddedId  the ID of the embedded server.
      * @param containerID the ID of the container.
      * @param factoryName the name of the factory.
-     * @param bean the bean class associated to given interface.
-     * @param factory this EJB Factory
+     * @param bean        the bean class associated to given interface.
+     * @param factory     this EJB Factory
+     *
      * @return the reference.
+     *
      * @throws EZBContainerException if interface cannot be loaded or if the
-     *         bind fails
+     *                               bind fails
      */
     protected LocalCallRef createLocalItfRef(final String itf,
-                                           final Integer embeddedId,
-                                           final String containerID,
-                                           final String factoryName,
-                                           final EasyBeansEjbJarClassMetadata bean,
-                                           final SessionFactory<?> factory) throws EZBContainerException {
+            final Integer embeddedId,
+            final String containerID,
+            final String factoryName,
+            final EasyBeansEjbJarClassMetadata bean,
+            final SessionFactory<?> factory) throws EZBContainerException {
         String itfClsName = itf.replace('/', '.');
         try {
             this.classLoader.loadClass(itfClsName);
@@ -1565,20 +1608,23 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Creates an EJB Remote interface reference and return it.
-     * @param itf the name of the interface that object will have.
+     *
+     * @param itf         the name of the interface that object will have.
      * @param containerID the ID of the container.
      * @param factoryName the name of the factory.
-     * @param bean the bean class associated to given interface.
-     * @param factory This bean's factory
+     * @param bean        the bean class associated to given interface.
+     * @param factory     This bean's factory
+     *
      * @return the reference.
+     *
      * @throws EZBContainerException if interface cannot be loaded or if the
-     *         bind fails
+     *                               bind fails
      */
     protected RemoteCallRef createRemoteItfRef(final String itf,
-                                             final String containerID,
-                                             final String factoryName,
-                                             final EasyBeansEjbJarClassMetadata bean,
-                                             final SessionFactory<?> factory) throws EZBContainerException {
+            final String containerID,
+            final String factoryName,
+            final EasyBeansEjbJarClassMetadata bean,
+            final SessionFactory<?> factory) throws EZBContainerException {
         String itfClsName = itf.replace('/', '.');
         try {
             this.classLoader.loadClass(itfClsName);
@@ -1602,7 +1648,9 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets a factory with its given name.
+     *
      * @param factoryName the factory name.
+     *
      * @return the factory found or null.
      */
     public Factory<?, ?> getFactory(final String factoryName) {
@@ -1618,6 +1666,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the name of this container.
+     *
      * @return the name.
      */
     public String getName() {
@@ -1626,6 +1675,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the classloader.
+     *
      * @return classloader of the container
      */
     public ClassLoader getClassLoader() {
@@ -1634,6 +1684,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the deployable used by this container.
+     *
      * @return the deployable.
      */
     public IDeployable getDeployable() {
@@ -1643,6 +1694,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * Gets the archive used by this container. It can be a .jar file or a
      * directory.
+     *
      * @return the archive.
      */
     public IArchive getArchive() {
@@ -1651,6 +1703,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the parent EZBServer instance.
+     *
      * @return Returns the Embedded instance.
      */
     public EZBServer getEmbedded() {
@@ -1666,6 +1719,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Check if the container is available or not.
+     *
      * @return true if the container is available.
      */
     public boolean isAvailable() {
@@ -1675,6 +1729,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * Gets the persistence manager object which manages all persistence-unit
      * associated to this container.
+     *
      * @return persistence unit manager object
      */
     public EZBPersistenceUnitManager getPersistenceUnitManager() {
@@ -1683,6 +1738,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Sets the classloader.
+     *
      * @param classLoader to be used by the container
      */
     public void setClassLoader(final ClassLoader classLoader) {
@@ -1695,6 +1751,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * Sets the persistence manager object which manages all persistence-unit
      * associated to this container.
+     *
      * @param persistenceUnitManager persistence unit manager object to set.
      */
     public void setPersistenceUnitManager(final EZBPersistenceUnitManager persistenceUnitManager) {
@@ -1713,6 +1770,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Gets the permission manager (that manages EJB permissions).
+     *
      * @return permission manager.
      */
     public EZBPermissionManager getPermissionManager() {
@@ -1721,6 +1779,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Sets the permission manager (that manages EJB permissions).
+     *
      * @param ezbPermissionManager the EasyBeans permission manager.
      */
     public void setPermissionManager(final EZBPermissionManager ezbPermissionManager) {
@@ -1730,6 +1789,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Add extra archives for finding classes.
+     *
      * @param extraArchives the given archives.
      */
     public void setExtraArchives(final List<IArchive> extraArchives) {
@@ -1738,6 +1798,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * {@inheritDoc}
+     *
      * @see org.ow2.easybeans.api.EZBExtensor#addExtension(java.lang.Class, java.lang.Object)
      */
     public <T> T addExtension(final Class<T> clazz, final T extension) {
@@ -1746,6 +1807,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * {@inheritDoc}
+     *
      * @see org.ow2.easybeans.api.EZBExtensor#getExtension(java.lang.Class)
      */
     public <T> T getExtension(final Class<T> clazz) {
@@ -1754,6 +1816,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * {@inheritDoc}
+     *
      * @see org.ow2.easybeans.api.EZBExtensor#removeExtension(java.lang.Class)
      */
     public <T> T removeExtension(final Class<T> clazz) {
@@ -1762,8 +1825,10 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Get a reference to the first component matching the interface.
+     *
      * @param <T> The interface type.
      * @param itf The interface class.
+     *
      * @return The component.
      */
     public <T extends EZBComponent> T getComponent(final Class<T> itf) {
@@ -1772,6 +1837,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Get the J2EE managed object id.
+     *
      * @return The J2EE managed object id.
      */
     public String getJ2EEManagedObjectId() {
@@ -1780,6 +1846,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Get the event Dispatcher.
+     *
      * @return The event Dispatcher.
      */
     public IEventDispatcher getEventDispatcher() {
@@ -1789,8 +1856,8 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * @return the extended persistence context for the current container.
-     * This return the current map from a thread local so the data is only on a current thread.
-     * The key of the returned map is the name of the persistence unit
+     *         This return the current map from a thread local so the data is only on a current thread.
+     *         The key of the returned map is the name of the persistence unit
      */
     public Map<String, EZBExtendedEntityManager> getCurrentExtendedPersistenceContexts() {
         return this.currentExtendedPersistenceContexts.get();
@@ -1798,6 +1865,7 @@ public class JContainer3 implements EZBContainer {
 
     /**
      * Sets the data on the current thread.
+     *
      * @param extendedPersistenceContexts a map between the persistence unit name and the associated extended persistence context.
      */
     public void setCurrentExtendedPersistenceContexts(final Map<String, EZBExtendedEntityManager> extendedPersistenceContexts) {

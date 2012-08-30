@@ -28,14 +28,17 @@ package org.ow2.easybeans.component.jdbcpool;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.component.api.EZBComponent;
 import org.ow2.easybeans.component.api.EZBComponentException;
+import org.ow2.easybeans.component.itf.EZBEventComponent;
 import org.ow2.easybeans.component.itf.TMComponent;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
 /**
  * Defines a component that creates a JDBC pool in order to use it in EasyBeans.
+ *
  * @author Florent Benoit
  */
 public class JDBCPoolComponent implements EZBComponent {
@@ -149,6 +152,17 @@ public class JDBCPoolComponent implements EZBComponent {
      */
     private TMComponent transactionComponent = null;
 
+
+    /**
+     * Event component.
+     */
+    private EZBEventComponent eventComponent;
+
+    /**
+     * The extension listener for data sources definition
+     */
+    private DSDefinitionExtensionListener dsDefinitionExtensionListener;
+
     /**
      * Default constructor.
      */
@@ -157,6 +171,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Init method.<br/> This method is called before the start method.
+     *
      * @throws EZBComponentException if the initialization has failed.
      */
     public void init() throws EZBComponentException {
@@ -185,6 +200,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Validate current data.
+     *
      * @throws EZBComponentException if validation fails.
      */
     private void validate() throws EZBComponentException {
@@ -206,6 +222,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Start method.<br/> This method is called after the init method.
+     *
      * @throws EZBComponentException if the start has failed.
      */
     public void start() throws EZBComponentException {
@@ -239,11 +256,17 @@ public class JDBCPoolComponent implements EZBComponent {
         }
 
         logger.info("DS ''{0}'', URL ''{1}'', Driver = ''{2}''.", this.jndiName, this.url, this.driver);
+
+        if (this.eventComponent != null) {
+            this.dsDefinitionExtensionListener = new DSDefinitionExtensionListener();
+            this.eventComponent.getEventService().registerListener(this.dsDefinitionExtensionListener, EZBServer.NAMING_EXTENSION_POINT);
+        }
     }
 
     /**
      * Stop method.<br/> This method is called when component needs to be
      * stopped.
+     *
      * @throws EZBComponentException if the stop is failing.
      */
     public void stop() throws EZBComponentException {
@@ -253,10 +276,16 @@ public class JDBCPoolComponent implements EZBComponent {
         } catch (NamingException e) {
             throw new EZBComponentException("Cannot unbind a JDBC Datasource with the jndi name '" + this.jndiName + "'.");
         }
+
+        if (this.eventComponent != null && this.dsDefinitionExtensionListener != null) {
+            this.eventComponent.getEventService().unregisterListener(this.dsDefinitionExtensionListener);
+            this.dsDefinitionExtensionListener.clearAllGlobalDataSources();
+        }
     }
 
     /**
      * Sets the name of the JDBC driver.
+     *
      * @param driver the driver's name
      */
     public void setDriver(final String driver) {
@@ -272,6 +301,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the JNDI name.
+     *
      * @param jndiName the name to bind the datasource
      */
     public void setJndiName(final String jndiName) {
@@ -287,6 +317,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the password to use.
+     *
      * @param password the password for the url connection.
      */
     public void setPassword(final String password) {
@@ -295,6 +326,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * The maximum size of the JDBC pool.
+     *
      * @param poolMax the value of the pool's max.
      */
     public void setPoolMax(final int poolMax) {
@@ -310,6 +342,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * The minimum size of the JDBC pool.
+     *
      * @param poolMin the value of the pool's min.
      */
     public void setPoolMin(final int poolMin) {
@@ -325,6 +358,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Set the max cache of prepared statement.
+     *
      * @param pstmtMax the max value for prepare statement.
      */
     public void setPstmtMax(final int pstmtMax) {
@@ -340,6 +374,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the connection's URL.
+     *
      * @param url the URL used for the connection.
      */
     public void setUrl(final String url) {
@@ -355,6 +390,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the username that is used to get a connection.
+     *
      * @param username the name of the user.
      */
     public void setUsername(final String username) {
@@ -370,6 +406,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Is that the pool will use transaction or not.
+     *
      * @param useTM the true/false value.
      */
     public void setUseTM(final boolean useTM) {
@@ -392,6 +429,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the JDBC check level.
+     *
      * @param checkLevel jdbc connection checking level.
      */
     public void setCheckLevel(final int checkLevel) {
@@ -407,6 +445,7 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the test statement.
+     *
      * @param testStatement the statement to execute
      */
     public void setTestStatement(final String testStatement) {
@@ -423,10 +462,15 @@ public class JDBCPoolComponent implements EZBComponent {
 
     /**
      * Sets the transaction component.
+     *
      * @param transactionComponent the given transaction component.
      */
     public void setTransactionComponent(final TMComponent transactionComponent) {
         this.transactionComponent = transactionComponent;
     }
 
+
+    public void setEventComponent(EZBEventComponent eventComponent) {
+        this.eventComponent = eventComponent;
+    }
 }

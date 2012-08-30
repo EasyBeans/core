@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006 Bull S.A.S.
+ * Copyright (C) 2006-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.TransactionManagementType;
+
+import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
 
 /**
  * This interface is used for containing a description for a bean.
@@ -202,4 +204,7 @@ public interface IBeanInfo {
      * @param timersInfo the  list of timers that needs to be applied on this bean.
      */
     void setTimersInfo(final List<ITimerInfo> timersInfo);
+
+    List<IJAnnotationSqlDataSourceDefinition> getDataSourceDefinitions();
+
 }
