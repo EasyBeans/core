@@ -194,6 +194,11 @@ public interface IBeanInfo {
      */
     void setStartup(final boolean startup);
 
+    /**
+     * DataSourcesDefinitions associated to the bean instance
+     *
+     * @return the list of DataSourcesDefinitions
+     */
     List<IJAnnotationSqlDataSourceDefinition> getDataSourceDefinitions();
 
 }
