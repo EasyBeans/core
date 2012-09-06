@@ -172,17 +172,17 @@ public class LocalCallInvocationHandler extends AbsInvocationHandler implements 
      *         the proxy instance.
      */
     public Object invoke(final Object proxy, final Method method, final Object[] args, final Long hashMethod) throws Exception {
-        // bean removed ?
-        if (isRemoved()) {
-            handleThrowable(convertThrowable(new NoSuchEJBException("The bean has been removed")), false, method, null);
-        }
-
         // Methods on the Object.class are not send on the remote side
         if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
             // for stateful bean, let the first call to toString go to the remote side in order to initialize the bean ID
             if (!isUsingID() || getBeanId() != null || !method.getName().equals("toString")) {
                 return handleObjectMethods(proxy, method, args);
             }
+        }
+
+        // bean removed ?
+        if (isRemoved()) {
+            handleThrowable(convertThrowable(new NoSuchEJBException("The bean has been removed")), false, method, null);
         }
 
         if (getHashedMethods() == null) {
