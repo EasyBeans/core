@@ -56,9 +56,19 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
     private static final String WEB_INF_EJBJAR_XML = WEB_INF.concat("ejb-jar.xml");
 
     /**
+     * WEB-INF/easybeans.xml.
+     */
+    private static final String WEB_INF_EASYBEANS_XML = WEB_INF.concat("easybeans.xml");
+
+    /**
      * META-INF/ejb-jar.xml.
      */
     public static final String META_INF_EJBJAR_XML = "META-INF/ejb-jar.xml";
+
+    /**
+     * META-INF/easybeans.xml.
+     */
+    public static final String META_INF_EASYBEANS_XML = "META-INF/easybeans.xml";
 
     /**
      * WEB-INF/classes folder.
@@ -115,10 +125,18 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
         Iterator<String> itEntries = this.wrappedWarArchive.getEntries();
         while (itEntries.hasNext()) {
             String wrappedEntry = itEntries.next();
-            // Handle special case of ejb-jar.xml
+            // Handle special case of ejb-jar.xml and easybeans.xml
             if (WEB_INF_EJBJAR_XML.equals(wrappedEntry)) {
                 // add it on our own entry
                 addEntry(META_INF_EJBJAR_XML, this.wrappedWarArchive.getResource(wrappedEntry));
+            }
+            if (WEB_INF_EASYBEANS_XML.equals(wrappedEntry)) {
+                // add it on our own entry
+                addEntry(META_INF_EASYBEANS_XML, this.wrappedWarArchive.getResource(wrappedEntry));
+            }
+            if (META_INF_EASYBEANS_XML.equals(wrappedEntry)) {
+                // add it on our own entry
+                addEntry(META_INF_EASYBEANS_XML, this.wrappedWarArchive.getResource(wrappedEntry));
             }
 
             // Filter WEB-INF/ resources
