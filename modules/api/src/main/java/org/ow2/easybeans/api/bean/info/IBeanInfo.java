@@ -205,6 +205,10 @@ public interface IBeanInfo {
      */
     void setTimersInfo(final List<ITimerInfo> timersInfo);
 
+     /**
+     * DataSourcesDefinitions associated to the bean instance
+     * @return the list of DataSourcesDefinitions
+     */
     List<IJAnnotationSqlDataSourceDefinition> getDataSourceDefinitions();
 
 }
