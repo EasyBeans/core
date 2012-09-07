@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,28 +19,34 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: TimerComponent.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.component.itf;
+package org.ow2.easybeans.api.bean.info;
 
-import org.ow2.easybeans.api.EZBTimerService;
-import org.ow2.easybeans.api.Factory;
-import org.ow2.easybeans.component.api.EZBComponent;
+import javax.ejb.ScheduleExpression;
+import javax.ejb.TimerConfig;
 
 /**
- * Interface for the component that provides the EJB timer service.
+ * Defines a schedule expression applied on a given method.
  * @author Florent Benoit
  */
-public interface TimerComponent extends EZBComponent {
-
+public interface ITimerInfo {
 
     /**
-     * Gets an EJB timer service through this component.
-     * @param factory an EasyBeans factory providing timeout notification.
-     * @return an EJB timer service
+     * @return method on which we've to apply Schedule
      */
-    EZBTimerService getTimerService(final Factory<?, ?> factory);
+    IMethodInfo getMethodInfo();
+
+    /**
+     * @return Schedule expression
+     */
+    ScheduleExpression getScheduleExpression();
+
+    /**
+     * @return timer configuration
+     */
+    TimerConfig getTimerConfig();
 
 }

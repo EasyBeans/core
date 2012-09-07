@@ -76,6 +76,14 @@ public final class TimedObjectInterface {
             timeoutMethod.setTimeout(true);
         }
 
+        // Set as business method the @Schedule methods
+        for (EasyBeansEjbJarMethodMetadata methodData : bean.getMethodMetadataCollection()) {
+            if (methodData.getJavaxEjbSchedules() != null && methodData.getJavaxEjbSchedules().size() > 0) {
+                methodData.setBusinessMethod(true);
+            }
+        }
+
+
 
     }
 

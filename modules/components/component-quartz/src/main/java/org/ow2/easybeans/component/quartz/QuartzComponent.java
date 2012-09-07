@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2007-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -28,8 +28,7 @@ package org.ow2.easybeans.component.quartz;
 import java.util.List;
 import java.util.Properties;
 
-import javax.ejb.TimerService;
-
+import org.ow2.easybeans.api.EZBTimerService;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.component.api.EZBComponentException;
 import org.ow2.easybeans.component.itf.TimerComponent;
@@ -55,7 +54,7 @@ public class QuartzComponent implements TimerComponent {
     /**
      * Properties for the scheduler. These properties should have been set before the init of the scheduler.
      */
-    private List<Property> quartzProperties= null;
+    private List<Property> quartzProperties = null;
 
 
     /**
@@ -72,17 +71,17 @@ public class QuartzComponent implements TimerComponent {
 
         // Get properties
         Properties schedulerProperties = new Properties();
-        if (quartzProperties != null) {
-            for (Property property : quartzProperties) {
+        if (this.quartzProperties != null) {
+            for (Property property : this.quartzProperties) {
                 schedulerProperties.put(property.getName(), property.getValue());
             }
         }
 
 
         // Initialize the Quartz scheduler Factory
-        schedulerFactory = null;
+        this.schedulerFactory = null;
         try {
-            schedulerFactory  = new StdSchedulerFactory(schedulerProperties);
+            this.schedulerFactory  = new StdSchedulerFactory(schedulerProperties);
         } catch (SchedulerException e) {
             throw new EZBComponentException("Cannot initialize the Scheduler factory", e);
         }
@@ -100,14 +99,14 @@ public class QuartzComponent implements TimerComponent {
 
         // Build a Scheduler
         try {
-            this.scheduler = schedulerFactory.getScheduler();
+            this.scheduler = this.schedulerFactory.getScheduler();
         } catch (SchedulerException e) {
             throw new EZBComponentException("Cannot get a scheduler from the factory", e);
         }
 
         // Start the scheduler
         try {
-            scheduler.start();
+            this.scheduler.start();
         } catch (SchedulerException e) {
            throw new EZBComponentException("Cannot start the scheduler", e);
         }
@@ -122,7 +121,7 @@ public class QuartzComponent implements TimerComponent {
     public void stop() throws EZBComponentException {
         // Stop the scheduler
         try {
-            scheduler.shutdown();
+            this.scheduler.shutdown();
         } catch (SchedulerException e) {
             throw new EZBComponentException("Cannot stop the scheduler", e);
         }
@@ -134,8 +133,8 @@ public class QuartzComponent implements TimerComponent {
      * @param factory an EasyBeans factory providing timeout notification.
      * @return an EJB timer service
      */
-    public TimerService getTimerService(final Factory factory) {
-        return new QuartzTimerService(factory, scheduler);
+    public EZBTimerService getTimerService(final Factory<?, ?> factory) {
+        return new QuartzTimerService(factory, this.scheduler);
     }
 
     /**
@@ -159,7 +158,7 @@ public class QuartzComponent implements TimerComponent {
      * @return the Quartz scheduler.
      */
     public Scheduler getScheduler() {
-        return scheduler;
+        return this.scheduler;
     }
 
 

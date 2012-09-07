@@ -186,7 +186,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      * @throws IllegalArgumentException if bean is not found.
      */
     @Override
-    protected synchronized EasyBeansSFSB getBean(final Long beanId) throws IllegalArgumentException {
+    protected EasyBeansSFSB getBean(final Long beanId) throws IllegalArgumentException {
         EasyBeansSFSB bean = null;
         try {
             bean = getPool().get(beanId);
@@ -456,8 +456,10 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      * Notified when the timer service send a Timer object.
      * It has to call the Timed method.
      * @param timer the given timer object that will be given to the timer method.
+     * @param methodInfo the method to use for the callback if applied on a specific method
      */
-    public void notifyTimeout(final Timer timer) {
+    @Override
+    public void notifyTimeout(final Timer timer, final IMethodInfo methodInfo) {
         throw new EJBException("Stateful bean cannot receive Timer objects");
     }
 

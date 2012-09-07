@@ -69,6 +69,7 @@ import org.ow2.easybeans.enhancer.lib.MethodRenamer;
 import org.ow2.easybeans.enhancer.lib.ParameterAnnotationRecorder;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbSchedule;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
@@ -265,10 +266,19 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
         String newName = name;
         int newAccess = access;
 
+        if (isScheduleMethod(jMethod)) {
+            // Ensure that the access is public for all timeout methods
+            newAccess = Opcodes.ACC_PUBLIC;
+        }
+
+
         // Intercepted method : need to change the method name for Beans
         if (isInterceptedMethod(jMethod) && this.classAnnotationMetadata.isBean()) {
             // Add the method as renamed
             this.renamedMethods.add(jMethod);
+
+            // Ensure that the access is public for all intercepted methods
+            newAccess = Opcodes.ACC_PUBLIC;
 
             // Rename the method name
             newName = MethodRenamer.encode(name);
@@ -1144,6 +1154,29 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                     + this.classAnnotationMetadata.getClassName());
         }
         return method.isBusinessMethod();
+    }
+
+    /**
+     * @param jMethod object to check
+     * @return true if the given method has schedule annotation
+     */
+    private boolean isScheduleMethod(final JMethod jMethod) {
+
+        // get method metadata
+        EasyBeansEjbJarMethodMetadata method = this.classAnnotationMetadata.getMethodMetadata(jMethod);
+        if (method == null) {
+            return false;
+        }
+
+        if (method.isTimeout()) {
+            return true;
+        }
+
+        List<IJEjbSchedule> schedules = method.getJavaxEjbSchedules();
+        if (schedules != null) {
+            return schedules.size() > 0;
+        }
+        return false;
     }
 
     /**

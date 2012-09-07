@@ -25,6 +25,10 @@
 
 package org.ow2.easybeans.container.mdb;
 
+import java.util.Collection;
+
+import javax.ejb.Timer;
+
 import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.bean.EasyBeansMDB;
@@ -112,6 +116,12 @@ public abstract class MDBFactory extends AbsFactory<EasyBeansMDB> implements IPo
      */
     @Override
     public void stop() {
+        // Stop all timers
+        Collection<Timer> timers = getTimerService().getTimers();
+        for (Timer timer : timers) {
+            timer.cancel();
+        }
+
         super.stop();
 
         // remove pool
@@ -184,6 +194,7 @@ public abstract class MDBFactory extends AbsFactory<EasyBeansMDB> implements IPo
 
             // post construct callback
             instance.postConstructEasyBeansLifeCycle();
+
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
         }

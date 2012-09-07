@@ -121,7 +121,18 @@ public final class MethodHelper {
         } catch (SecurityException e) {
             throw new IllegalStateException("Unable to get the method '" + methodName + "'.", e);
         } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("Unable to get the method '" + methodName + "'.", e);
+            // try with the private attribute
+            try {
+                Method m = clazz.getDeclaredMethod(methodName, parameterTypes);
+                if (!m.isAccessible()) {
+                    m.setAccessible(true);
+                }
+                return m;
+            } catch (SecurityException e1) {
+                throw new IllegalStateException("Unable to get the method '" + methodName + "'.", e1);
+            } catch (NoSuchMethodException e1) {
+                throw new IllegalStateException("Unable to get the method '" + methodName + "'.", e1);
+            }
         }
     }
 

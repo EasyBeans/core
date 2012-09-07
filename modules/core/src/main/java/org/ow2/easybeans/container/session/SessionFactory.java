@@ -30,10 +30,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.ejb.EJBException;
+import javax.ejb.Timer;
+import javax.ejb.TimerService;
+
 import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.bean.EasyBeansSB;
+import org.ow2.easybeans.api.bean.EasyBeansSLSB;
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
+import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.container.EZBSessionContext;
 import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocation;
 import org.ow2.easybeans.container.AbsFactory;
@@ -47,6 +53,8 @@ import org.ow2.easybeans.rpc.JEJBResponse;
 import org.ow2.easybeans.rpc.api.EJBLocalRequest;
 import org.ow2.easybeans.rpc.api.EJBRemoteRequest;
 import org.ow2.easybeans.rpc.api.EJBResponse;
+import org.ow2.easybeans.rpc.api.RPCException;
+import org.ow2.easybeans.rpc.util.Hash;
 import org.ow2.util.auditreport.api.IAuditID;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -371,5 +379,67 @@ public abstract class SessionFactory<PoolType extends EasyBeansSB<PoolType>> ext
     public void poolItemRemoved(final PoolType instance) {
         super.remove(instance);
         instance.setEasyBeansRemoved(true);
+    }
+
+
+    /**
+     * Notified when the timer service send a Timer object.
+     * It has to call the Timed method.
+     * @param timer the given timer object that will be given to the timer method.
+     * @param methodInfo the method to use for the callback if applied on a specific method
+     */
+    public void notifyTimeout(final Timer timer, final IMethodInfo methodInfo) {
+
+        // If receiving a call when factory is stopped, ignore this call
+        if (!isStarted()) {
+            logger.warn("Received a timer call but the factory has been stopped, so ignore this call");
+            return;
+        }
+
+        if (methodInfo != null) {
+            // Get method hash from the method info
+            long hashMethod = Hash.hashMethod(methodInfo.getName(), methodInfo.getDescriptor());
+
+            Object[] parameters = null;
+
+            // If timer argument is specified on the method, send it
+            if (methodInfo.getParameters().size() == 1) {
+                parameters = new Object[] {timer};
+            }
+
+            // Needs to call a specific method on the bean
+            if (methodInfo != null) {
+                EJBLocalRequest request = new EJBLocalRequestImpl(Long.valueOf(hashMethod), parameters, Long.valueOf(0),
+                        TimerService.class.getName());
+                EJBResponse response = localCall(request);
+                RPCException exception = response.getRPCException();
+                if (exception != null) {
+                    logger.error("Unable to call the timer callback", exception);
+                }
+                return;
+            }
+        }
+
+        // Get Bean
+        PoolType bean = getBean(null);
+
+        // Set ClassLoader
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getContainer().getClassLoader());
+
+        // Call the timer method on the bean
+        try {
+            bean.timeoutCallByEasyBeans(timer);
+        } finally {
+            // Reset classloader
+            Thread.currentThread().setContextClassLoader(oldClassLoader);
+            if (bean.getClass().isAssignableFrom(EasyBeansSLSB.class)) {
+                try {
+                    getPool().release(bean);
+                } catch (PoolException e) {
+                    throw new EJBException("cannot release bean", e);
+                }
+            }
+        }
     }
 }

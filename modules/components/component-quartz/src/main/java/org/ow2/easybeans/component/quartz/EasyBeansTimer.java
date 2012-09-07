@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2007-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -27,18 +27,19 @@ package org.ow2.easybeans.component.quartz;
 
 import static org.ow2.easybeans.api.OperationState.AFTER_COMPLETION;
 import static org.ow2.easybeans.api.OperationState.DEPENDENCY_INJECTION;
-import static org.ow2.easybeans.api.OperationState.LIFECYCLE_CALLBACK_INTERCEPTOR;
 
 import java.io.Serializable;
 import java.util.Date;
 
 import javax.ejb.EJBException;
 import javax.ejb.NoSuchObjectLocalException;
+import javax.ejb.ScheduleExpression;
 import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.OperationState;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -52,7 +53,7 @@ public class EasyBeansTimer implements Timer {
     /**
      * Job Detail for this timer.
      */
-    private EasyBeansJobDetail jobDetail = null;
+    private JobDetail jobDetail = null;
 
     /**
      * Trigger used by this timer.
@@ -69,6 +70,12 @@ public class EasyBeansTimer implements Timer {
      */
     private Factory<?, ?> factory = null;
 
+
+    /**
+     * This timer has been cancelled ?
+     */
+    private boolean cancelled = false;
+
     /**
      * Create a new Timer object with the given objects (job, trigger and
      * scheduler).
@@ -78,7 +85,7 @@ public class EasyBeansTimer implements Timer {
      * @param scheduler for canceling jobs
      * @param factory optional factory that is creating this timer
      */
-    public EasyBeansTimer(final EasyBeansJobDetail jobDetail, final Trigger trigger, final Scheduler scheduler,
+    public EasyBeansTimer(final JobDetail jobDetail, final Trigger trigger, final Scheduler scheduler,
             final Factory<?, ?> factory) {
         this.jobDetail = jobDetail;
         this.trigger = trigger;
@@ -98,18 +105,22 @@ public class EasyBeansTimer implements Timer {
      */
     public void cancel() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
         OperationState operationState = this.factory.getOperationState();
-        if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
-                || AFTER_COMPLETION == operationState) {
+        if (DEPENDENCY_INJECTION == operationState || AFTER_COMPLETION == operationState) {
             throw new IllegalStateException("The cancel() method cannot be called within the operation state '"
                     + operationState + "'.");
         }
 
+        checkNotCancelled();
+
         // Delete job that has been registered by timer service
         try {
-            this.scheduler.deleteJob(this.jobDetail.getName(), this.jobDetail.getGroup());
+            this.scheduler.deleteJob(this.jobDetail.getKey());
         } catch (SchedulerException e) {
-            throw new EJBException("Cannot cancel job with name '" + this.jobDetail.getName() + "'.", e);
+            throw new EJBException("Cannot cancel job with name '" + this.jobDetail.getKey().getName() + "'.", e);
         }
+
+        // Timer is cancelled
+        this.cancelled = true;
     }
 
     /**
@@ -126,15 +137,18 @@ public class EasyBeansTimer implements Timer {
      */
     public long getTimeRemaining() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
         OperationState operationState = this.factory.getOperationState();
-        if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
-                || AFTER_COMPLETION == operationState) {
+        if (DEPENDENCY_INJECTION == operationState || AFTER_COMPLETION == operationState) {
             throw new IllegalStateException("The getTimeRemaining() method cannot be called within the operation state '"
                     + operationState + "'.");
         }
 
+        checkNotCancelled();
+
+
         // If there is no more next timeout, getNextTimeout() method will throw
         // IllegalStateException
         return getNextTimeout().getTime() - System.currentTimeMillis();
+
     }
 
     /**
@@ -151,22 +165,45 @@ public class EasyBeansTimer implements Timer {
      */
     public Date getNextTimeout() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
         OperationState operationState = this.factory.getOperationState();
-        if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
-                || AFTER_COMPLETION == operationState) {
+        if (DEPENDENCY_INJECTION == operationState || AFTER_COMPLETION == operationState) {
             throw new IllegalStateException("The getNextTimeout() method cannot be called within the operation state '"
                     + operationState + "'.");
         }
 
+        checkNotCancelled();
+
+
         // Get next timeout
-        Date date = this.trigger.getNextFireTime();
+        boolean noNextTimeout = false;
+        Date nextFireTime = this.trigger.getNextFireTime();
+        Date now = new Date();
+
+        // do we have a date ?
+        if (nextFireTime != null) {
+            // if we've a date in the past or equals to now, check for a future date
+            if (now.after(nextFireTime) || now.equals(nextFireTime)) {
+                Date newTime = this.trigger.getFireTimeAfter(now);
+                if (newTime != null && nextFireTime.equals(newTime)) {
+                    // Well this has been ended
+                    noNextTimeout = true;
+                } else {
+                    return newTime;
+                }
+            }
+        }
 
         // May be null (trigger will not fire again)
-        if (date == null) {
-            throw new IllegalStateException("No next timeout for this timer");
+        if (nextFireTime == null) {
+            noNextTimeout = true;
+        }
+
+        if (noNextTimeout) {
+            throw new NoSuchObjectLocalException("No next timeout for this timer");
+
         }
 
         // return the date
-        return date;
+        return nextFireTime;
     }
 
     /**
@@ -182,14 +219,18 @@ public class EasyBeansTimer implements Timer {
      */
     public Serializable getInfo() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
         OperationState operationState = this.factory.getOperationState();
-        if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
-                || AFTER_COMPLETION == operationState) {
+        if (DEPENDENCY_INJECTION == operationState || AFTER_COMPLETION == operationState) {
             throw new IllegalStateException("The getInfo() method cannot be called within the operation state '"
                     + operationState + "'.");
         }
 
+        checkNotCancelled();
+
+
+        EasyBeansJobDetailData data = (EasyBeansJobDetailData) this.jobDetail.getJobDataMap().get("data");
+
         // Get info from the data of the job detail
-        return this.jobDetail.getJobDetailData().getInfo();
+        return data.getInfo();
     }
 
     /**
@@ -205,13 +246,129 @@ public class EasyBeansTimer implements Timer {
      */
     public TimerHandle getHandle() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
         OperationState operationState = this.factory.getOperationState();
-        if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
-                || AFTER_COMPLETION == operationState) {
+        if (DEPENDENCY_INJECTION == operationState || AFTER_COMPLETION == operationState) {
             throw new IllegalStateException("The getHandle() method cannot be called within the operation state '"
                     + operationState + "'.");
         }
 
+        checkNotCancelled();
+
+        if (!isPersistent()) {
+            throw new IllegalStateException("Cannot call getHandle on a non-persistent timer");
+        }
+
         return new EasyBeansTimerHandle(this.jobDetail);
+    }
+
+    /**
+     * Get the schedule expression corresponding to this timer.  The timer
+     * must be a calendar-based timer.  It may have been created automatically
+     * or programmatically.
+     * @return schedule expression for the timer.
+     * @throws IllegalStateException If this method is
+     * invoked while the instance is in a state that does not allow access
+     * to this method.  Also thrown if invoked on a timer that is not a
+     * calendar-based timer.
+     * @throws NoSuchObjectLocalException If invoked on a timer
+     * that has expired or has been cancelled.
+     * @throws EJBException If this method could not complete due
+     * to a system-level failure.
+     * @since EJB 3.1 version.
+     */
+    public ScheduleExpression getSchedule() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+
+        checkNotCancelled();
+
+
+        EasyBeansJobDetailData data = (EasyBeansJobDetailData) this.jobDetail.getJobDataMap().get("data");
+        ScheduleExpression scheduleExpression = data.getScheduleExpression();
+
+        if (scheduleExpression == null) {
+            throw new IllegalStateException("Not a calendar based timer");
+        }
+        return scheduleExpression;
+    }
+
+    /**
+     * Return whether this timer is a calendar-based timer.
+     * @return boolean indicating whether the timer is calendar-based.
+     * @throws java.lang.IllegalStateException If this method is invoked while the instance is in a state that does not allow
+     * access to this method.
+     * @throws javax.ejb.NoSuchObjectLocalException If invoked on a timer that has expired or has been cancelled.
+     * @throws javax.ejb.EJBException If this method could not complete due to a system-level failure.
+     * @since EJB 3.1 version.
+     */
+    public boolean isCalendarTimer() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+        OperationState operationState = this.factory.getOperationState();
+        if (DEPENDENCY_INJECTION == operationState || AFTER_COMPLETION == operationState) {
+            throw new IllegalStateException("The getHandle() method cannot be called within the operation state '"
+                    + operationState + "'.");
+        }
+
+        checkNotCancelled();
+
+
+        EasyBeansJobDetailData data = (EasyBeansJobDetailData) this.jobDetail.getJobDataMap().get("data");
+        return data.getScheduleExpression() != null;
+        }
+
+    /**
+     * Return whether this timer has persistent semantics.
+     * @return boolean indicating whether the timer is persistent.
+     * @throws IllegalStateException If this method is invoked while the instance is in a state that does not allow access to this
+     * method.
+     * @throws NoSuchObjectLocalException If invoked on a timer that has expired or has been cancelled.
+     * @throws EJBException If this method could not complete due to a system-level failure.
+     * @since EJB 3.1 version.
+     */
+    public boolean isPersistent() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+        checkNotCancelled();
+
+        EasyBeansJobDetailData data = (EasyBeansJobDetailData) this.jobDetail.getJobDataMap().get("data");
+        return data.isPersistent();
+    }
+
+    /**
+     * Gets the trigger.
+     * @return trigger
+     */
+    protected Trigger getTrigger() {
+        return this.trigger;
+    }
+
+    /**
+     * Checks that the current timer has not be cancelled else throws an exception.
+     * @throws NoSuchObjectLocalException if the timer has been cancelled.
+     */
+    protected void checkNotCancelled() throws NoSuchObjectLocalException {
+        if (this.cancelled) {
+            throw new NoSuchObjectLocalException("This timer has been cancelled");
+        }
+    }
+
+
+    /**
+     * Flag this timer as being invalid from now.
+     */
+    public void setInvalid() {
+        this.cancelled = true;
+    }
+
+
+    @Override
+    public boolean equals(final Object other) {
+        if (other == null || !(other instanceof EasyBeansTimer)) {
+            return false;
+        }
+
+        EasyBeansTimer otherTimer = (EasyBeansTimer) other;
+        return this.jobDetail.getKey().equals(otherTimer.jobDetail.getKey());
+
+    }
+
+    @Override
+    public int hashCode() {
+        return this.jobDetail.hashCode();
     }
 
 }

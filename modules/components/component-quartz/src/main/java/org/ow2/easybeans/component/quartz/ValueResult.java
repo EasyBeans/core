@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,28 +19,59 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: TimerComponent.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.component.itf;
-
-import org.ow2.easybeans.api.EZBTimerService;
-import org.ow2.easybeans.api.Factory;
-import org.ow2.easybeans.component.api.EZBComponent;
+package org.ow2.easybeans.component.quartz;
 
 /**
- * Interface for the component that provides the EJB timer service.
+ * Result value.
  * @author Florent Benoit
  */
-public interface TimerComponent extends EZBComponent {
-
+public class ValueResult {
 
     /**
-     * Gets an EJB timer service through this component.
-     * @param factory an EasyBeans factory providing timeout notification.
-     * @return an EJB timer service
+     * Default result is 0.
      */
-    EZBTimerService getTimerService(final Factory<?, ?> factory);
+    private int result = 0;
+
+    /**
+     * By default, do not need to increment the next field.
+     */
+    private boolean needsIncrement = false;
+
+    /**
+     * @return the value
+     */
+    public int getResult() {
+        return this.result;
+    }
+
+    /**
+     * Sets the result value.
+     * @param result the value
+     */
+    public void setResult(final int result) {
+        this.result = result;
+    }
+
+    /**
+     * @return true if we needs to increment the next field
+     */
+    public boolean needsIncrement() {
+        return this.needsIncrement;
+    }
+
+    /**
+     * Sets the value for the increment flag.
+     * @param needsIncrement true/false
+     */
+    public void setNeedsIncrement(final boolean needsIncrement) {
+        this.needsIncrement = needsIncrement;
+    }
+
+
+
 
 }

@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2007-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -27,7 +27,10 @@ package org.ow2.easybeans.component.quartz;
 
 import java.io.Serializable;
 
+import javax.ejb.ScheduleExpression;
 import javax.ejb.Timer;
+
+import org.ow2.easybeans.api.bean.info.IMethodInfo;
 
 /**
  * Data that are stored in the JobDetail. The data needs to be serializable.
@@ -68,12 +71,27 @@ public class EasyBeansJobDetailData implements Serializable {
      */
     private transient Timer timer = null;
 
+    /**
+     * Callback method for the timeout.
+     */
+    private transient IMethodInfo methodInfo = null;
+
+    /**
+     * Schedule Expression for calendar based timer.
+     */
+    private ScheduleExpression scheduleExpression = null;
+
+    /**
+     * Persistent flag for the timers.
+     */
+    private boolean isPersistent = false;
+
 
     /**
      * @return the serializable info used for the timer expiration notification.
      */
     public Serializable getInfo() {
-        return info;
+        return this.info;
     }
 
     /**
@@ -96,14 +114,14 @@ public class EasyBeansJobDetailData implements Serializable {
      * @return the container id.
      */
     protected String getContainerId() {
-        return containerId;
+        return this.containerId;
     }
 
     /**
      * @return the name of the factory.
      */
     public String getFactoryName() {
-        return factoryName;
+        return this.factoryName;
     }
 
     /**
@@ -127,7 +145,7 @@ public class EasyBeansJobDetailData implements Serializable {
      * @return the ID of the EasyBeans server
      */
     public Integer getEasyBeansServerID() {
-        return easyBeansServerID;
+        return this.easyBeansServerID;
     }
 
 
@@ -144,7 +162,54 @@ public class EasyBeansJobDetailData implements Serializable {
      * @return the timer object
      */
     public Timer getTimer() {
-        return timer;
+        return this.timer;
+    }
+
+    /**
+     * Sets the callback method info.
+     * @param methodInfo the callback method
+     */
+    public void setMethodInfo(final IMethodInfo methodInfo) {
+        this.methodInfo = methodInfo;
+    }
+
+
+    /**
+     * @return callback method
+     */
+    public IMethodInfo getMethodInfo() {
+
+        return this.methodInfo;
+    }
+
+    /**
+     * Sets the sechedule expression if it's a calendar based timer.
+     * @param scheduleExpression the expression
+     */
+    public void setScheduleExpression(final ScheduleExpression scheduleExpression) {
+        this.scheduleExpression = scheduleExpression;
+    }
+
+    /**
+     * @return calendar based timer expression or null
+     */
+    public ScheduleExpression getScheduleExpression() {
+        return this.scheduleExpression;
+    }
+
+    /**
+     * Sets the persistent mode flag.
+     * @param isPersistent true/false
+     */
+    public void setPersistent(final boolean isPersistent) {
+        this.isPersistent = isPersistent;
+    }
+
+    /**
+     * @return true if this timer is a persistent timer.
+     */
+    public boolean isPersistent() {
+        return this.isPersistent;
     }
 
 }

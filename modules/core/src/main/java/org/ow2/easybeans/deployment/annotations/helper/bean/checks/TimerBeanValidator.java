@@ -75,8 +75,9 @@ public final class TimerBeanValidator {
                 alreadyFoundTimerMethod = method;
 
                 // Check that the signature is valid
-                // void and Timer parameter
-                if (!BeanClassAdapter.TIMER_JMETHOD.getDescriptor().equals(method.getJMethod().getDescriptor())) {
+                // void or Timer parameter
+                if (!BeanClassAdapter.TIMER_JMETHOD.getDescriptor().equals(method.getJMethod().getDescriptor())
+                        && !BeanClassAdapter.TIMER_JMETHOD_NOARG.getDescriptor().equals(method.getJMethod().getDescriptor())) {
                     throw new InterceptorsValidationException("The timeout method '" + method
                             + "' hasn't a valid signature. The valid signature should be '"
                             + BeanClassAdapter.TIMER_JMETHOD.getDescriptor() + "'.");

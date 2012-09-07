@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2007-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -62,14 +62,14 @@ public class EasyBeansTimerHandle implements TimerHandle {
     /**
      * JobDetail used to get parameters.
      */
-    private EasyBeansJobDetail easyBeansJobDetail;
+    private JobDetail jobDetail;
 
     /**
      * Constructor. Build an handle for this timer.
-     * @param easyBeansJobDetail the job detail.
+     * @param jobDetail the job detail.
      */
-    public EasyBeansTimerHandle(final EasyBeansJobDetail easyBeansJobDetail) {
-        this.easyBeansJobDetail = easyBeansJobDetail;
+    public EasyBeansTimerHandle(final JobDetail jobDetail) {
+        this.jobDetail = jobDetail;
     }
 
     /**
@@ -85,12 +85,9 @@ public class EasyBeansTimerHandle implements TimerHandle {
     public Timer getTimer() throws IllegalStateException, NoSuchObjectLocalException, EJBException {
         Timer timer = null;
 
-        // Get data from the Job Detail
-        String jobName = this.easyBeansJobDetail.getName();
-        String groupName = this.easyBeansJobDetail.getGroup();
-
         // Get data from the jobDetail
-        EasyBeansJobDetailData easyBeansJobDetailData = this.easyBeansJobDetail.getJobDetailData();
+        EasyBeansJobDetailData easyBeansJobDetailData = (EasyBeansJobDetailData) this.jobDetail.getJobDataMap().get("data");
+
         Integer easyBeansServerID = easyBeansJobDetailData.getEasyBeansServerID();
         String containerID = easyBeansJobDetailData.getContainerId();
         String factoryName = easyBeansJobDetailData.getFactoryName();
@@ -133,37 +130,27 @@ public class EasyBeansTimerHandle implements TimerHandle {
         // Get Scheduler on the quartz component
         Scheduler scheduler = quartzComponent.getScheduler();
 
-        // Get detail
-        JobDetail jobDetail = null;
-        try {
-            jobDetail = scheduler.getJobDetail(jobName, groupName);
-        } catch (SchedulerException e) {
-            throw new EJBException("Cannot get the jobDetail for the jobName '" + jobName + "'.", e);
-        }
-
-        // Cast to correct object
-        EasyBeansJobDetail easyBeansJobDetail = null;
-        if (jobDetail instanceof EasyBeansJobDetail) {
-            easyBeansJobDetail = (EasyBeansJobDetail) jobDetail;
-        } else {
-            throw new EJBException("JobDetail found for the job named '" + jobName + "' is not an EasyBeansJobDetail object");
-        }
 
         // Get triggers
-        Trigger[] triggers = null;
+        List<? extends Trigger> triggers = null;
         try {
-            triggers = scheduler.getTriggersOfJob(jobName, groupName);
+            triggers = scheduler.getTriggersOfJob(this.jobDetail.getKey());
         } catch (SchedulerException e) {
-            throw new EJBException("Cannot get triggers for the job named '" + jobName + "'.", e);
+            throw new EJBException("Cannot get triggers for the job named '" + this.jobDetail.getKey().getName() + "'.", e);
+        }
+
+        if (triggers.size() == 0) {
+            throw new NoSuchObjectLocalException("The associated timer of the handle has been cancelled.");
         }
 
         // Should be only once trigger per job
-        if (triggers == null || triggers.length > 1) {
-            throw new EJBException("Invalid numbers of triggers found for the job named '" + jobName + "'.");
+        if (triggers == null || triggers.size() > 1) {
+            throw new EJBException("Invalid numbers of triggers found for the job named '" + this.jobDetail.getKey().getName()
+                    + "'.");
         }
 
         // Build a timer object and return it
-        timer = new EasyBeansTimer(easyBeansJobDetail, triggers[0], scheduler, factory);
+        timer = new EasyBeansTimer(this.jobDetail, triggers.get(0), scheduler, factory);
 
         // Return the timer instance
         return timer;

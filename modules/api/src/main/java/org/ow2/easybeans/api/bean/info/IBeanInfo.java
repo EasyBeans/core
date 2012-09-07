@@ -191,4 +191,15 @@ public interface IBeanInfo {
      * @param startup true/false
      */
     void setStartup(final boolean startup);
+
+    /**
+     * @return list of timers that needs to be applied on this bean.
+     */
+    List<ITimerInfo> getTimersInfo();
+
+    /**
+     * Sets the timers info.
+     * @param timersInfo the  list of timers that needs to be applied on this bean.
+     */
+    void setTimersInfo(final List<ITimerInfo> timersInfo);
 }

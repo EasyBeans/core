@@ -28,10 +28,10 @@ package org.ow2.easybeans.api;
 import java.util.Map;
 
 import javax.ejb.Timer;
-import javax.ejb.TimerService;
 import javax.naming.Context;
 
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
+import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.interceptor.EZBInvocationContextFactory;
 import org.ow2.easybeans.rpc.api.EJBLocalRequest;
 import org.ow2.easybeans.rpc.api.EJBRemoteRequest;
@@ -66,8 +66,9 @@ public interface Factory<PoolType, Clue> extends EZBJ2EEManagedObject {
      * Notified when the timer service send a Timer object.
      * It has to call the Timed method.
      * @param timer the given timer object that will be given to the timer method.
+     * @param methodInfo the method to use for the callback if applied on a specific method
      */
-    void notifyTimeout(final Timer timer);
+    void notifyTimeout(final Timer timer, IMethodInfo methodInfo);
 
     /**
      * Init the factory.
@@ -132,7 +133,7 @@ public interface Factory<PoolType, Clue> extends EZBJ2EEManagedObject {
        * Gets the timer service of this factory.
        * @return the timer service.
        */
-      TimerService getTimerService();
+      EZBTimerService getTimerService();
 
       /**
        * Defines the invocation context factory (for dynamic mode).

@@ -31,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import javax.ejb.EJBException;
 import javax.ejb.NoSuchEJBException;
 import javax.ejb.Timer;
 
@@ -234,49 +233,36 @@ public class StatelessSessionFactory extends SessionFactory<EasyBeansSLSB> imple
         instance.setEasyBeansRemoved(true);
     }
 
-
     /**
-     * Notified when the timer service send a Timer object.
-     * It has to call the Timed method.
-     * @param timer the given timer object that will be given to the timer method.
+     * Start the factory.
+     * @throws FactoryException if the startup fails.
      */
-    public void notifyTimeout(final Timer timer) {
+    @Override
+    public void start() throws FactoryException {
+        super.start();
 
-        // If receiving a call when factory is stopped, ignore this call
-        if (!isStarted()) {
-            logger.warn("Received a timer call but the factory has been stopped, so ignore this call");
-            return;
-        }
 
-        // Call the EasyBeans timer method on a given bean instance
-        EasyBeansSLSB bean = null;
-        bean = getBean(null);
-
-        //set ClassLoader
-        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getContainer().getClassLoader());
-
-        // Call the timer method on the bean
-        try {
-            bean.timeoutCallByEasyBeans(timer);
-        } finally {
-            // Reset classloader
-            Thread.currentThread().setContextClassLoader(oldClassLoader);
-
-            // push back into the pool
+        // Not yet instantiated ?
+        if (getSessionBeanInfo().getTimersInfo().size() > 0) {
             try {
-                getPool().release(bean);
-            } catch (PoolException e) {
-                throw new EJBException("cannot release bean", e);
+                EasyBeansSLSB bean = getBean(null);
+                try {
+                    getPool().release(bean);
+                } catch (PoolException e) {
+                    throw new FactoryException("Cannot initialize a Stateless Session bean required by schedule timers", e);
+                }
+            } catch (RuntimeException e) {
+                throw new FactoryException("Cannot initialize a Stateless Session bean required by schedule timers", e);
             }
         }
+
+
     }
 
     /**
      * Stops the factory.
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void stop() {
         try {
             // Stop all timers

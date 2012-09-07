@@ -29,6 +29,7 @@ import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -130,6 +131,9 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
      */
     @Override
     protected EasyBeansSingletonSB getBean(final Long beanId) throws IllegalArgumentException {
+        if (this.singletonBean != null) {
+            return this.singletonBean;
+        }
         try {
             return getPool().get();
         } catch (PoolException e) {
@@ -231,7 +235,6 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
                     return ejbResponse;
                 }
             }
-
             Method m = getHashes().get(methodHash);
 
             if (m == null) {
@@ -330,58 +333,41 @@ public class SingletonSessionFactory extends SessionFactory<EasyBeansSingletonSB
     public void start() throws FactoryException {
         super.start();
 
+
         // Not yet instantiated ?
-        if (getSessionBeanInfo().isStartup() && this.singletonBean == null) {
+        if ((getSessionBeanInfo().isStartup() || getSessionBeanInfo().getTimersInfo().size() > 0) && this.singletonBean == null) {
             try {
                 this.singletonBean = getBean(null);
             } catch (RuntimeException e) {
                 throw new FactoryException("Cannot initialize Singleton bean", e);
             }
         }
+
+
     }
-
-
-
-    /**
-     * Notified when the timer service send a Timer object.
-     * It has to call the Timed method.
-     * @param timer the given timer object that will be given to the timer method.
-     */
-    public void notifyTimeout(final Timer timer) {
-        // Call the EasyBeans timer method on a given bean instance
-        if (this.singletonBean == null) {
-            this.singletonBean = getBean(null);
-        }
-
-        //set ClassLoader
-        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getContainer().getClassLoader());
-
-        // Call the timer method on the bean
-        try {
-            this.singletonBean.timeoutCallByEasyBeans(timer);
-        } finally {
-            // Reset classloader
-            Thread.currentThread().setContextClassLoader(oldClassLoader);
-        }
-    }
-
 
     /**
      * Stops the factory.
      */
     @Override
     public void stop() {
-
-        // push back into the pool
-        if (this.singletonBean != null) {
-            try {
-                getPool().release(this.singletonBean);
-            } catch (PoolException e) {
-                LOGGER.error("Unable to release singleton bean", e);
+        try {
+            // Stop all timers
+            Collection<Timer> timers = getTimerService().getTimers();
+            for (Timer timer : timers) {
+                timer.cancel();
             }
+        } finally {
+            // push back into the pool
+            if (this.singletonBean != null) {
+                try {
+                    getPool().release(this.singletonBean);
+                } catch (PoolException e) {
+                    LOGGER.error("Unable to release singleton bean", e);
+                }
+            }
+            super.stop();
         }
-        super.stop();
     }
 
 }

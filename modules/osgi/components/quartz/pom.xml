@@ -49,7 +49,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.easybeans</groupId>
+      <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
     </dependency>
     <dependency>

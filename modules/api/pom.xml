@@ -39,7 +39,7 @@
   <dependencies>
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>
-      <artifactId>ow2-ejb-3.0-spec</artifactId>
+      <artifactId>ow2-ejb-3.1-spec</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>

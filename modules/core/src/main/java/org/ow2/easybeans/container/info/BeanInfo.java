@@ -37,6 +37,7 @@ import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.bean.info.ISecurityInfo;
+import org.ow2.easybeans.api.bean.info.ITimerInfo;
 import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
 
 /**
@@ -102,6 +103,10 @@ public class BeanInfo implements IBeanInfo {
      */
     private List<IMethodInfo> sessionSynchronizationMethodsInfo = null;
 
+    /**
+     * List of timers.
+     */
+    private List<ITimerInfo> timersInfo = null;
 
     /**
      * Depends On ?
@@ -423,4 +428,19 @@ public class BeanInfo implements IBeanInfo {
         this.sessionSynchronizationMethodsInfo = sessionSynchronizationMethodsInfo;
     }
 
+
+    /**
+     * @return list of timers that needs to be applied on this bean.
+     */
+    public List<ITimerInfo> getTimersInfo() {
+        return this.timersInfo;
+    }
+
+    /**
+     * Sets the timers info.
+     * @param timersInfo the  list of timers that needs to be applied on this bean.
+     */
+    public void setTimersInfo(final List<ITimerInfo> timersInfo) {
+        this.timersInfo = timersInfo;
+    }
 }

@@ -90,6 +90,12 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
             "(Ljavax/ejb/Timer;)V", null, null);
 
     /**
+     * JMethod object for timeoutCallByEasyBeans.
+     */
+    public static final JMethod TIMER_JMETHOD_NOARG = new JMethod(ACC_PUBLIC, MethodRenamer.encode(TIMER_METHOD),
+            "()V", null, null);
+
+    /**
      * Mappping between className and the bytecode.
      */
     private List<DefinedClass> definedClasses = null;
@@ -327,7 +333,11 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
             if (method.isTimeout()) {
                 // Write a call to this method
                 mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(ALOAD, 1);
+
+                // Timer argument (not a void method)
+                if (!"()V".equals(method.getJMethod().getDescriptor())) {
+                    mv.visitVarInsn(ALOAD, 1);
+                }
 
                 // The name of the class where the method is defined (can be a super class)
                 String className = this.classAnnotationMetadata.getClassName();
@@ -335,7 +345,7 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
                     className = method.getOriginalClassMetadata().getClassName();
                 }
 
-                mv.visitMethodInsn(INVOKESPECIAL, className, method.getMethodName(), "(Ljavax/ejb/Timer;)V");
+                mv.visitMethodInsn(INVOKESPECIAL, className, method.getMethodName(), method.getJMethod().getDescriptor());
                 found = true;
                 break;
             }

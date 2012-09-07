@@ -30,6 +30,7 @@
 	<classpathentry kind="src" output="modules/components/component-jotm/target/classes" path="modules/components/component-jotm/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-mail/target/classes" path="modules/components/component-mail/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-quartz/target/classes" path="modules/components/component-quartz/src/main/java"/>
+	<classpathentry kind="src" output="modules/components/component-quartz/target/test-classes" path="modules/components/component-quartz/src/test/java"/>
 	<classpathentry kind="src" output="modules/components/component-remotejndiresolver/target/classes" path="modules/components/component-remotejndiresolver/src/main/java"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/target/test-classes" path="modules/components/component-smartclient/src/test/java"/>
 	<classpathentry kind="src" output="modules/components/component-smartclient/api/target/classes" path="modules/components/component-smartclient/api/src/main/java"/>

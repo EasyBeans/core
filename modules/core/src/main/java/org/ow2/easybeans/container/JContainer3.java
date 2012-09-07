@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.ejb.ScheduleExpression;
+import javax.ejb.TimerConfig;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -65,6 +68,7 @@ import org.ow2.easybeans.api.audit.EZBAuditComponent;
 import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
 import org.ow2.easybeans.api.bean.info.IEJBJarInfo;
+import org.ow2.easybeans.api.bean.info.ITimerInfo;
 import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
 import org.ow2.easybeans.api.binding.BindingException;
 import org.ow2.easybeans.api.binding.EZBBindingFactory;
@@ -78,8 +82,10 @@ import org.ow2.easybeans.container.info.ApplicationExceptionInfo;
 import org.ow2.easybeans.container.info.BusinessMethodsInfoHelper;
 import org.ow2.easybeans.container.info.EJBJarInfo;
 import org.ow2.easybeans.container.info.MessageDrivenInfo;
+import org.ow2.easybeans.container.info.MethodInfo;
 import org.ow2.easybeans.container.info.SessionBeanInfo;
 import org.ow2.easybeans.container.info.SessionSynchronizationInfoHelper;
+import org.ow2.easybeans.container.info.TimerInfo;
 import org.ow2.easybeans.container.info.security.SecurityInfoHelper;
 import org.ow2.easybeans.container.info.ws.WebServiceInfo;
 import org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory;
@@ -93,6 +99,7 @@ import org.ow2.easybeans.deployment.annotations.exceptions.ResolverException;
 import org.ow2.easybeans.deployment.helper.JavaContextHelper;
 import org.ow2.easybeans.deployment.helper.JavaContextHelperException;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
+import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.xml.EJB;
 import org.ow2.easybeans.deployment.metadata.ejbjar.xml.EasyBeansDD;
@@ -148,6 +155,7 @@ import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataExceptio
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IApplicationException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IDependsOn;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbSchedule;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JActivationConfigProperty;
@@ -955,6 +963,7 @@ public class JContainer3 implements EZBContainer {
         messageDrivenInfo.setTransactionManagementType(messageDrivenBean.getTransactionManagementType());
         messageDrivenInfo.setMessageListenerInterface(messageDrivenBean.getJMessageDriven()
                 .getMessageListenerInterface());
+        messageDrivenInfo.setTimersInfo(convertTimersInfo(messageDrivenBean));
         messageDrivenInfo.setMessageDestinationLink(messageDrivenBean.getJMessageDriven()
                 .getMessageDestinationLink());
 
@@ -1016,6 +1025,7 @@ public class JContainer3 implements EZBContainer {
         // Build runtime information
         SessionBeanInfo sessionBeanInfo = new SessionBeanInfo();
         sessionBeanInfo.setTransactionManagementType(sessionBean.getTransactionManagementType());
+        sessionBeanInfo.setTimersInfo(convertTimersInfo(sessionBean));
         sessionBeanInfo.setApplicationExceptions(convertApplicationExceptionInfo(sessionBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
         // Only for singleton
         if (sessionBean.isSingleton()) {
@@ -1096,6 +1106,52 @@ public class JContainer3 implements EZBContainer {
         }
 
         return sessionFactory;
+    }
+
+
+    /**
+     * Gets timers info from a given bean.
+     * @param bean the bean to analyze
+     * @return a list of timers
+     */
+    protected List<ITimerInfo> convertTimersInfo(final EasyBeansEjbJarClassMetadata bean) {
+
+        List<ITimerInfo> timersInfo = new ArrayList<ITimerInfo>();
+
+        // Scan all methods
+        for (EasyBeansEjbJarMethodMetadata methodMetadata : bean.getMethodMetadataCollection()) {
+            List<IJEjbSchedule> schedules = methodMetadata.getJavaxEjbSchedules();
+            if (schedules != null && schedules.size() > 0) {
+                for (IJEjbSchedule schedule : schedules) {
+
+                    ScheduleExpression scheduleExpression = new ScheduleExpression();
+                    scheduleExpression = scheduleExpression.second(schedule.getSecond()).minute(schedule.getMinute()).hour(
+                            schedule.getHour()).dayOfMonth(schedule.getDayOfMonth()).month(schedule.getMonth()).dayOfWeek(
+                            schedule.getDayOfWeek()).year(schedule.getYear());
+                    if (schedule.getStart() != null) {
+                    scheduleExpression = scheduleExpression.start(Date.valueOf(schedule.getStart()));
+                    }
+                    if (schedule.getEnd() != null) {
+                        scheduleExpression = scheduleExpression.start(Date.valueOf(schedule.getEnd()));
+                    }
+
+                    TimerConfig timerConfig = new TimerConfig();
+                    timerConfig.setInfo(schedule.getInfo());
+                    timerConfig.setPersistent(schedule.isPersistent());
+
+                    TimerInfo timerInfo = new TimerInfo();
+                    timerInfo.setScheduleExpression(scheduleExpression);
+                    timerInfo.setTimerConfig(timerConfig);
+                    timerInfo.setMethodInfo(new MethodInfo(methodMetadata));
+
+                    timersInfo.add(timerInfo);
+
+                }
+            }
+        }
+
+        return timersInfo;
+
     }
 
     /**

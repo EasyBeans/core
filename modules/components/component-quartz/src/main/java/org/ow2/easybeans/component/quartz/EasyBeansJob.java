@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2007 Bull S.A.S.
+ * Copyright (C) 2007-2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -49,8 +49,9 @@ public class EasyBeansJob implements Job {
      *         the job.
      */
     public void execute(final JobExecutionContext context) throws JobExecutionException {
+
         // Get the Job Detail data from the context
-        EasyBeansJobDetailData data = ((EasyBeansJobDetail) context.getJobDetail()).getJobDetailData();
+        EasyBeansJobDetailData data = (EasyBeansJobDetailData) context.getJobDetail().getJobDataMap().get("data");
 
 
         // Find the Embedded instance
@@ -66,7 +67,7 @@ public class EasyBeansJob implements Job {
         }
 
         // Get the factory
-        Factory factory = container.getFactory(data.getFactoryName());
+        Factory<?, ?> factory = container.getFactory(data.getFactoryName());
         if (factory == null) {
             throw new JobExecutionException("Cannot find the factory with the name '" + data.getFactoryName() + "'.");
         }
@@ -78,7 +79,7 @@ public class EasyBeansJob implements Job {
         }
 
         // Invoke the timer method
-        factory.notifyTimeout(timer);
+        factory.notifyTimeout(timer, data.getMethodInfo());
 
     }
 }

@@ -445,8 +445,9 @@ public class MDBMessageEndPointFactory extends MDBFactory implements MessageEndp
      * Notified when the timer service send a Timer object.
      * It has to call the Timed method.
      * @param timer the given timer object that will be given to the timer method.
+     * @param methodInfo the method to use for the callback if applied on a specific method
      */
-    public void notifyTimeout(final Timer timer) {
+    public void notifyTimeout(final Timer timer, final IMethodInfo methodInfo) {
         // Get an EndPoint
         EZBMessageEndPoint mdbMessageEndPoint = null;
         try {

@@ -30,18 +30,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.TimerService;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.resource.spi.work.WorkManager;
 
 import org.ow2.easybeans.api.EZBContainer;
+import org.ow2.easybeans.api.EZBTimerService;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.FactoryException;
 import org.ow2.easybeans.api.OperationState;
 import org.ow2.easybeans.api.audit.EZBAuditComponent;
 import org.ow2.easybeans.api.bean.EasyBeansBean;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
+import org.ow2.easybeans.api.bean.info.ITimerInfo;
 import org.ow2.easybeans.api.components.EZBComponentRegistry;
 import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocationBegin;
 import org.ow2.easybeans.api.injection.EasyBeansInjectionException;
@@ -162,7 +163,7 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
     /**
      * Timer Service for this factory.
      */
-    private TimerService timerService = null;
+    private EZBTimerService timerService = null;
 
     /**
      * The event dispatcher.
@@ -199,6 +200,11 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
      * Inherited Local thread used to keep the Context data.
      */
     private InheritableThreadLocal<Map<String, Object>> contextDataThreadLocal;
+
+    /**
+     * Timer initialized.
+     */
+    private volatile boolean timersInitialized = false;
 
     /**
      * Builds a new factory with a given name and its container.
@@ -345,13 +351,37 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
      * Call the postconstruct lifecycle interceptors on the given instance.
      * @param instance the given instance
      */
-    protected void postConstruct(final PoolType instance) {
-        OperationState oldState = getOperationState();
-        getOperationStateThreadLocal().set(OperationState.LIFECYCLE_CALLBACK_INTERCEPTOR);
+    protected synchronized void postConstruct(final PoolType instance) {
+
         try {
-            instance.postConstructEasyBeansLifeCycle();
+            // We perform only once the timer initialization (as we need one by bean class and not by bean instance)
+            if (!this.timersInitialized) {
+                this.timersInitialized = true;
+                // Before calling postconstruct, we initialize the timers.
+                // Do we have Schedule timers ?
+                List<ITimerInfo> timersInfo = getBeanInfo().getTimersInfo();
+
+                // Do we have timers ?
+                if (timersInfo != null && timersInfo.size() > 0) {
+                    for (ITimerInfo timerInfo : timersInfo) {
+                        // Get Timer Service
+                        EZBTimerService timerService = getTimerService();
+
+                        // Schedule the timer
+                        timerService.createCalendarTimer(timerInfo.getScheduleExpression(), timerInfo.getTimerConfig(), timerInfo
+                                .getMethodInfo());
+                    }
+                }
+            }
+
         } finally {
-            getOperationStateThreadLocal().set(oldState);
+            OperationState oldState = getOperationState();
+            getOperationStateThreadLocal().set(OperationState.LIFECYCLE_CALLBACK_INTERCEPTOR);
+            try {
+                instance.postConstructEasyBeansLifeCycle();
+            } finally {
+                getOperationStateThreadLocal().set(oldState);
+            }
         }
     }
 
@@ -556,7 +586,7 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
      * Gets the timer service of this factory.
      * @return the timer service.
      */
-    public TimerService getTimerService() {
+    public EZBTimerService getTimerService() {
         return this.timerService;
     }
 
@@ -699,5 +729,6 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
     public InheritableThreadLocal<Map<String, Object>> getContextDataThreadLocal() {
         return this.contextDataThreadLocal;
     }
+
 
 }
