@@ -248,6 +248,10 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
             if (this.classAnnotationMetadata.isStateful()) {
                 CommonClassGenerator.addFieldGettersSetters(this.cv, this.classAnnotationMetadata.getClassName(),
                         "easyBeansStatefulID", Long.class);
+                CommonClassGenerator.addFieldGettersSetters(this.cv, this.classAnnotationMetadata.getClassName(),
+                        "inTransaction", Boolean.class);
+                CommonClassGenerator.addFieldGettersSetters(this.cv, this.classAnnotationMetadata.getClassName(),
+                        "statefulTimeout", Long.class);
             }
 
             // Add XAResource field for MDB

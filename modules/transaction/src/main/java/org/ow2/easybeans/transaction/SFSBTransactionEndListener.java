@@ -1,6 +1,6 @@
-/**
+/*
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,35 +19,39 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: SessionBeanInfo.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id:$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.container.info;
+package org.ow2.easybeans.transaction;
 
+import javax.transaction.Synchronization;
 
-import org.ow2.easybeans.api.bean.info.ISessionBeanInfo;
-import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbStatefulTimeout;
+import org.ow2.easybeans.api.bean.EasyBeansSFSB;
 
 /**
- * This class contains information for a session bean.
- * It is used at the runtime.
- * @author Florent Benoit
+ * This Listener is notified of a Transaction completion and updates the StatefulBean accordingly.
+ * @author Loic Albertin
  */
-public class SessionBeanInfo extends BeanInfo implements ISessionBeanInfo {
-
-    private IJEjbStatefulTimeout statefulTimeout;
+public class SFSBTransactionEndListener implements Synchronization {
 
     /**
-     * Default constructor.
+     * Stateful session bean that is used to manage Session synchronization.
      */
-    public SessionBeanInfo(final IJEjbStatefulTimeout statefulTimeout) {
-        super();
-        this.statefulTimeout = statefulTimeout;
+    private EasyBeansSFSB statefulBean = null;
+
+
+    public SFSBTransactionEndListener(EasyBeansSFSB statefulBean) {
+        this.statefulBean = statefulBean;
     }
 
+    public void beforeCompletion() {
+        // Nothing to do
+    }
 
-    public IJEjbStatefulTimeout getStatefulTimeout() {
-        return statefulTimeout;
+    public void afterCompletion(int i) {
+        if (statefulBean != null) {
+            statefulBean.setInTransaction(false);
+        }
     }
 }

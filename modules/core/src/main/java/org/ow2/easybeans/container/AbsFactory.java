@@ -207,6 +207,11 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
     private volatile boolean timersInitialized = false;
 
     /**
+     *  The timer component
+     */
+    private TimerComponent timerComponent;
+
+    /**
      * Builds a new factory with a given name and its container.
      * @param className name of this factory (name of class that is managed)
      * @param container the root component of this factory.
@@ -247,7 +252,7 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
 
         // use the first one if there is at least once
         if (timerComponents.size() > 0) {
-            TimerComponent timerComponent = timerComponents.get(0);
+            timerComponent = timerComponents.get(0);
             if (timerComponents.size() > 1) {
                 logger.warn("There are {0} timer components running on this server. Only the first one will be used",
                         Integer.valueOf(timerComponents.size()));
@@ -588,6 +593,14 @@ public abstract class AbsFactory<PoolType extends EasyBeansBean> implements Fact
      */
     public EZBTimerService getTimerService() {
         return this.timerService;
+    }
+
+    /**
+     * Gets the timer component.
+     * @return the timer component.
+     */
+    protected TimerComponent getTimerComponent() {
+        return this.timerComponent;
     }
 
     /**

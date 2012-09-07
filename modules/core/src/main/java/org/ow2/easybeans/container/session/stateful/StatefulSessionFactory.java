@@ -25,8 +25,6 @@
 
 package org.ow2.easybeans.container.session.stateful;
 
-import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -52,6 +50,8 @@ import org.ow2.easybeans.api.bean.info.IAccessTimeoutInfo;
 import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.bean.info.IMethodInfo;
 import org.ow2.easybeans.api.event.bean.EZBEventBeanInvocation;
+import org.ow2.easybeans.component.api.EZBComponentException;
+import org.ow2.easybeans.component.util.TimerCallback;
 import org.ow2.easybeans.container.session.JPoolWrapperFactory;
 import org.ow2.easybeans.container.session.SessionFactory;
 import org.ow2.easybeans.event.bean.EventBeanInvocationEnd;
@@ -63,6 +63,7 @@ import org.ow2.easybeans.rpc.api.EJBLocalRequest;
 import org.ow2.easybeans.rpc.api.EJBResponse;
 import org.ow2.easybeans.rpc.api.RPCException;
 import org.ow2.util.auditreport.api.IAuditID;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbStatefulTimeout;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.pool.api.PoolException;
@@ -72,13 +73,21 @@ import org.ow2.util.pool.impl.enhanced.api.clue.basiccluemanager.IClueAccessor;
 import org.ow2.util.pool.impl.enhanced.impl.clue.basiccluemanager.BasicClueManager;
 import org.ow2.util.pool.impl.enhanced.manager.clue.optional.IPoolItemRemoveClueManager;
 
+import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
+
 /**
  * This class manages the stateless session bean and its creation/lifecycle.
+ *
  * @author Florent Benoit
  */
 public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implements
         EZBStatefulSessionFactory<EasyBeansSFSB, Long>, IPoolItemRemoveClueManager<EasyBeansSFSB, Long>,
-        IClueAccessor<EasyBeansSFSB, Long> {
+        IClueAccessor<EasyBeansSFSB, Long>, TimerCallback {
+
+    /**
+     * System property used to configure the Stateful timeout check interval
+     */
+    private static final String STATEFUL_TIMEOUT_INTERVAL_FLAG = "easybeans.stateful.timeout.check.interval";
 
     /**
      * Logger.
@@ -102,6 +111,11 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     private Map<Long, Lock> locks;
 
     /**
+     * Locks by beans having StatefulTimeout.
+     */
+    private final Map<Long, Lock> statefulTimeoutLocks;
+
+    /**
      * Extended Persistence contexts for a given bean.
      */
     private Map<EasyBeansSFSB, List<EZBExtendedEntityManager>> extendedPersistenceContexts = null;
@@ -118,9 +132,31 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     private Map<Transaction, Synchronization> sessionSynchronizationListeners = null;
 
     /**
+     * The interval in ms between to check of idle timeout
+     */
+    private long statefulTimeoutTimerInterval = 480000;
+
+    /**
+     * List of running scheduled jobs used to check stateful timeout
+     */
+    private final List<String> scheduledJobIds = new ArrayList<String>();
+
+    /**
+     * Property key used to store the bean id for a check timeout scheduled job
+     */
+    private static final String BEAN_ID_KEY = "BEAN-ID";
+
+    /**
+     * List of bean ids removed by a scheduled job and for which the client has not already be notified of the bean removal
+     */
+    private final List<Long> killedTimedoutIds = new ArrayList<Long>();
+
+    /**
      * Builds a new factory with a given name and its container.
+     *
      * @param className name of this factory (name of class that is managed)
      * @param container the root component of this factory.
+     *
      * @throws FactoryException if class can't be loaded.
      */
     public StatefulSessionFactory(final String className, final EZBContainer container) throws FactoryException {
@@ -129,9 +165,11 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Builds a new factory with a given name and its container.
-     * @param className name of this factory (name of class that is managed)
-     * @param container the root component of this factory.
+     *
+     * @param className                     name of this factory (name of class that is managed)
+     * @param container                     the root component of this factory.
      * @param useExtendedPersistenceContext if the SFSB is using an extended Persistence context
+     *
      * @throws FactoryException if class can't be loaded.
      */
     public StatefulSessionFactory(final String className, final EZBContainer container,
@@ -139,6 +177,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
         super(className, container);
 
         this.locks = new HashMap<Long, Lock>();
+        this.statefulTimeoutLocks = new HashMap<Long, Lock>();
         this.currentBeanId = new InheritableThreadLocal<Long>();
 
         // Init Stateful session synchronization
@@ -162,11 +201,16 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
             enhancedPool.setAllowSharedInstance(false);
             setPool(enhancedPool);
         }
+
+        // Get timer interval
+        statefulTimeoutTimerInterval = Long.getLong(STATEFUL_TIMEOUT_INTERVAL_FLAG, statefulTimeoutTimerInterval);
     }
 
     /**
      * Gets a new ID or a null value.
+     *
      * @param beanId given id.
+     *
      * @return new id
      */
     protected synchronized Long getId(final Long beanId) {
@@ -181,8 +225,11 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Gets a bean for the given id.
+     *
      * @param beanId id of the expected bean.
+     *
      * @return a Stateless bean.
+     *
      * @throws IllegalArgumentException if bean is not found.
      */
     @Override
@@ -195,11 +242,35 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
         }
         logger.debug("Set for bean {0} the Id = {1}", bean, beanId);
         bean.setEasyBeansStatefulID(beanId);
+        // Update timeout if any and it is not already set on bean instance
+        IJEjbStatefulTimeout statefulTimeout = this.getSessionBeanInfo().getStatefulTimeout();
+        if (statefulTimeout != null && statefulTimeout.getValue() >= 0 && bean.getStatefulTimeout() == null) {
+            // Compute timeout
+            bean.setStatefulTimeout(System.currentTimeMillis() + statefulTimeout.getUnit().toMillis(statefulTimeout.getValue()));
+            logger.debug("Factory {0}/{1} have stateful timeout {2} {3}",this.getClassName(), this.getId(), statefulTimeout.getValue(),
+                    statefulTimeout.getUnit());
+            logger.debug("Scheduling a timeout callback for bean {0} with id: {1}", bean, beanId);
+            //Create a recurring timer to check timeout
+            Map<String, Object> properties = new HashMap<String, Object>();
+            String jobId = this.getId() + "-" + beanId;
+            properties.put(StatefulSessionFactory.BEAN_ID_KEY, beanId);
+            synchronized (scheduledJobIds) {
+            if (!scheduledJobIds.contains(jobId)) {
+                try {
+                    this.getTimerComponent().schedule(jobId, this.statefulTimeoutTimerInterval, this, properties);
+                    scheduledJobIds.add(jobId);
+                } catch (EZBComponentException e) {
+                    logger.info("EZBComponentException caught when scheduling a stateful timeout check", e);
+                }
+            }
+            }
+        }
         return bean;
     }
 
     /**
      * Callback called when object is gonna be removed.
+     *
      * @param instance that is being removed from the pool.
      */
     @Override
@@ -214,13 +285,32 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                 }
             }
         } finally {
-
+            // Unschedule timeout job if any
+            IJEjbStatefulTimeout statefulTimeout = this.getSessionBeanInfo().getStatefulTimeout();
+            if (statefulTimeout != null && statefulTimeout.getValue() >= 0) {
+                String jobId = this.getId() + "-" + instance.getEasyBeansStatefulID();
+                synchronized (scheduledJobIds) {
+                    if (scheduledJobIds.contains(jobId)) {
+                        try {
+                            this.getTimerComponent().unschedule(jobId);
+                        } catch (EZBComponentException e) {
+                            logger.info("EZBComponentException caught when unscheduling a stateful timeout check", e);
+                        }
+                        scheduledJobIds.remove(jobId);
+                    }
+                }
+            }
             super.remove(instance);
             instance.setEasyBeansRemoved(true);
 
             // Remove lock for this instance
             synchronized (this.locks) {
                 this.locks.remove(instance.getEasyBeansStatefulID());
+            }
+
+            // Remove stateful timeout lock for this instance
+            synchronized (this.statefulTimeoutLocks) {
+                this.statefulTimeoutLocks.remove(instance.getEasyBeansStatefulID());
             }
         }
     }
@@ -229,7 +319,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     /**
      * before set for the current container the extended persistence contexts.
      * Injects Resources into the Bean.
+     *
      * @param instance The Bean instance to be injected.
+     *
      * @throws PoolException if resources cannot be injected.
      */
     @Override
@@ -256,7 +348,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Do a local call on a method of this factory.
+     *
      * @param localCallRequest the given request
+     *
      * @return response with the value of the call and the bean ID (if any)
      */
     @Override
@@ -267,6 +361,19 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
         // build EJB Response and set the id
         EJBResponse ejbResponse = new JEJBResponse();
         ejbResponse.setBeanId(id);
+
+        // Check if it was automatically removed due to a timeout
+        if (this.getSessionBeanInfo().getStatefulTimeout() != null) {
+            synchronized (killedTimedoutIds) {
+                if (killedTimedoutIds.contains(id)) {
+                    killedTimedoutIds.remove(id);
+                    ejbResponse.setRemoved(true);
+                    ejbResponse.setRPCException(new RPCException("Bean has been removed due to an idle timeout",
+                            new NoSuchEJBException("Bean has been removed due to an idle timeout")));
+                    return ejbResponse;
+                }
+            }
+        }
 
         IMethodInfo methodInfo = getMethodInfoHashes().get(methodHash);
         IAccessTimeoutInfo accessTimeout = null;
@@ -328,6 +435,17 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                 return ejbResponse;
             }
         }
+        Lock statefulTimeoutLock = null;
+        if (this.getSessionBeanInfo().getStatefulTimeout() != null) {
+            synchronized (statefulTimeoutLocks) {
+                statefulTimeoutLock = this.statefulTimeoutLocks.get(id);
+                if (statefulTimeoutLock == null) {
+                    statefulTimeoutLock = new ReentrantLock();
+                }
+                this.locks.put(id, statefulTimeoutLock);
+            }
+            statefulTimeoutLock.lock();
+        }
 
         // If we're here, it means that we've got the lock. so don't forget to unlock
         try {
@@ -336,11 +454,32 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
             try {
                 bean = getBean(id);
             } catch (IllegalArgumentException e) {
-                ejbResponse.setRPCException(new RPCException("Cannot get element in the pool", e));
+                ejbResponse.setRPCException(new RPCException("Cannot get element in the pool",
+                        new NoSuchEJBException("Bean has been removed", e)));
                 return ejbResponse;
             } catch (NoSuchEJBException e) {
                 ejbResponse.setRPCException(new RPCException("Bean has been removed", e));
                 return ejbResponse;
+            }
+
+            // Check Stateful timeout
+            if (bean.getStatefulTimeout() != null) {
+                if (bean.getInTransaction() == null || !bean.getInTransaction()) {
+                    logger.debug("Checking idle timeout for bean {0} with id: {1}", bean, id);
+                    if (System.currentTimeMillis() > bean.getStatefulTimeout()) {
+                        // Timeout
+                        logger.debug("Bean {0} with id: {1} is eligible to collection due to an idle timeout, discarding it", bean, id);
+                        try {
+                            this.getPool().discard(bean);
+                        } catch (PoolException e) {
+                            logger.warn("Unable to discard the bean {0} with id: {1} eligible to collection due to an idle timeout", bean, id, e);
+                        }
+                        ejbResponse.setRemoved(true);
+                        ejbResponse.setRPCException(new RPCException("Bean has been removed due to an idle timeout",
+                                new NoSuchEJBException("Bean has been removed due to an idle timeout")));
+                        return ejbResponse;
+                    }
+                }
             }
 
             Method m = getHashes().get(methodHash);
@@ -350,7 +489,6 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                         new NoSuchMethodException("The method is not found on the bean")));
                 return ejbResponse;
             }
-
 
 
             Object value = null;
@@ -372,7 +510,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
             // Dispatch the bean invocation begin event.
             String methodEventProviderId = getJ2EEManagedObjectId() + "/" + J2EEManagedObjectNamingHelper.getMethodSignature(m)
-            + "@Local";
+                    + "@Local";
             boolean enabledEvent = !localCallRequest.isCalledFromRemoteRequest();
 
             EZBEventBeanInvocation event = null;
@@ -443,9 +581,22 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
                 }
             }
             ejbResponse.setValue(value);
+
+            // Update timeout if any
+            IJEjbStatefulTimeout statefulTimeout = this.getSessionBeanInfo().getStatefulTimeout();
+            if (statefulTimeout != null && statefulTimeout.getValue() >= 0) {
+                // Compute timeout
+                logger.debug("Recomputing idle timeout for bean {0} with id: {1}", bean, id);
+                bean.setStatefulTimeout(System.currentTimeMillis() + statefulTimeout.getUnit().toMillis(statefulTimeout.getValue()));
+            }
+
+
         } finally {
             // Release the lock
             lock.unlock();
+            if (statefulTimeoutLock != null) {
+                statefulTimeoutLock.unlock();
+            }
         }
 
         return ejbResponse;
@@ -455,6 +606,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     /**
      * Notified when the timer service send a Timer object.
      * It has to call the Timed method.
+     *
      * @param timer the given timer object that will be given to the timer method.
      * @param methodInfo the method to use for the callback if applied on a specific method
      */
@@ -465,8 +617,10 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Try to find if there is a matching instance by using the given instance and the given clue.
+     *
      * @param easyBeansSFSB the given stateful instance
-     * @param clue the given clue
+     * @param clue          the given clue
+     *
      * @return true if the instance is matching
      */
     public boolean tryMatch(final EasyBeansSFSB easyBeansSFSB, final Long clue) {
@@ -475,6 +629,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Unmatch the given instance.
+     *
      * @param easyBeansSFSB the given stateful instance
      */
     public void unMatch(final EasyBeansSFSB easyBeansSFSB) {
@@ -483,6 +638,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * @param easyBeansSFSB the given instance
+     *
      * @return the clue for the given instance.
      */
     public Long getClue(final EasyBeansSFSB easyBeansSFSB) {
@@ -491,10 +647,12 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Sets the given clue on the given instance.
+     *
      * @param easyBeansSFSB the given instance
-     * @param clue the given clue
+     * @param clue          the given clue
      */
     public void setClue(final EasyBeansSFSB easyBeansSFSB, final Long clue) {
+        logger.debug("Set for bean {0} the clue = {1}", easyBeansSFSB, clue);
         easyBeansSFSB.setEasyBeansStatefulID(clue);
     }
 
@@ -508,7 +666,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Gets the current session synchronization listener on the given transaction if any.
+     *
      * @param tx the given transaction
+     *
      * @return the current session synchronization listener
      */
     public Synchronization getSessionSynchronizationListener(final Transaction tx) {
@@ -517,7 +677,8 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Sets the current session synchronization listener on the given transaction.
-     * @param tx the given transaction
+     *
+     * @param tx                             the given transaction
      * @param sessionSynchronizationListener the session synchronization listener
      */
     public void setSessionSynchronizationListener(final Transaction tx, final Synchronization sessionSynchronizationListener) {
@@ -526,6 +687,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Unsets the current session synchronization listener on the given transaction.
+     *
      * @param tx the given transaction
      */
     public void unsetSessionSynchronizationListener(final Transaction tx) {
@@ -534,7 +696,9 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
     /**
      * Gets the list of extended persistence context for the given stateful session bean.
+     *
      * @param statefulSessionBean the given bean
+     *
      * @return the list of extended persistence contexts
      */
     public List<EZBExtendedEntityManager> getExtendedPersistenceContexts(final EasyBeansSFSB statefulSessionBean) {
@@ -544,7 +708,8 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     /**
      * Adds the given extended persistence context for the given stateful
      * session bean.
-     * @param statefulSessionBean the given bean
+     *
+     * @param statefulSessionBean   the given bean
      * @param extendedEntityManager the given persistence context
      */
     public void addExtendedPersistenceContext(final EasyBeansSFSB statefulSessionBean,
@@ -567,7 +732,89 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
 
         // Cleanup extended persistence contexts
         this.extendedPersistenceContexts.clear();
+        synchronized (scheduledJobIds) {
+            for (String scheduledJobId : scheduledJobIds) {
+                try {
+                    this.getTimerComponent().unschedule(scheduledJobId);
+                    logger.debug("Unscheduled job with id: {0}", scheduledJobId);
+                } catch (EZBComponentException e1) {
+                    logger.info("EZBComponentException caught when scheduling a stateful timeout check", e1);
+                }
+            }
+            scheduledJobIds.clear();
+        }
 
     }
 
+    /**
+     * Execute a timer callback with the given properties.
+     * Check idle timeout and remove instance if necessary.
+     *
+     * @param properties properties specified when the timer was scheduled
+     */
+    public void execute(Map<String, Object> properties) {
+        Lock statefulTimeoutLock = null;
+        if (this.getSessionBeanInfo().getStatefulTimeout() != null && properties != null) {
+            Long beanId = (Long) properties.get(BEAN_ID_KEY);
+            logger.debug("Checking timeout for bean with id: {0}", beanId);
+            synchronized (statefulTimeoutLocks) {
+                statefulTimeoutLock = this.statefulTimeoutLocks.get(beanId);
+                if (statefulTimeoutLock == null) {
+                    statefulTimeoutLock = new ReentrantLock();
+                }
+                this.locks.put(beanId, statefulTimeoutLock);
+            }
+            try {
+                statefulTimeoutLock.lock();
+                EasyBeansSFSB bean = null;
+                try {
+                    bean = this.getBean(beanId);
+                } catch (Exception e) {
+                    // Unschedule yourself
+                    logger.debug("Bean not found, unscheduling timeout callback for bean with id: {0}", beanId);
+                    String jobId = this.getId() + "-" + beanId;
+                    synchronized (scheduledJobIds) {
+                        try {
+                            this.getTimerComponent().unschedule(jobId);
+                        } catch (EZBComponentException e1) {
+                            logger.info("EZBComponentException caught when scheduling a stateful timeout check", e1);
+                        }
+                        scheduledJobIds.remove(jobId);
+                    }
+                    return;
+                }
+                if (bean.getInTransaction() == null || !bean.getInTransaction()) {
+                    if (System.currentTimeMillis() > bean.getStatefulTimeout()) {
+                        logger.debug("Bean {0} with id: {1} is in timeout, discarding it", bean, beanId);
+                        try {
+                            this.getPool().discard(bean);
+                            synchronized (killedTimedoutIds) {
+                                killedTimedoutIds.add(bean.getEasyBeansStatefulID());
+                            }
+                            } catch (PoolException e) {
+                            logger.warn("Unable to discard timed-out bean", e);
+                        }
+                        // Unschedule yourself
+                        String jobId = this.getId() + "-" + beanId;
+                        synchronized (scheduledJobIds) {
+                            try {
+                                this.getTimerComponent().unschedule(jobId);
+                            } catch (EZBComponentException e) {
+                                logger.info("EZBComponentException caught when scheduling a stateful timeout check", e);
+                            }
+                            scheduledJobIds.remove(jobId);
+                        }
+                        return;
+                    }
+                }
+                try {
+                    this.getPool().release(bean);
+                } catch (PoolException e) {
+                    logger.debug("Unable to release bean {0} with id: {1}", bean, beanId, e);
+                }
+            } finally {
+                statefulTimeoutLock.unlock();
+            }
+        }
+    }
 }

@@ -1049,7 +1049,7 @@ public class JContainer3 implements EZBContainer {
         }
 
         // Build runtime information
-        SessionBeanInfo sessionBeanInfo = new SessionBeanInfo();
+        SessionBeanInfo sessionBeanInfo = new SessionBeanInfo(sessionBean.getJavaxEjbStatefulTimeout());
         sessionBeanInfo.setTransactionManagementType(sessionBean.getTransactionManagementType());
         sessionBeanInfo.setTimersInfo(convertTimersInfo(sessionBean));
         sessionBeanInfo.setApplicationExceptions(convertApplicationExceptionInfo(sessionBean.getEjbJarDeployableMetadata().getApplicationExceptions()));

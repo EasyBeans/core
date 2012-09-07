@@ -54,6 +54,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jta-1.1-spec</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-component-smartclient</artifactId>
       <version>${project.version}</version>
@@ -136,6 +142,12 @@
       <artifactId>easybeans-tests-applications-ejbjars-data-sources-definitions</artifactId>
       <version>${easybeans-tests-applications.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-stateful-timeout</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
     </dependency>
 
   </dependencies>
@@ -274,6 +286,13 @@
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-timer</artifactId>
+                    <version>${easybeans-tests-applications.version}
+                    </version>
+                  </artifact>
+
+                  <artifact>
+                    <groupId>org.ow2.easybeans.tests</groupId>
+                    <artifactId>easybeans-tests-applications-ejbjars-stateful-timeout</artifactId>
                     <version>${easybeans-tests-applications.version}
                     </version>
                   </artifact>

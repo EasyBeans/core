@@ -25,8 +25,6 @@
 
 package org.ow2.easybeans.deployment.annotations.helper.bean;
 
-import static javax.ejb.TransactionManagementType.BEAN;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +44,7 @@ import org.ow2.easybeans.transaction.interceptors.CMTRequiredTransactionIntercep
 import org.ow2.easybeans.transaction.interceptors.CMTRequiresNewTransactionInterceptor;
 import org.ow2.easybeans.transaction.interceptors.CMTSupportsTransactionInterceptor;
 import org.ow2.easybeans.transaction.interceptors.ExtendedPersistenceContextInterceptor;
+import org.ow2.easybeans.transaction.interceptors.ListenerSFSBTransactionInterceptor;
 import org.ow2.easybeans.transaction.interceptors.ListenerSessionSynchronizationInterceptor;
 import org.ow2.easybeans.transaction.interceptors.MDBCMTRequiredTransactionInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
@@ -53,6 +52,8 @@ import org.ow2.util.ee.metadata.ejbjar.impl.JClassInterceptor;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
+
+import static javax.ejb.TransactionManagementType.BEAN;
 
 /**
  * This class adds the interceptor for transaction on a given method.
@@ -135,7 +136,11 @@ public final class TransactionResolver {
     private static final String EXTENDED_PERSISTENCECONTEXT_INTERCEPTOR = Type
             .getInternalName(ExtendedPersistenceContextInterceptor.class);
 
-
+    /**
+     * ListenerSessionSynchronizationInterceptor transaction interceptor.
+     */
+    private static final String LISTENER_SFSB_TRANSACTION_INTERCEPTOR = Type
+            .getInternalName(ListenerSFSBTransactionInterceptor.class);
 
     /**
      * Helper class, no public constructor.
@@ -275,7 +280,11 @@ public final class TransactionResolver {
             interceptors.add(new JClassInterceptor(EXTENDED_PERSISTENCECONTEXT_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
         }
 
-
+        // Add a listener on transaction end for stateful session beans having a non negative idle timeout.
+        // Because a bean in transaction should not be timed-out.
+        if (bean.isStateful() && bean.getJavaxEjbStatefulTimeout() != null && bean.getJavaxEjbStatefulTimeout().getValue() >= 0) {
+            interceptors.add(new JClassInterceptor(LISTENER_SFSB_TRANSACTION_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
+        }
 
         method.setInterceptors(interceptors);
     }

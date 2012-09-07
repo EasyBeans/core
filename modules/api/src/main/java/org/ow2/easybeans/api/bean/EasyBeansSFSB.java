@@ -44,4 +44,31 @@ public interface EasyBeansSFSB extends EasyBeansSB<EasyBeansSFSB>, EasyBeansSFSB
      * @param easyBeansStatefulID the id to set.
      */
     void setEasyBeansStatefulID(final Long easyBeansStatefulID);
+
+    /**
+     * <p>Boolean indicating if the Bean is currently under a running transaction.</p>
+     * <p>If true it prevent the been from being collected due to an StatefulTimeout.</p>
+     * <p>If the bean metadata doesn't define a Stateful Timeout then it should return <code>null</code></p>
+     * @return Boolean indicating if the Bean is currently under a running transaction
+     */
+    Boolean getInTransaction();
+
+    /**
+     * Sets the boolean indicating if the Bean is currently under a running transaction
+     * @param inTransaction true if the bean is under a running transaction
+     */
+    void setInTransaction(final Boolean inTransaction);
+
+    /**
+     * <p>The next timeout deadline</p>
+     * <p>If the bean metadata doesn't define a Stateful Timeout then it should return <code>null</code></p>
+     * @return The next timeout deadline to be compared with {@link System#nanoTime()}
+     */
+    Long getStatefulTimeout();
+
+    /**
+     * Sets the next timeout deadline
+     * @param statefulTimeout The next timeout deadline to be compared with {@link System#nanoTime()}
+     */
+    void setStatefulTimeout(final Long statefulTimeout);
 }

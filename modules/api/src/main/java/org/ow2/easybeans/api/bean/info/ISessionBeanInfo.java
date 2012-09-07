@@ -1,6 +1,6 @@
-/**
+/*
  * EasyBeans
- * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2012 Bull S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -19,35 +19,28 @@
  * USA
  *
  * --------------------------------------------------------------------------
- * $Id: SessionBeanInfo.java 5369 2010-02-24 14:58:19Z benoitf $
+ * $Id:$
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.easybeans.container.info;
+package org.ow2.easybeans.api.bean.info;
 
-
-import org.ow2.easybeans.api.bean.info.ISessionBeanInfo;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbStatefulTimeout;
 
 /**
- * This class contains information for a session bean.
+ * This interface is used for containing a description for a session bean.
  * It is used at the runtime.
- * @author Florent Benoit
+ *
+ * @author Loic Albertin
  */
-public class SessionBeanInfo extends BeanInfo implements ISessionBeanInfo {
+public interface ISessionBeanInfo extends IBeanInfo {
 
-    private IJEjbStatefulTimeout statefulTimeout;
 
     /**
-     * Default constructor.
+     * Returns the StatefulTimeout associated with the be if any.<br/>
+     * This method makes sense only for Stateful Session Beans and should return null for in others cases.
+     *
+     * @return The StatefulTimeout if any or null.
      */
-    public SessionBeanInfo(final IJEjbStatefulTimeout statefulTimeout) {
-        super();
-        this.statefulTimeout = statefulTimeout;
-    }
-
-
-    public IJEjbStatefulTimeout getStatefulTimeout() {
-        return statefulTimeout;
-    }
+    IJEjbStatefulTimeout getStatefulTimeout();
 }
