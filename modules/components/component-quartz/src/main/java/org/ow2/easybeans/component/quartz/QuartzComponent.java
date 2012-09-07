@@ -25,7 +25,9 @@
 
 package org.ow2.easybeans.component.quartz;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.ow2.easybeans.api.EZBTimerService;
@@ -33,16 +35,27 @@ import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.component.api.EZBComponentException;
 import org.ow2.easybeans.component.itf.TimerComponent;
 import org.ow2.easybeans.component.util.Property;
+import org.ow2.easybeans.component.util.TimerCallback;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 
 /**
  * This component starts the Quartz framework and configure it.
  * It is also providing the Scheduler that EJB timer will use for their use.
- * @author Florent Benoit
  *
+ * @author Florent Benoit
  */
 public class QuartzComponent implements TimerComponent {
 
@@ -65,6 +78,7 @@ public class QuartzComponent implements TimerComponent {
     /**
      * Init method.<br/>
      * This method is called before the start method.
+     *
      * @throws EZBComponentException if the initialization has failed.
      */
     public void init() throws EZBComponentException {
@@ -91,10 +105,10 @@ public class QuartzComponent implements TimerComponent {
     /**
      * Start method.<br/>
      * This method is called after the init method.
+     *
      * @throws EZBComponentException if the start has failed.
      */
     public void start() throws EZBComponentException {
-
 
 
         // Build a Scheduler
@@ -108,7 +122,7 @@ public class QuartzComponent implements TimerComponent {
         try {
             this.scheduler.start();
         } catch (SchedulerException e) {
-           throw new EZBComponentException("Cannot start the scheduler", e);
+            throw new EZBComponentException("Cannot start the scheduler", e);
         }
     }
 
@@ -116,6 +130,7 @@ public class QuartzComponent implements TimerComponent {
     /**
      * Stop method.<br/>
      * This method is called when component needs to be stopped.
+     *
      * @throws EZBComponentException if the stop is failing.
      */
     public void stop() throws EZBComponentException {
@@ -130,7 +145,9 @@ public class QuartzComponent implements TimerComponent {
 
     /**
      * Gets an EJB timer service through this component.
+     *
      * @param factory an EasyBeans factory providing timeout notification.
+     *
      * @return an EJB timer service
      */
     public EZBTimerService getTimerService(final Factory<?, ?> factory) {
@@ -138,7 +155,50 @@ public class QuartzComponent implements TimerComponent {
     }
 
     /**
+     * Schedule a recurring call to a {@link TimerCallback} starting immediately.
+     *
+     * @param id                 if there is already a Callback scheduled with the same id then an exception is thrown
+     * @param interval           Recurrence interval in milliseconds
+     * @param callback           The {@link TimerCallback} to notify
+     * @param callbackProperties Properties to be send to the {@link TimerCallback#execute(java.util.Map)} method
+     */
+    public void schedule(String id, long interval, TimerCallback callback, Map<String, Object> callbackProperties)
+            throws EZBComponentException {
+        try {
+            if (this.getScheduler().getTriggerKeys(GroupMatcher.triggerGroupContains(CallbackJobDetailData.JOB_GROUP_NAME)).size() != 0) {
+                throw new EZBComponentException("An existing TimerCallback with the same id is already registered");
+            }
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put(CallbackJobDetailData.CALLBACK_DATA_KEY, new CallbackJobDetailData(callback, callbackProperties));
+            JobDetail jobDetail = JobBuilder.newJob(CallbackJob.class).usingJobData(jobDataMap).
+                    withIdentity(JobKey.jobKey(id, CallbackJobDetailData.JOB_GROUP_NAME)).build();
+
+            Trigger trigger = TriggerBuilder.newTrigger().withIdentity(TriggerKey.triggerKey(id, CallbackJobDetailData.JOB_GROUP_NAME))
+                    .forJob(jobDetail).startNow()
+                    .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(interval).repeatForever()).build();
+
+            this.getScheduler().scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            throw new EZBComponentException("Unable to schedule TimeCallback " + id + " with a repeat interval of " + interval, e);
+        }
+    }
+
+    /**
+     * Unschedule a callback timer for a given id
+     *
+     * @param id the scheduled timer id
+     */
+    public void unschedule(String id) throws EZBComponentException {
+        try {
+            this.getScheduler().deleteJob(JobKey.jobKey(id, CallbackJobDetailData.JOB_GROUP_NAME));
+        } catch (SchedulerException e) {
+            throw new EZBComponentException("Unable to unschedule job " + id, e);
+        }
+    }
+
+    /**
      * Gets the list of properties.
+     *
      * @return the list of properties.
      */
     public List<Property> getProperties() {
@@ -147,6 +207,7 @@ public class QuartzComponent implements TimerComponent {
 
     /**
      * Set the list of properties.
+     *
      * @param quartzProperties the list of properties.
      */
     public void setProperties(final List<Property> quartzProperties) {
@@ -155,6 +216,7 @@ public class QuartzComponent implements TimerComponent {
 
     /**
      * Gets the Quartz scheduler.
+     *
      * @return the Quartz scheduler.
      */
     public Scheduler getScheduler() {

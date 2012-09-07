@@ -25,9 +25,13 @@
 
 package org.ow2.easybeans.component.itf;
 
+import java.util.Map;
+
 import org.ow2.easybeans.api.EZBTimerService;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.component.api.EZBComponent;
+import org.ow2.easybeans.component.api.EZBComponentException;
+import org.ow2.easybeans.component.util.TimerCallback;
 
 /**
  * Interface for the component that provides the EJB timer service.
@@ -42,5 +46,22 @@ public interface TimerComponent extends EZBComponent {
      * @return an EJB timer service
      */
     EZBTimerService getTimerService(final Factory<?, ?> factory);
+
+    /**
+     * Schedule a recurring call to a {@link TimerCallback} starting immediately.
+     *
+     * @param id                 if there is already a Callback scheduled with the same id then an exception is thrown
+     * @param interval           Recurrence interval in milliseconds
+     * @param callback           The {@link TimerCallback} to notify
+     * @param callbackProperties Properties to be send to the {@link TimerCallback#execute(java.util.Map)} method
+     */
+    void schedule(String id, long interval, TimerCallback callback, Map<String, Object> callbackProperties) throws EZBComponentException;
+
+    /**
+     * Unschedule a callback timer for a given id
+     *
+     * @param id the scheduled timer id
+     */
+    void unschedule(String id) throws EZBComponentException;
 
 }
