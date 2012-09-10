@@ -71,6 +71,8 @@ public class TestStatefulTimeout {
          Stateful test Bean.
         */
         ITimeoutBean zeroTimeoutBean = (ITimeoutBean) new InitialContext().lookup("zero-timeout");
+        // As the actual resolution is in ms, on some powerful machines we need to sleep the test a little bit to detect the timeout
+        Thread.sleep(2);
         try {
             zeroTimeoutBean.ping();
         } catch (NoSuchEJBException e) {
