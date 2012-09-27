@@ -40,7 +40,9 @@ import org.ow2.easybeans.proxy.helper.ProxyType;
 
 /**
  * Defines the Session Context used by Stateless and Stateful beans.
+ *
  * @param <FactoryType> a factory.
+ *
  * @author Florent Benoit
  */
 public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> extends EasyBeansEJBContext<FactoryType> implements
@@ -53,6 +55,7 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
 
     /**
      * Gets the transaction used by this bean.
+     *
      * @return the bean transaction.
      */
     public Transaction getBeanTransaction() {
@@ -61,6 +64,7 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
 
     /**
      * Sets the transaction used by this bean.
+     *
      * @param beanTransaction the bean transaction.
      */
     public void setBeanTransaction(final Transaction beanTransaction) {
@@ -69,7 +73,29 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
 
 
     /**
+     * The bean id a case of stateful bean
+     */
+    private Long beanId = null;
+
+    /**
+     *
+     * @return The stateful bean id or null for other bean types
+     */
+    public Long getBeanId() {
+        return beanId;
+    }
+
+    /**
+     *
+     * @param beanId  The stateful bean id
+     */
+    public void setBeanId(Long beanId) {
+        this.beanId = beanId;
+    }
+
+    /**
      * Build a new Session context.
+     *
      * @param factory the factory on which we are linked.
      */
     public EasyBeansSessionContext(final FactoryType factory) {
@@ -83,11 +109,14 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
      * from within the ejbCreate() and ejbRemove() methods. An instance can use
      * this method, for example, when it wants to pass a reference to itself in
      * a method argument or result.
+     *
      * @return The EJB local object currently associated with the instance.
-     * @throws java.lang.IllegalStateException - Thrown if the instance invokes
-     *         this method while the instance is in a state that does not allow
-     *         the instance to invoke this method, or if the instance does not
-     *         have a local interface.
+     *
+     * @throws java.lang.IllegalStateException
+     *          - Thrown if the instance invokes
+     *          this method while the instance is in a state that does not allow
+     *          the instance to invoke this method, or if the instance does not
+     *          have a local interface.
      */
     public EJBLocalObject getEJBLocalObject() throws java.lang.IllegalStateException {
         throw new IllegalStateException("No getEJBLocalObject() method");
@@ -100,11 +129,14 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
      * including from within the ejbCreate() and ejbRemove() methods. An
      * instance can use this method, for example, when it wants to pass a
      * reference to itself in a method argument or result.
+     *
      * @return The EJB object currently associated with the instance.
-     * @throws java.lang.IllegalStateException - Thrown if the instance invokes
-     *         this method while the instance is in a state that does not allow
-     *         the instance to invoke this method, or if the instance does not
-     *         have a remote interface.
+     *
+     * @throws java.lang.IllegalStateException
+     *          - Thrown if the instance invokes
+     *          this method while the instance is in a state that does not allow
+     *          the instance to invoke this method, or if the instance does not
+     *          have a remote interface.
      */
     public EJBObject getEJBObject() throws java.lang.IllegalStateException {
         throw new IllegalStateException("No getEJBObject() method");
@@ -114,10 +146,13 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
      * Obtain a reference to the JAX-RPC MessageContext. An instance of a
      * stateless session bean can call this method from any business method
      * invoked through its web service endpoint interface.
+     *
      * @return The MessageContext for this web service invocation.
-     * @throws java.lang.IllegalStateException - Thrown if this method is
-     *         invoked while the instance is in a state that does not allow
-     *         access to this method.
+     *
+     * @throws java.lang.IllegalStateException
+     *          - Thrown if this method is
+     *          invoked while the instance is in a state that does not allow
+     *          access to this method.
      */
     public javax.xml.rpc.handler.MessageContext getMessageContext() throws java.lang.IllegalStateException {
         throw new IllegalStateException("No getMessageContext() method");
@@ -126,13 +161,16 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
     /**
      * Obtain an object that can be used to invoke the current bean through the
      * given business interface.
-     * @param <T> the interface of the bean
+     *
+     * @param <T>               the interface of the bean
      * @param businessInterface One of the local business interfaces or remote
-     *        business interfaces for this session bean.
+     *                          business interfaces for this session bean.
+     *
      * @return The business object corresponding to the given business
      *         interface.
+     *
      * @throws IllegalStateException - Thrown if this method is invoked with an
-     *         invalid business interface for the current bean.
+     *                               invalid business interface for the current bean.
      */
     public <T> T getBusinessObject(final Class<T> businessInterface) throws IllegalStateException {
         if (businessInterface == null) {
@@ -167,20 +205,18 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
         }
 
         // Return a new proxy
-        return ProxyHelper.getProxy(getFactory(), businessInterface, proxyType);
-
-
-
-
+        return ProxyHelper.getProxy(getFactory(), businessInterface, proxyType, beanId);
     }
 
     /**
      * Obtain the business interface through which the current business method
      * invocation was made.
+     *
      * @return the business interface through which the current business method
      *         invocation was made.
+     *
      * @throws IllegalStateException - Thrown if this method is called and the
-     *         bean has not been invoked through a business interface.
+     *                               bean has not been invoked through a business interface.
      */
     public Class<?> getInvokedBusinessInterface() throws IllegalStateException {
 
@@ -202,9 +238,11 @@ public class EasyBeansSessionContext<FactoryType extends SessionFactory<?>> exte
     /**
      * Check whether a client invoked the cancel() method on the client Future object corresponding to the currently executing
      * asynchronous business method.
+     *
      * @return true if the client has invoked Future.cancel with a value of true for the mayInterruptIfRunning parameter.
+     *
      * @throws IllegalStateException - Thrown if not invoked from within an asynchronous business method invocation with return
-     * type Future.
+     *                               type Future.
      */
     public boolean wasCancelCalled() throws IllegalStateException {
         //TODO: implement !
