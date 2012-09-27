@@ -207,18 +207,26 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     }
 
     /**
+     * Generate a new bean Id
+     * @return a new bean id
+     */
+    public synchronized Long generateNewId() {
+        this.idCount++;
+        return Long.valueOf(this.idCount);
+    }
+
+    /**
      * Gets a new ID or a null value.
      *
      * @param beanId given id.
      *
      * @return new id
      */
-    protected synchronized Long getId(final Long beanId) {
+    protected Long getId(final Long beanId) {
         Long newId = beanId;
         // no Id, compute a new one
         if (newId == null) {
-            this.idCount++;
-            newId = Long.valueOf(this.idCount);
+            newId = this.generateNewId();
         }
         return newId;
     }
