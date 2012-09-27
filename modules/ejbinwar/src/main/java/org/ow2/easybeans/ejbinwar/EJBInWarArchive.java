@@ -253,4 +253,11 @@ public class EJBInWarArchive extends AbsArchiveImpl implements IArchive {
         return this.wrappedWarArchive.getURL();
     }
 
+    /**
+     *
+     * @return Returns the original wrapped archive
+     */
+    public IArchive getWrappedWarArchive() {
+        return wrappedWarArchive;
+    }
 }
