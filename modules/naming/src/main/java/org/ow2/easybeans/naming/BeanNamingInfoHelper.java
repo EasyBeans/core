@@ -83,12 +83,17 @@ public final class BeanNamingInfoHelper {
         }
 
         BeanNamingInfo beanNamingInfo = new BeanNamingInfo();
-        beanNamingInfo.setName(commonBean.getName());
+        if (!beanClassMetadata.isSession() && !beanClassMetadata.isMdb() &&
+                beanClassMetadata.isManagedBean()) {
+            beanNamingInfo.setName(beanClassMetadata.getManagedBeanName());
+        } else {
+            beanNamingInfo.setName(commonBean.getName());
+            beanNamingInfo.setMappedName(commonBean.getMappedName());
+        }
         beanNamingInfo.setBeanClassName(beanClassMetadata.getClassName());
         beanNamingInfo.setInterfaceName(interfaceName);
         beanNamingInfo.setMode(mode);
         beanNamingInfo.setModuleName(moduleName);
-        beanNamingInfo.setMappedName(commonBean.getMappedName());
         beanNamingInfo.setJavaEEApplicationName(javaEEApplicationName);
 
         // Single interface

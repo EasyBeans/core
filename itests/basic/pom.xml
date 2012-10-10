@@ -149,6 +149,13 @@
       <version>${easybeans-tests-applications.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.ow2.easybeans.tests</groupId>
+      <artifactId>easybeans-tests-applications-ejbjars-managed-beans</artifactId>
+      <version>${easybeans-tests-applications.version}</version>
+    </dependency>
+
+
   </dependencies>
 
   <build>
@@ -295,6 +302,12 @@
                     <version>${easybeans-tests-applications.version}
                     </version>
                   </artifact>
+
+                  <dependency>
+                     <groupId>org.ow2.easybeans.tests</groupId>
+                     <artifactId>easybeans-tests-applications-ejbjars-managed-beans</artifactId>
+                     <version>${easybeans-tests-applications.version}</version>
+                   </dependency>
 
                 </artifacts>
               </deployables>

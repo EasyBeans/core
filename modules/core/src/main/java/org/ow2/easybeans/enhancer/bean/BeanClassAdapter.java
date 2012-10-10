@@ -33,6 +33,7 @@ import javax.transaction.xa.XAResource;
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.bean.EasyBeansBean;
 import org.ow2.easybeans.api.bean.EasyBeansMDB;
+import org.ow2.easybeans.api.bean.EasyBeansManagedBean;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
 import org.ow2.easybeans.api.bean.EasyBeansSLSB;
 import org.ow2.easybeans.api.bean.EasyBeansSingletonSB;
@@ -162,6 +163,8 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
                 newInterfaces[indexElement] = Type.getInternalName(EasyBeansMDB.class);
             } else if (this.classAnnotationMetadata.isSingleton()) {
                 newInterfaces[indexElement] = Type.getInternalName(EasyBeansSingletonSB.class);
+            } else if (this.classAnnotationMetadata.isManagedBean()) {
+                newInterfaces[indexElement] = Type.getInternalName(EasyBeansManagedBean.class);
             } else {
                 newInterfaces[indexElement] = Type.getInternalName(EasyBeansBean.class);
             }

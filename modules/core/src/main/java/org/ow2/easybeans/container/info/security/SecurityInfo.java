@@ -184,7 +184,13 @@ public class SecurityInfo implements ISecurityInfo {
         EasyBeansDD easyBeansDD = this.bean.getEjbJarDeployableMetadata().getEasyBeansDD();
         if (easyBeansDD != null) {
             // Get the current bean name
-            String beanName = this.bean.getJCommonBean().getName();
+            String beanName;
+            if (this.bean.isSession() || this.bean.isMdb()) {
+                beanName = this.bean.getJCommonBean().getName();
+            } else {
+                // ManagedBean
+                beanName = this.bean.getManagedBeanName();
+            }
 
             // For each declared session bean
             List<Session> sessions = easyBeansDD.getEJB().getSessions();

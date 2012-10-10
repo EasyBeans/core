@@ -25,13 +25,12 @@
 
 package org.ow2.easybeans.deployment.helper.listener;
 
-import static javax.ejb.TransactionManagementType.CONTAINER;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.container.EasyBeansEJBContext;
+import org.ow2.easybeans.container.managedbean.ManagedBeanFactory;
 import org.ow2.easybeans.container.mdb.EasyBeansMessageDrivenContext;
 import org.ow2.easybeans.container.mdb.MDBFactory;
 import org.ow2.easybeans.container.session.EasyBeansSessionContext;
@@ -42,6 +41,8 @@ import org.ow2.easybeans.event.naming.JavaContextNamingEvent;
 import org.ow2.util.event.api.IEvent;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
+
+import static javax.ejb.TransactionManagementType.CONTAINER;
 
 /**
  * This ExtensionListener is dedicated to adapt the <code>java:comp</code> Context.
@@ -93,6 +94,8 @@ public class JavaCompExtensionListener extends AbstractExtensionListener {
                 context = new EasyBeansSessionContext<SingletonSessionFactory>((SingletonSessionFactory) easyBeansFactory);
         } else if (easyBeansFactory instanceof MDBFactory) {
             context = new EasyBeansMessageDrivenContext((MDBFactory) easyBeansFactory);
+        } else if (easyBeansFactory instanceof ManagedBeanFactory) {
+            context = new EasyBeansEJBContext<ManagedBeanFactory>((ManagedBeanFactory) easyBeansFactory);
         } else {
             throwException(cne, new IllegalStateException("Unable to detect factory type '" + easyBeansFactory + "'"));
         }

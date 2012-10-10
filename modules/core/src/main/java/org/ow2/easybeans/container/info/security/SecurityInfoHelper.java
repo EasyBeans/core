@@ -93,7 +93,13 @@ public final class SecurityInfoHelper {
             }
 
             // Build permission
-            String ejbName = bean.getJCommonBean().getName();
+            String ejbName;
+            if (bean.isSession() || bean.isMdb()) {
+                ejbName = bean.getJCommonBean().getName();
+            } else {
+                // ManagedBean
+                ejbName = bean.getManagedBeanName();
+            }
             String methodName = method.getMethodName();
             //TODO: fixme
             String methodInterface = null;

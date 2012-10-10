@@ -25,12 +25,6 @@
 
 package org.ow2.easybeans.enhancer.injection;
 
-import static org.ow2.easybeans.deployment.helper.JavaContextHelper.getJndiName;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP_ENV;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.REGISTRY;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,9 +67,16 @@ import org.ow2.util.ee.metadata.common.api.struct.IJEjbEJB;
 import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceContext;
 import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceUnit;
 import org.ow2.util.ee.metadata.common.api.struct.IJaxwsWebServiceRef;
+import org.ow2.util.ee.metadata.ejbjar.impl.EjbJarClassMetadata;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
+
+import static org.ow2.easybeans.deployment.helper.JavaContextHelper.getJndiName;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP_ENV;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.REGISTRY;
 
 /**
  * This class adds methods which will inject resources in the bean class.
@@ -793,11 +794,18 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                     callAttributeJndi(lookupName, typeInterface, mv, fieldMetaData,
                             this.classAnnotationMetadata.getClassName(), type);
                 } else if (mappedName != null && !mappedName.equals("")) {
-                        callAttributeJndi(mappedName, typeInterface, mv, fieldMetaData,
-                                this.classAnnotationMetadata.getClassName(), REGISTRY);
-                        callBindAttributeJndi(jAnnotationResource.getName(), mappedName, mv, fieldMetaData);
+                    callAttributeJndi(mappedName, typeInterface, mv, fieldMetaData,
+                            this.classAnnotationMetadata.getClassName(), REGISTRY);
+                    callBindAttributeJndi(jAnnotationResource.getName(), mappedName, mv, fieldMetaData);
+                } else {
+                    //Check managed beans
+                    EjbJarClassMetadata resourceClassMetadata =
+                            classAnnotationMetadata.getEjbJarDeployableMetadata().getScannedClassMetadata(itfName.replace(".", "/"));
+                    if (resourceClassMetadata != null && resourceClassMetadata.getManagedBeanName() != null) {
+                        lookupName = "java:module/" + resourceClassMetadata.getManagedBeanName();
+                        callAttributeJndi(lookupName, typeInterface, mv, fieldMetaData, this.classAnnotationMetadata.getClassName(), JAVA);
                     }
-
+                }
             }
 
             // &#64;WebServiceRef annotation

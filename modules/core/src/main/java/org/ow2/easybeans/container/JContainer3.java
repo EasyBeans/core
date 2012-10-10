@@ -33,6 +33,7 @@ import java.security.PrivilegedAction;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -70,11 +71,13 @@ import org.ow2.easybeans.api.binding.BindingException;
 import org.ow2.easybeans.api.binding.EZBBindingFactory;
 import org.ow2.easybeans.api.binding.EZBRef;
 import org.ow2.easybeans.api.event.bean.EZBClusteredBeanEvent;
+import org.ow2.easybeans.api.naming.EZBNamingStrategy;
 import org.ow2.easybeans.component.api.EZBComponent;
 import org.ow2.easybeans.component.itf.EZBEventComponent;
 import org.ow2.easybeans.component.itf.EZBStatisticComponent;
 import org.ow2.easybeans.component.itf.JMSComponent;
 import org.ow2.easybeans.container.info.ApplicationExceptionInfo;
+import org.ow2.easybeans.container.info.BeanInfo;
 import org.ow2.easybeans.container.info.BusinessMethodsInfoHelper;
 import org.ow2.easybeans.container.info.EJBJarInfo;
 import org.ow2.easybeans.container.info.MessageDrivenInfo;
@@ -84,6 +87,7 @@ import org.ow2.easybeans.container.info.SessionSynchronizationInfoHelper;
 import org.ow2.easybeans.container.info.TimerInfo;
 import org.ow2.easybeans.container.info.security.SecurityInfoHelper;
 import org.ow2.easybeans.container.info.ws.WebServiceInfo;
+import org.ow2.easybeans.container.managedbean.ManagedBeanFactory;
 import org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory;
 import org.ow2.easybeans.container.mdb.helper.MDBResourceAdapterHelper;
 import org.ow2.easybeans.container.session.SessionFactory;
@@ -126,6 +130,7 @@ import org.ow2.easybeans.naming.JNDINamingInfoHelper;
 import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.easybeans.naming.strategy.EasyBeansV1NamingStrategy;
 import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
+import org.ow2.easybeans.naming.strategy.ManagedBeanNamingStrategy;
 import org.ow2.easybeans.persistence.PersistenceUnitManager;
 import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
 import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
@@ -136,6 +141,7 @@ import org.ow2.easybeans.proxy.binding.BindingManager;
 import org.ow2.easybeans.proxy.reference.EJBHomeCallRef;
 import org.ow2.easybeans.proxy.reference.EJBLocalHomeCallRef;
 import org.ow2.easybeans.proxy.reference.LocalCallRef;
+import org.ow2.easybeans.proxy.reference.ManagedBeanRef;
 import org.ow2.easybeans.proxy.reference.NoInterfaceLocalCallRef;
 import org.ow2.easybeans.proxy.reference.RemoteCallRef;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
@@ -477,6 +483,7 @@ public class JContainer3 implements EZBContainer {
             int slsb = 0;
             int mdb = 0;
             int singletons = 0;
+            int mb = 0;
             for (Factory<?, ?> factory : this.factories.values()) {
                 if (factory instanceof StatelessSessionFactory) {
                     slsb++;
@@ -486,11 +493,13 @@ public class JContainer3 implements EZBContainer {
                     singletons++;
                 } else if (factory instanceof MDBMessageEndPointFactory) {
                     mdb++;
+                } else if (factory instanceof ManagedBeanFactory) {
+                    mb++;
                 }
             }
-            logger.info("Container ''{0}'' [{1} SLSB, {2} SFSB, {3} Sing, {4} MDB] started in {5} ms", getArchive().getName(),
-                    Integer.valueOf(slsb), Integer.valueOf(sfsb), Integer.valueOf(singletons), Integer.valueOf(mdb), Long.valueOf((System
-                    .currentTimeMillis() - tStart)));
+            logger.info("Container ''{0}'' [{1} SLSB, {2} SFSB, {3} Sing, {4} MDB, {5} MB] started in {6} ms", getArchive().getName(),
+                    Integer.valueOf(slsb), Integer.valueOf(sfsb), Integer.valueOf(singletons), Integer.valueOf(mdb), Integer.valueOf(mb),
+                    Long.valueOf((System.currentTimeMillis() - tStart)));
         }
 
         this.dispatcher.dispatch(new EventContainerStarted(this.j2eeManagedObjectId, getArchive(),
@@ -693,7 +702,9 @@ public class JContainer3 implements EZBContainer {
                         }
 
                         // Check bean name is matching (can happen with super class also being beans)
-                        if (!beanName.equals(classAnnotationMetadata.getJCommonBean().getName())) {
+                        if (!(!classAnnotationMetadata.isSession() && !classAnnotationMetadata.isMdb() &&
+                                                            classAnnotationMetadata.isManagedBean()) &&
+                                !beanName.equals(classAnnotationMetadata.getJCommonBean().getName())) {
                             continue;
                         }
 
@@ -702,6 +713,8 @@ public class JContainer3 implements EZBContainer {
                             factory = createSessionBeanFactory(classAnnotationMetadata);
                         } else if (classAnnotationMetadata.isMdb()) {
                             factory = createMessageDrivenBeanFactory(classAnnotationMetadata);
+                        } else if (classAnnotationMetadata.isManagedBean()) {
+                            factory = createManagedBeanFactory(classAnnotationMetadata);
                         }
 
                         // Post-Configure the created factories.
@@ -711,8 +724,12 @@ public class JContainer3 implements EZBContainer {
                             IBeanInfo beanInfo = factory.getBeanInfo();
 
                             // EJB Name
-                            beanInfo.setName(classAnnotationMetadata.getJCommonBean().getName());
-
+                            if (!classAnnotationMetadata.isSession() && !classAnnotationMetadata.isMdb() &&
+                                    classAnnotationMetadata.isManagedBean()) {
+                                beanInfo.setName(classAnnotationMetadata.getManagedBeanName());
+                            } else {
+                                beanInfo.setName(classAnnotationMetadata.getJCommonBean().getName());
+                            }
                             // Adds security info.
                             beanInfo.setSecurityInfo(SecurityInfoHelper.getSecurityInfo(classAnnotationMetadata));
 
@@ -754,10 +771,13 @@ public class JContainer3 implements EZBContainer {
                             factory.setJavaContext(javaContext);
 
                             // Add Management
-                            try {
-                                MBeansHelper.getInstance().registerMBean(factory);
-                            } catch (MBeansException me) {
-                                throw new EZBContainerException("Cannot register the factory MBean", me);
+                            if (classAnnotationMetadata.isSession() || classAnnotationMetadata.isMdb()) {
+                                // TODO check if we have to register an MBean for ManagedBeans
+                                try {
+                                    MBeansHelper.getInstance().registerMBean(factory);
+                                } catch (MBeansException me) {
+                                    throw new EZBContainerException("Cannot register the factory MBean", me);
+                                }
                             }
 
                             // Pool config
@@ -1135,6 +1155,40 @@ public class JContainer3 implements EZBContainer {
         return sessionFactory;
     }
 
+    /**
+     * Creates a ManagedBean Factory for a given ManagedBean class metadata.
+     *
+     * @param managedBean a Managed Bean class metadata
+     * @return The created Factory
+     * @throws EZBContainerException If the ManagedBean Factory can't be created
+     */
+    private Factory<?, ?> createManagedBeanFactory(EasyBeansEjbJarClassMetadata managedBean) throws EZBContainerException {
+        String className = managedBean.getClassName().replace('/', '.');
+        String factoryName = managedBean.getManagedBeanName();
+
+        ManagedBeanFactory managedBeanFactory = null;
+        try {
+            managedBeanFactory = new ManagedBeanFactory(className, this);
+        } catch (FactoryException fe) {
+            throw new EZBContainerException("Cannot build the ManagedBean factory", fe);
+        }
+
+        // Build runtime information
+        BeanInfo beanInfo = new BeanInfo();
+        beanInfo.setTransactionManagementType(managedBean.getTransactionManagementType());
+        beanInfo.setTimersInfo(convertTimersInfo(managedBean));
+        beanInfo.setApplicationExceptions(
+                convertApplicationExceptionInfo(managedBean.getEjbJarDeployableMetadata().getApplicationExceptions()));
+
+
+        this.bindingReferences.add(createManagedBeanRef(managedBean.getJClass().getName(), getEmbedded().getID(), getId(), factoryName,
+                managedBean, managedBeanFactory));
+
+        managedBeanFactory.setBeanInfo(beanInfo);
+
+        return managedBeanFactory;
+    }
+
 
     /**
      * Gets timers info from a given bean.
@@ -1344,10 +1398,13 @@ public class JContainer3 implements EZBContainer {
             f.stop();
 
             // Remove MBeans
-            try {
-                MBeansHelper.getInstance().unregisterMBean(f);
-            } catch (MBeansException me) {
-                logger.error("Cannot unregister the factory MBean", me);
+            if (!(f instanceof ManagedBeanFactory)) {
+                // TODO check if we have to register an MBean for ManagedBeans
+                try {
+                    MBeansHelper.getInstance().unregisterMBean(f);
+                } catch (MBeansException me) {
+                    logger.error("Cannot unregister the factory MBean", me);
+                }
             }
 
         }
@@ -1644,6 +1701,49 @@ public class JContainer3 implements EZBContainer {
                 BeanNamingInfoHelper.buildInfo(bean, itfClsName, "Remote", getConfiguration())));
 
         return remoteCallRef;
+    }
+
+    /**
+     * Creates an ManagedBean interface reference and return it.
+     *
+     * @param itf         the name of the interface that object will have.
+     * @param embeddedId  the ID of the embedded server.
+     * @param containerID the ID of the container.
+     * @param factoryName the name of the factory.
+     * @param bean        the bean class associated to given interface.
+     * @param factory     this ManagedBean Factory
+     *
+     * @return the reference.
+     *
+     * @throws EZBContainerException if interface cannot be loaded or if the
+     *                               bind fails
+     */
+    protected ManagedBeanRef createManagedBeanRef(final String itf,
+            final Integer embeddedId,
+            final String containerID,
+            final String factoryName,
+            final EasyBeansEjbJarClassMetadata bean,
+            final ManagedBeanFactory factory) throws EZBContainerException {
+        String itfClsName = itf.replace('/', '.');
+        try {
+            this.classLoader.loadClass(itfClsName);
+        } catch (ClassNotFoundException e) {
+            throw new EZBContainerException(
+                    "Cannot find the class '" + itf + "' in Classloader '" + this.classLoader + "'.", e);
+        }
+
+        // Build a reference
+        ManagedBeanRef managedBeanRef = new ManagedBeanRef(itfClsName, embeddedId, containerID, factoryName, bean.isStateful());
+
+        // Assign it to the factory
+        managedBeanRef.setFactory(factory);
+
+        // Set the JNDI naming infos
+        managedBeanRef.setJNDINamingInfos(JNDINamingInfoHelper.buildInfo(
+                new ArrayList<EZBNamingStrategy>(Collections.singleton(new ManagedBeanNamingStrategy())),
+                BeanNamingInfoHelper.buildInfo(bean, itfClsName, null, getConfiguration())));
+
+        return managedBeanRef;
     }
 
     /**
