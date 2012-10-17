@@ -65,7 +65,7 @@ public class TestStatefulTimeout {
         Assert.fail("Timeout exceeded and call to the EJB doesn't throw a NoSuchEJBException");
     }
 
-    @Test
+//    @Test
     public void testZeroTimeout() throws InterruptedException, NamingException {
         /*
          Stateful test Bean.
