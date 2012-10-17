@@ -42,6 +42,8 @@ public class TestManagedBeans {
      */
     private MBeanTest lifeCycleMBeanTest = null;
 
+    private MBeanTest interceptorsMBeanTest = null;
+
     /**
      * Initialize beans.
      *
@@ -50,10 +52,16 @@ public class TestManagedBeans {
     @BeforeClass
     public void getBeans() throws NamingException {
         this.lifeCycleMBeanTest = (MBeanTest) new InitialContext().lookup("LifeCycleTest");
+        this.interceptorsMBeanTest = (MBeanTest) new InitialContext().lookup("InterceptorsTest");
     }
 
     @Test
     public void testManagedBeanLifeCycle() {
         this.lifeCycleMBeanTest.checkMBean();
+    }
+
+    @Test
+    public void testManagedBeanInterceptors() {
+        this.interceptorsMBeanTest.checkMBean();
     }
 }
