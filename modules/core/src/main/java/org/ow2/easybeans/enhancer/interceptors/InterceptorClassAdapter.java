@@ -25,14 +25,6 @@
 
 package org.ow2.easybeans.enhancer.interceptors;
 
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.AROUND_INVOKE;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.DEP_INJECT;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_ACTIVATE;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_CONSTRUCT;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_DESTROY;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_PASSIVATE;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.TIMED_OBJECT;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ow2.easybeans.api.bean.lifecycle.EasyBeansMDBLifeCycle;
+import org.ow2.easybeans.api.bean.lifecycle.EasyBeansManagedBeanLifeCycle;
 import org.ow2.easybeans.api.bean.lifecycle.EasyBeansSFSBLifeCycle;
 import org.ow2.easybeans.api.bean.lifecycle.EasyBeansSLSBLifeCycle;
 import org.ow2.easybeans.asm.ClassAdapter;
@@ -55,6 +48,7 @@ import org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceMethodRes
 import org.ow2.easybeans.deployment.annotations.helper.bean.InterfaceAnnotatedHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.SessionBeanHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.TransactionResolver;
+import org.ow2.easybeans.deployment.annotations.helper.bean.managedbean.ManagedBeanBusinessMethodResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBBeanHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBListenerBusinessMethodResolver;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
@@ -73,6 +67,14 @@ import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbSchedule;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
+
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.AROUND_INVOKE;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.DEP_INJECT;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_ACTIVATE;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_CONSTRUCT;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_DESTROY;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_PASSIVATE;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.TIMED_OBJECT;
 
 /**
  * This class delegates the creation of an implementation of a
@@ -210,8 +212,10 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                 newInterfaces[indexElement] = Type.getInternalName(EasyBeansSFSBLifeCycle.class);
             } else if (this.classAnnotationMetadata.isMdb()) {
                 newInterfaces[indexElement] = Type.getInternalName(EasyBeansMDBLifeCycle.class);
+            } else if (this.classAnnotationMetadata.isManagedBean()) {
+                newInterfaces[indexElement] = Type.getInternalName(EasyBeansManagedBeanLifeCycle.class);
             } else {
-                throw new IllegalStateException("Bean '" + this.classAnnotationMetadata.getClassName() + "' not SLSB, SFSB or MDB");
+                throw new IllegalStateException("Bean '" + this.classAnnotationMetadata.getClassName() + "' not SLSB, SFSB, MDB or MB");
             }
         } else {
             newInterfaces = interfaces;
@@ -941,6 +945,8 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                     BusinessMethodResolver.resolve(superClassMetadata);
                 } else if (superClassMetadata.isMdb()) {
                     MDBListenerBusinessMethodResolver.resolve(superClassMetadata);
+                } else if (superClassMetadata.isManagedBean()) {
+                    ManagedBeanBusinessMethodResolver.resolve(superClassMetadata);
                 }
 
                 // for each bean, call sub helper

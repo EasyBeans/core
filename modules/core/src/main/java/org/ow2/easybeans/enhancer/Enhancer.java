@@ -25,8 +25,8 @@
 
 package org.ow2.easybeans.enhancer;
 
-import static org.ow2.easybeans.enhancer.injection.InjectionClassAdapter.JAVA_LANG_OBJECT;
-
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -52,6 +52,8 @@ import org.ow2.easybeans.util.topological.NodeWrapper;
 import org.ow2.easybeans.util.topological.TopologicalSort;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
+
+import static org.ow2.easybeans.enhancer.injection.InjectionClassAdapter.JAVA_LANG_OBJECT;
 
 /**
  * This class is used for enhancing a set of classes (Beans like Stateless,
@@ -167,7 +169,9 @@ public class Enhancer {
                     if (classAnnotationMetadata.isBean()) {
                         // Check bean name is matching (can happen with super
                         // class also being beans)
-                        if (!beanName.equals(classAnnotationMetadata.getJCommonBean().getName())) {
+                        if (!(!classAnnotationMetadata.isSession() && !classAnnotationMetadata.isMdb() &&
+                                classAnnotationMetadata.isManagedBean()) &&
+                                !beanName.equals(classAnnotationMetadata.getJCommonBean().getName())) {
                             continue;
                         }
 
@@ -279,6 +283,20 @@ public class Enhancer {
                     }
 
                     defineClass(this.writeLoader, classAnnotationMetadata.getClassName().replace("/", "."), cw.toByteArray());
+
+                    if (logger.isDebugEnabled()) {
+                        String fName = System.getProperty("java.io.tmpdir") + File.separator
+                                + classAnnotationMetadata.getClassName().replace("/", ".") + ".class";
+                        logger.debug( "Writing Interceptor Manager of class " +
+                                classAnnotationMetadata.getClassName().replace("/", ".") + " to " + fName);
+                        try {
+                            FileOutputStream fos = new FileOutputStream(fName);
+                            fos.write(cw.toByteArray());
+                            fos.close();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             }
         }
@@ -303,6 +321,19 @@ public class Enhancer {
                 cr.accept(cv2, 0);
                 classAnnotationMetadata.setModified();
                 defineClass(this.writeLoader, classAnnotationMetadata.getClassName().replace("/", "."), cw.toByteArray());
+                if (logger.isDebugEnabled()) {
+                    String fName = System.getProperty("java.io.tmpdir") + File.separator
+                            + classAnnotationMetadata.getClassName().replace("/", ".") + ".class";
+                    logger.debug("Writing Interceptor Manager of class " +
+                            classAnnotationMetadata.getClassName().replace("/", ".") + " to " + fName);
+                    try {
+                        FileOutputStream fos = new FileOutputStream(fName);
+                        fos.write(cw.toByteArray());
+                        fos.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
         // search all beans
@@ -346,7 +377,19 @@ public class Enhancer {
                     // Define proxy class
                     loadDefinedClasses(this.writeLoader, cv.getDefinedClasses());
 
-
+                    if (logger.isDebugEnabled()) {
+                        String fName = System.getProperty("java.io.tmpdir") + File.separator
+                                + classAnnotationMetadata.getClassName().replace("/", ".") + ".class";
+                        logger.debug( "Writing Interceptor Manager of class " +
+                                classAnnotationMetadata.getClassName().replace("/", ".") + " to " + fName);
+                        try {
+                            FileOutputStream fos = new FileOutputStream(fName);
+                            fos.write(cw.toByteArray());
+                            fos.close();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             }
         }
@@ -381,9 +424,26 @@ public class Enhancer {
                         beanClassMetadata, false);
                 cr.accept(cv, 0);
                 superMetaData.setModified();
+                EasyBeansEjbJarClassMetadata classicMetadata = this.ejbJarAnnotationMetadata.getScannedClassMetadata(
+                        superMetaData.getClassName());
+                if (classicMetadata != null) {
+                    classicMetadata.setModified();
+                }
                 enhanceSuperClass(superMetaData, beanClassMetadata);
                 defineClass(this.writeLoader, superMetaData.getClassName().replace("/", "."), cw.toByteArray());
 
+                if (logger.isDebugEnabled()) {
+                    String fName = System.getProperty("java.io.tmpdir") + File.separator
+                            + superMetaData.getClassName().replace("/", ".") + ".class";
+                    logger.debug("Writing Interceptor Manager of class " + superMetaData.getClassName().replace("/", ".") + " to " + fName);
+                    try {
+                        FileOutputStream fos = new FileOutputStream(fName);
+                        fos.write(cw.toByteArray());
+                        fos.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
 

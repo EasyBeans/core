@@ -25,20 +25,16 @@
 
 package org.ow2.easybeans.deployment.annotations.helper.bean;
 
-import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import javax.ejb.Remove;
 
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.api.EasyBeansInterceptor;
-import org.ow2.easybeans.asm.Opcodes;
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.container.session.stateful.interceptors.RemoveAlwaysInterceptor;
 import org.ow2.easybeans.container.session.stateful.interceptors.RemoveOnlyWithoutExceptionInterceptor;
@@ -52,6 +48,8 @@ import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
 import org.ow2.util.ee.metadata.ejbjar.impl.JClassInterceptor;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
+
+import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
 
 /**
  * This class sets the EasyBeans interceptors used when invoking business methods and also for life cycle events.
@@ -253,96 +251,50 @@ public final class InterceptorsClassResolver {
             LinkedList<EasyBeansEjbJarClassMetadata> invertedInheritanceClassesList =
                 getInvertedSuperClassesMetadata(interceptorMetadata);
 
-            // For each class (starting super class first, add the interceptor methods)
-            for (EasyBeansEjbJarClassMetadata currentMetaData : invertedInheritanceClassesList) {
-
-                // Analyze methods of the interceptor meta-data and add it in the map
-                for (EasyBeansEjbJarMethodMetadata method : currentMetaData.getMethodMetadataCollection()) {
-                    // Don't look inherited methods.
-                    if (method.isInherited()) {
-                        continue;
-                    }
-                    JClassInterceptor jInterceptor = new JClassInterceptor(className, method.getJMethod(),
-                            interceptorClassAnalyzed);
-
-                    // If the method is overriden, take care of using the
-                    // annotation of the lower class in the inheritance classes.
-                    // As the method is only add once for a single interceptor
-                    // class.
-                    EasyBeansEjbJarMethodMetadata analyzedMethod = method;
-                    EasyBeansEjbJarMethodMetadata methodSubClass = findLastRedefinedMethod(method,
-                            invertedInheritanceClassesList);
-                    boolean superMethodIsPrivate = (analyzedMethod.getJMethod().getAccess()
-                            & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE;
-                    if (methodSubClass != null && !superMethodIsPrivate && !methodSubClass.isInherited()) {
-                        analyzedMethod = methodSubClass;
-                    }
-
-                    // check if method is redefined in a super class
-
-                    // Skip super method that we have also as it will be added in a generated method
-                    if (methodSubClass != null && !methodSubClass.isInherited()
-                            && methodSubClass.getClassMetadata().equals(interceptorMetadata) && superMethodIsPrivate
-                            && !currentMetaData.equals(interceptorMetadata)
-                            && !invertedInheritanceClassesList.contains(classMetadata)) {
-                        continue;
-                    }
-
-                    // A method can be designed to be used for all annotation, so no "else if" !
-                    if (analyzedMethod.isAroundInvoke()) {
-                        addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.AROUND_INVOKE), jInterceptor);
-                    }
-
-                    // Only if interceptor class is not a bean's class. Else, it is only simple methods.
-                    // Also check if the interceptor class is not a super class of the bean
-                    if (!currentMetaData.isBean() && !invertedInheritanceClassesList.contains(classMetadata)) {
-                        // build interceptor object.
-                        if (analyzedMethod.isPostActivate()) {
-                            addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.POST_ACTIVATE), jInterceptor);
-                        }
-                        if (analyzedMethod.isPostConstruct()) {
-                            addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.POST_CONSTRUCT), jInterceptor);
-                        }
-                        if (analyzedMethod.isPreDestroy()) {
-                            addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.PRE_DESTROY), jInterceptor);
-                        }
-                        if (analyzedMethod.isPrePassivate()) {
-                            addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.PRE_PASSIVATE), jInterceptor);
-                        }
-                    }
+            List<EasyBeansEjbJarMethodMetadata> methods = interceptorMetadata.getAroundInvokeMethodMetadatas();
+            if (methods != null) {
+                for (EasyBeansEjbJarMethodMetadata method : methods) {
+                    JClassInterceptor jInterceptor = new JClassInterceptor(className, method.getJMethod(), interceptorClassAnalyzed);
+                    addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.AROUND_INVOKE), jInterceptor);
                 }
             }
 
-        }
+            if (!interceptorMetadata.isBean() && !invertedInheritanceClassesList.contains(classMetadata)) {
+                methods = interceptorMetadata.getPostActivateMethodsMetadata();
+                if (methods != null) {
+                    for (EasyBeansEjbJarMethodMetadata method : methods) {
+                        JClassInterceptor jInterceptor = new JClassInterceptor(className, method.getJMethod(), interceptorClassAnalyzed);
+                        addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.POST_ACTIVATE), jInterceptor);
+                    }
+                }
 
+                methods = interceptorMetadata.getPostConstructMethodsMetadata();
+                if (methods != null) {
+                    for (EasyBeansEjbJarMethodMetadata method : methods) {
+                        JClassInterceptor jInterceptor = new JClassInterceptor(className, method.getJMethod(), interceptorClassAnalyzed);
+                        addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.POST_CONSTRUCT), jInterceptor);
+                    }
+                }
 
+                methods = interceptorMetadata.getPreDestroyMethodsMetadata();
+                if (methods != null) {
+                    for (EasyBeansEjbJarMethodMetadata method : methods) {
+                        JClassInterceptor jInterceptor = new JClassInterceptor(className, method.getJMethod(), interceptorClassAnalyzed);
+                        addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.PRE_DESTROY), jInterceptor);
+                    }
+                }
 
-
-        return mapInterceptors;
-    }
-
-    /**
-     * Gets the method with the lower inheritance level defined in the class which is not inherited from a super class.
-     * @param method the given method
-     * @param classMetadatas the list of class to parse
-     * @return a method if found
-     */
-    protected static EasyBeansEjbJarMethodMetadata findLastRedefinedMethod(final EasyBeansEjbJarMethodMetadata method,
-            final LinkedList<EasyBeansEjbJarClassMetadata> classMetadatas) {
-        ListIterator<EasyBeansEjbJarClassMetadata> it = classMetadatas.listIterator();
-        EasyBeansEjbJarMethodMetadata foundMethod = null;
-        // search method
-        while (it.hasNext()) {
-            EasyBeansEjbJarClassMetadata subClass = it.next();
-            EasyBeansEjbJarMethodMetadata subMethod = subClass.getMethodMetadata(method.getJMethod());
-            if (subMethod != null && !subMethod.isInherited()) {
-                foundMethod = subMethod;
+                methods = interceptorMetadata.getPrePassivateMethodsMetadata();
+                if (methods != null) {
+                    for (EasyBeansEjbJarMethodMetadata method : methods) {
+                        JClassInterceptor jInterceptor = new JClassInterceptor(className, method.getJMethod(), interceptorClassAnalyzed);
+                        addOnlyIfNotPresent(mapInterceptors.get(InterceptorType.PRE_PASSIVATE), jInterceptor);
+                    }
+                }
             }
         }
-        if (foundMethod != null) {
-            return foundMethod;
-        }
-        return null;
+
+        return mapInterceptors;
     }
 
 

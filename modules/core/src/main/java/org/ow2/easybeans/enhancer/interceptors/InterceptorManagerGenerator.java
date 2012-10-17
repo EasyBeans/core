@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.enhancer.interceptors;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 import org.ow2.easybeans.api.Factory;
@@ -35,6 +37,8 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.easybeans.enhancer.CommonClassGenerator;
 import org.ow2.easybeans.enhancer.EasyBeansClassWriter;
 import org.ow2.easybeans.enhancer.injection.InjectionClassAdapter;
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
 
 /**
  * This generates a class that manage the interceptor of a given bean. It
@@ -43,6 +47,11 @@ import org.ow2.easybeans.enhancer.injection.InjectionClassAdapter;
  * @author Florent Benoit
  */
 public class InterceptorManagerGenerator extends CommonClassGenerator {
+
+    /**
+     * Logger.
+     */
+    private static Log logger = LogFactory.getLog(InterceptorManagerGenerator.class);
 
     /**
      * Metadata to retrieve info on interceptors.
@@ -89,11 +98,24 @@ public class InterceptorManagerGenerator extends CommonClassGenerator {
      * the code
      */
     public void generate() {
+
         addClassDeclaration();
         addAttributes();
         addConstructor();
         addMethods();
         endClass();
+        if (logger.isDebugEnabled()) {
+            String fName = System.getProperty("java.io.tmpdir") + File.separator
+                    + this.generatedClassName.replace("/", ".") + ".class";
+            logger.debug("Writing Interceptor Manager of class " + generatedClassName + " to " + fName);
+            try {
+                FileOutputStream fos = new FileOutputStream(fName);
+                fos.write(getCW().toByteArray());
+                fos.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**

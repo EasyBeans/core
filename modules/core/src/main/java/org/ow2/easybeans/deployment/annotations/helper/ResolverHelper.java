@@ -25,8 +25,6 @@
 
 package org.ow2.easybeans.deployment.annotations.helper;
 
-import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +41,7 @@ import org.ow2.easybeans.deployment.annotations.helper.bean.SessionBeanHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.TimedObjectInterface;
 import org.ow2.easybeans.deployment.annotations.helper.bean.TransactionResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.checks.TimerBeanValidator;
+import org.ow2.easybeans.deployment.annotations.helper.bean.managedbean.ManagedBeanBusinessMethodResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBBeanHelper;
 import org.ow2.easybeans.deployment.annotations.helper.bean.mdb.MDBListenerBusinessMethodResolver;
 import org.ow2.easybeans.deployment.annotations.helper.bean.session.SessionSynchronizationResolver;
@@ -50,6 +49,8 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.util.scan.api.metadata.structures.JMethod;
+
+import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
 
 /**
  * This class handle some steps that need to be done after the meta-data
@@ -94,6 +95,8 @@ public final class ResolverHelper {
                         BusinessMethodResolver.resolve(classMetaData);
                     } else if (classMetaData.isMdb()) {
                         MDBListenerBusinessMethodResolver.resolve(classMetaData);
+                    } else if (classMetaData.isManagedBean()) {
+                        ManagedBeanBusinessMethodResolver.resolve(classMetaData);
                     }
 
                     // Security
