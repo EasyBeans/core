@@ -175,6 +175,17 @@ public class TestScheduleTrigger {
             // 86400 seconds in a day and * 1000 to get it in milliseconds
             long expectedDiff = diff * 86400 * 1000;
 
+            if (easybeansCalendar.getTimeZone().inDaylightTime(easybeansDate) != now.getTimeZone().inDaylightTime(now.getTime())) {
+                // Take care of daylight time changing for some locales
+                int daylightOffset = Math.abs(now.getTimeZone().getOffset(now.getTime().getTime()) -
+                        easybeansCalendar.getTimeZone().getOffset(easybeansDate.getTime()));
+                if (easybeansCalendar.getTimeZone().inDaylightTime(easybeansDate)) {
+                    expectedDiff -= daylightOffset;
+                } else {
+                    expectedDiff += daylightOffset;
+                }
+            }
+
             long realDiff = easybeansCalendar.getTimeInMillis() - now.getTimeInMillis();
 
             long delta = Math.abs(expectedDiff - realDiff);
