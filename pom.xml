@@ -40,9 +40,9 @@
 
   <!-- Define properties -->
   <properties>
-    <ow2-util.version>1.0.36-SNAPSHOT</ow2-util.version>
-    <ow2-util-ant-tasks.version>1.0.36-SNAPSHOT</ow2-util-ant-tasks.version>
-    <ow2-spec.version>1.0.12-SNAPSHOT</ow2-spec.version>
+    <ow2-util.version>1.0.36</ow2-util.version>
+    <ow2-util-ant-tasks.version>1.0.36</ow2-util-ant-tasks.version>
+    <ow2-spec.version>1.0.12</ow2-spec.version>
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>
     <carol.version>3.0.9</carol.version>
@@ -53,7 +53,7 @@
     <easybeans-utils.version>1.0.0</easybeans-utils.version>
 
     <!-- OSGi -->
-    <ow2-bundle.version>1.0.34-SNAPSHOT</ow2-bundle.version>
+    <ow2-bundle.version>1.0.34</ow2-bundle.version>
     <felix.dm.version>2.0.1</felix.dm.version>
     <felix.scr.version>1.6.0</felix.scr.version>
     <ipojo.version>1.4.0</ipojo.version>
