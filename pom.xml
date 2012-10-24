@@ -35,7 +35,7 @@
   <artifactId>easybeans</artifactId>
   <packaging>pom</packaging>
   <name>EasyBeans</name>
-  <version>2.0.0-M2</version>
+  <version>2.0.0-M3-SNAPSHOT</version>
 
 
   <!-- Define properties -->
