@@ -52,8 +52,8 @@
       <artifactId>util-log</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-url</artifactId>
+      <groupId>org.ow2.util.url</groupId>
+      <artifactId>url</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.util</groupId>

@@ -54,8 +54,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-url</artifactId>
+      <groupId>org.ow2.util.url</groupId>
+      <artifactId>url</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

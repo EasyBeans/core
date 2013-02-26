@@ -380,9 +380,9 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${ow2-bundle.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-url</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.url</groupId>
+        <artifactId>url</artifactId>
+        <version>${ow2-util-url.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.bundles</groupId>
