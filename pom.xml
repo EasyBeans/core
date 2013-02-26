@@ -69,6 +69,7 @@
     <ow2-util-marshalling.version>2.0.0-SNAPSHOT</ow2-util-marshalling.version>
     <ow2-util-i18n.version>2.0.0</ow2-util-i18n.version>
     <ow2-util-url.version>2.0.0-SNAPSHOT</ow2-util-url.version>
+    <ow2-util-file.version>2.0.0</ow2-util-file.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -406,9 +407,9 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-file</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.file</groupId>
+        <artifactId>file</artifactId>
+        <version>${ow2-util-file.version}</version>
       </dependency>
 
       <dependency>
