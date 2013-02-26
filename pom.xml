@@ -71,6 +71,7 @@
     <ow2-util-url.version>2.0.0-SNAPSHOT</ow2-util-url.version>
     <ow2-util-file.version>2.0.0</ow2-util-file.version>
     <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
+    <ow2-util-jmx.version>2.0.0-SNAPSHOT</ow2-util-jmx.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -450,15 +451,15 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-jmx-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.jmx</groupId>
+        <artifactId>jmx-api</artifactId>
+        <version>${ow2-util-jmx.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-jmx-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.jmx</groupId>
+        <artifactId>jmx-impl</artifactId>
+        <version>${ow2-util-jmx.version}</version>
       </dependency>
       
       <dependency>

@@ -195,8 +195,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-jmx-impl</artifactId>
+      <groupId>org.ow2.util.jmx</groupId>
+      <artifactId>jmx-impl</artifactId>
     </dependency>
 
   </dependencies>

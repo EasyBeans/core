@@ -211,6 +211,12 @@
             <artifactId>log-bridge-jul</artifactId>
             <version>${ow2-util-log-bridge-jul.version}</version>
           </dependency>
+          <!-- For OW2 util JMX -->
+          <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo</artifactId>
+            <version>1.8.6</version>
+          </dependency>
         </dependencies>
         <executions>
           <execution>
