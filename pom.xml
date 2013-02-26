@@ -56,7 +56,7 @@
     <ow2-bundle.version>1.0.35</ow2-bundle.version>
     <felix.dm.version>2.0.1</felix.dm.version>
     <felix.scr.version>1.6.0</felix.scr.version>
-    <ipojo.version>1.4.0</ipojo.version>
+    <ipojo.version>1.8.6</ipojo.version>
 
     <!-- Test properties -->
     <easybeans-tests-applications.version>2.0.2</easybeans-tests-applications.version>
@@ -73,6 +73,7 @@
     <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
     <ow2-util-jmx.version>2.0.0-SNAPSHOT</ow2-util-jmx.version>
     <ow2-util-archive.version>2.0.0-SNAPSHOT</ow2-util-archive.version>
+    <ow2-util-scan.version>2.0.0-SNAPSHOT</ow2-util-scan.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -374,15 +375,9 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-scan-api</artifactId>
-        <version>${ow2-util.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-scan-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.scan</groupId>
+        <artifactId>scan-impl</artifactId>
+        <version>${ow2-util-scan.version}</version>
       </dependency>
 
       <dependency>
@@ -608,6 +603,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- As iPOJO manipulate bytecode for some dependencies -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.ipojo</artifactId>
+      <version>${ipojo.version}</version>
+      <scope>test</scope>
+    </dependency>
     <!-- Used to have readable log messages during test phases -->
     <dependency>
       <groupId>org.ow2.util.log</groupId>

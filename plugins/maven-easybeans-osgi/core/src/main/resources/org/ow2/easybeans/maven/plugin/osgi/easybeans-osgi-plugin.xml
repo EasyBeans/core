@@ -252,7 +252,7 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
       <bundle>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.ipojo</artifactId>
-        <version>1.8.6</version>
+        <version>${ipojo.version}</version>
       </bundle>
       <!-- EasyBeans -->
       <bundle>
@@ -378,14 +378,9 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${ow2-util-url.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-scan-api</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-scan-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.scan</groupId>
+        <artifactId>scan-impl</artifactId>
+        <version>${ow2-util-scan.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.bundles</groupId>
