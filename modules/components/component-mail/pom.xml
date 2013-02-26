@@ -47,9 +47,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-marshalling</artifactId>
-      <version>${ow2-util.version}</version>
+      <groupId>org.ow2.util.marshalling</groupId>
+      <artifactId>marshalling</artifactId>
     </dependency>
   </dependencies>
 </project>
