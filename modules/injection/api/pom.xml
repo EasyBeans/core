@@ -38,9 +38,8 @@
   <description>Injection API</description>
   <dependencies>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-archive-api</artifactId>
-      <version>${ow2-util.version}</version>
+      <groupId>org.ow2.util.archive</groupId>
+      <artifactId>archive-api</artifactId>
     </dependency>
   </dependencies>
     

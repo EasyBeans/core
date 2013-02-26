@@ -282,17 +282,10 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>5.1.1</version>
       </bundle>
 
-
-
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-archive-api</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-archive-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.archive</groupId>
+        <artifactId>archive-impl</artifactId>
+        <version>${ow2-util-archive.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.bundles</groupId>

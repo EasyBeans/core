@@ -72,6 +72,7 @@
     <ow2-util-file.version>2.0.0</ow2-util-file.version>
     <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
     <ow2-util-jmx.version>2.0.0-SNAPSHOT</ow2-util-jmx.version>
+    <ow2-util-archive.version>2.0.0-SNAPSHOT</ow2-util-archive.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -367,15 +368,9 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-archive-api</artifactId>
-        <version>${ow2-util.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-archive-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.archive</groupId>
+        <artifactId>archive-api</artifactId>
+        <version>${ow2-util-archive.version}</version>
       </dependency>
 
       <dependency>
