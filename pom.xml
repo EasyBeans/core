@@ -74,6 +74,7 @@
     <ow2-util-jmx.version>2.0.0-SNAPSHOT</ow2-util-jmx.version>
     <ow2-util-archive.version>2.0.0-SNAPSHOT</ow2-util-archive.version>
     <ow2-util-scan.version>2.0.0-SNAPSHOT</ow2-util-scan.version>
+    <ow2-util-pool.version>2.0.0-SNAPSHOT</ow2-util-pool.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -405,15 +406,20 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-pool-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.pool</groupId>
+        <artifactId>pool-api</artifactId>
+        <version>${ow2-util-pool.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-pool-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.pool</groupId>
+        <artifactId>pool-basic</artifactId>
+        <version>${ow2-util-pool.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.util.pool</groupId>
+        <artifactId>pool-enhanced</artifactId>
+        <version>${ow2-util-pool.version}</version>
       </dependency>
 
       <dependency>

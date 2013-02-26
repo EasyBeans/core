@@ -97,20 +97,17 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-pool-impl</artifactId>
+      <groupId>org.ow2.util.pool</groupId>
+      <artifactId>pool-basic</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>org.ow2.util.pool</groupId>
+      <artifactId>pool-enhanced</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.ow2.util</groupId>
       <artifactId>audit-report-impl</artifactId>
-      <version>${ow2-util.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-pool-implenhanced</artifactId>
       <version>${ow2-util.version}</version>
     </dependency>
 

@@ -74,8 +74,8 @@
       <artifactId>util-ee-metadata-common-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-pool-api</artifactId>
+      <groupId>org.ow2.util.pool</groupId>
+      <artifactId>pool-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.util</groupId>
