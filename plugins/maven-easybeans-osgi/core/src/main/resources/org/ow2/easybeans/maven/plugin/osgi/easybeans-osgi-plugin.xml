@@ -350,9 +350,9 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>2.0.0-SNAPSHOT</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-log</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.log</groupId>
+        <artifactId>log-bridge-jul</artifactId>
+        <version>${ow2-util-log-bridge-jul.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.util.i18n</groupId>

@@ -52,8 +52,8 @@
       <artifactId>ow2-connector-1.5-spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-log</artifactId>
+      <groupId>org.ow2.util.log</groupId>
+      <artifactId>log-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.easybeans</groupId>

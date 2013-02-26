@@ -70,6 +70,7 @@
     <ow2-util-i18n.version>2.0.0</ow2-util-i18n.version>
     <ow2-util-url.version>2.0.0-SNAPSHOT</ow2-util-url.version>
     <ow2-util-file.version>2.0.0</ow2-util-file.version>
+    <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -305,9 +306,9 @@
 
       <!-- OW2 Utils -->
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-log</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.log</groupId>
+        <artifactId>log-api</artifactId>
+        <version>2.0.0</version>
       </dependency>
 
       <dependency>
@@ -610,6 +611,15 @@
     </dependencies>
   </dependencyManagement>
 
+  <dependencies>
+    <!-- Used to have readable log messages during test phases -->
+    <dependency>
+      <groupId>org.ow2.util.log</groupId>
+      <artifactId>log-bridge-jul</artifactId>
+      <version>${ow2-util-log-bridge-jul.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <scm>
     <connection>scm:git:git://gitorious.ow2.org/ow2-easybeans/core.git</connection>
@@ -619,22 +629,35 @@
 
   <build>
 
-   <pluginManagement>
-   <plugins>
-   
-           <plugin>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
           <version>2.1.0</version>
         </plugin>
-        
+
         <plugin>
           <groupId>org.ow2.util</groupId>
           <artifactId>util-maven-plugin-antrmic</artifactId>
           <version>${ow2-util.version}</version>
         </plugin>
-   </plugins>
-   </pluginManagement>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <classpathDependencyExcludes>
+            <classpathDependencyExclude>org.ow2.util.log:log-api</classpathDependencyExclude>
+          </classpathDependencyExcludes>
+        </configuration>
+      </plugin>
+    </plugins>
 
     <!-- Temporary until the move to src/main/java -->
     <resources>

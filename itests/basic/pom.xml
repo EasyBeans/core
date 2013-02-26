@@ -206,6 +206,11 @@
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
           </dependency>
+          <dependency>
+            <groupId>org.ow2.util.log</groupId>
+            <artifactId>log-bridge-jul</artifactId>
+            <version>${ow2-util-log-bridge-jul.version}</version>
+          </dependency>
         </dependencies>
         <executions>
           <execution>
