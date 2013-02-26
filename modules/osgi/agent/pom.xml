@@ -37,8 +37,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-execution</artifactId>
+      <groupId>org.ow2.util.execution</groupId>
+      <artifactId>execution</artifactId>
     </dependency>
 
     <dependency>

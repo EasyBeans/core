@@ -61,7 +61,10 @@
     <!-- Test properties -->
     <easybeans-tests-applications.version>2.0.2</easybeans-tests-applications.version>
     <junit4osgi.version>1.0.0</junit4osgi.version>
-    <osgi.felix.framework.version>4.0.2</osgi.felix.framework.version> 
+    <osgi.felix.framework.version>4.0.2</osgi.felix.framework.version>
+
+    <!-- OW2 utils -->
+    <ow2-util-execution.version>2.0.0-SNAPSHOT</ow2-util-execution.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -303,10 +306,11 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-execution</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.execution</groupId>
+        <artifactId>execution</artifactId>
+        <version>${ow2-util-execution.version}</version>
       </dependency>
+
       
       <dependency>
         <groupId>org.ow2.util</groupId>
