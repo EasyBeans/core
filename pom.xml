@@ -65,6 +65,7 @@
 
     <!-- OW2 utils -->
     <ow2-util-execution.version>2.0.0-SNAPSHOT</ow2-util-execution.version>
+    <ow2-util-xmlconfig.version>2.0.0-SNAPSHOT</ow2-util-xmlconfig.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -311,11 +312,10 @@
         <version>${ow2-util-execution.version}</version>
       </dependency>
 
-      
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-xmlconfig</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.xmlconfig</groupId>
+        <artifactId>xmlconfig</artifactId>
+        <version>${ow2-util-xmlconfig.version}</version>
       </dependency>
 
       <dependency>

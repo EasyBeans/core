@@ -21,8 +21,8 @@
       <artifactId>easybeans-utils</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-xmlconfig</artifactId>
+      <groupId>org.ow2.util.xmlconfig</groupId>
+      <artifactId>xmlconfig</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.util</groupId>
