@@ -51,19 +51,16 @@
         <artifactId>deployment-system-impl</artifactId>
       </dependency>
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-metadata-common-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-common-api</artifactId>
       </dependency>
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-metadata-car-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-car-api</artifactId>
       </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-metadata-car-impl</artifactId>
-      <version>${ow2-util.version}</version>
+      <groupId>org.ow2.util.metadata</groupId>
+      <artifactId>metadata-car-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.util</groupId>

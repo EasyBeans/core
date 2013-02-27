@@ -42,7 +42,7 @@
   <properties>
     <ow2-util.version>1.0.37</ow2-util.version>
     <ow2-util-ant-tasks.version>1.0.36</ow2-util-ant-tasks.version>
-    <ow2-spec.version>1.0.12</ow2-spec.version>
+    <ow2-spec.version>1.0.13-SNAPSHOT</ow2-spec.version>
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>
     <carol.version>3.0.9</carol.version>
@@ -78,6 +78,7 @@
     <ow2-util-event.version>2.0.0-SNAPSHOT</ow2-util-event.version>
     <ow2-util-audit.version>2.0.0-SNAPSHOT</ow2-util-audit.version>
     <ow2-util-deploy-system.version>2.0.0-SNAPSHOT</ow2-util-deploy-system.version>
+    <ow2-util-ee-metadata.version>2.0.0-SNAPSHOT</ow2-util-ee-metadata.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -343,33 +344,38 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-metadata-common-api</artifactId>
-        <version>${ow2-util.version}</version>
-      </dependency>
-
-    <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-metadata-ws-api</artifactId>
-        <version>${ow2-util.version}</version>
-    </dependency>
-
-      <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-metadata-war-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-common-api</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-metadata-war-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-ws-api</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-metadata-ejbjar-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-ejbjar-api</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-ejbjar-impl</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-car-api</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-car-impl</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
       </dependency>
 
       <dependency>

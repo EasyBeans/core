@@ -138,8 +138,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-metadata-ws-api</artifactId>
+      <groupId>org.ow2.util.metadata</groupId>
+      <artifactId>metadata-ws-api</artifactId>
     </dependency>
 
     <dependency>

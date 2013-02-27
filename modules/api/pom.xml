@@ -70,8 +70,8 @@
       <artifactId>mail</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-metadata-common-api</artifactId>
+      <groupId>org.ow2.util.metadata</groupId>
+      <artifactId>metadata-common-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.util.pool</groupId>
@@ -90,9 +90,8 @@
       <artifactId>jmx-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-metadata-ejbjar-api</artifactId>
-      <version>${ow2-util.version}</version>
+      <groupId>org.ow2.util.metadata</groupId>
+      <artifactId>metadata-ejbjar-api</artifactId>
     </dependency>
   </dependencies>
 

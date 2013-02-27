@@ -68,12 +68,16 @@
       <artifactId>pool-basic</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.ow2.util.url</groupId>
+      <artifactId>url</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.ow2.util.xmlconfig</groupId>
       <artifactId>xmlconfig</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-metadata-ejbjar-impl</artifactId>
+      <groupId>org.ow2.util.metadata</groupId>
+      <artifactId>metadata-ejbjar-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>

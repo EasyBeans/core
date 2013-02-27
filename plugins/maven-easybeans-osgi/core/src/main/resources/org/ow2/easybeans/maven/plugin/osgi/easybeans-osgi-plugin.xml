@@ -288,34 +288,19 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${ow2-util-archive.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-metadata-common-api</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-common-impl</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-metadata-common-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-ejbjar-impl</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-metadata-ejbjar-api</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-metadata-ejbjar-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-metadata-ws-api</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-metadata-ws-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.metadata</groupId>
+        <artifactId>metadata-ws-impl</artifactId>
+        <version>${ow2-util-ee-metadata.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.util.event</groupId>
