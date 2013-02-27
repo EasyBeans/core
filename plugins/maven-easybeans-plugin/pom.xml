@@ -64,8 +64,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-maven-plugin-deployment-api</artifactId>
+      <groupId>org.ow2.util.maven</groupId>
+      <artifactId>maven-server-management</artifactId>
     </dependency>
 
     <dependency>
