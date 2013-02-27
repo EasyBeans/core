@@ -426,18 +426,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-plan-deploy-api</artifactId>
-        <version>${ow2-util.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-plan-schemas</artifactId>
-        <version>${ow2-util.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.ow2.util.event</groupId>
         <artifactId>event-api</artifactId>
         <version>${ow2-util-event.version}</version>

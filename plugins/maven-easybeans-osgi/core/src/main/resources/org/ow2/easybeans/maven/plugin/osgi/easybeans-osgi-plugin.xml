@@ -398,64 +398,59 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>2.0.0-SNAPSHOT</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-schemas</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-schemas</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-repository-api</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-repository-impl</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-repository-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-reader</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-reader</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-deploy-impl</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-deploy-api</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-deployer</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-deploy-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-fetcher-api</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-deployer</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-fetcher-impl</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-fetcher-api</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-fetcher-url</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-fetcher-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-fetcher-maven2</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-fetcher-impl-url</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-monitor-api</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-fetcher-impl-maven2</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>util-plan-monitor</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.plan</groupId>
+        <artifactId>plan-monitor-impl</artifactId>
+        <version>${ow2-util-deploy-plan.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.bundles</groupId>
