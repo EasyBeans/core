@@ -82,7 +82,7 @@
       <artifactId>event-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
+      <groupId>org.ow2.util.audit</groupId>
       <artifactId>audit-report-api</artifactId>
     </dependency>
     <dependency>

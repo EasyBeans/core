@@ -76,6 +76,7 @@
     <ow2-util-scan.version>2.0.0-SNAPSHOT</ow2-util-scan.version>
     <ow2-util-pool.version>2.0.0-SNAPSHOT</ow2-util-pool.version>
     <ow2-util-event.version>2.0.0-SNAPSHOT</ow2-util-event.version>
+    <ow2-util-audit.version>2.0.0-SNAPSHOT</ow2-util-audit.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -460,15 +461,15 @@
       </dependency>
       
       <dependency>
-        <groupId>org.ow2.util</groupId>
+        <groupId>org.ow2.util.audit</groupId>
         <artifactId>audit-report-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <version>${ow2-util-audit.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
+        <groupId>org.ow2.util.audit</groupId>
         <artifactId>audit-report-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <version>${ow2-util-audit.version}</version>
       </dependency>
       
       <dependency>

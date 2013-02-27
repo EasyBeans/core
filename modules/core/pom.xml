@@ -106,9 +106,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ow2.util</groupId>
+      <groupId>org.ow2.util.audit</groupId>
       <artifactId>audit-report-impl</artifactId>
-      <version>${ow2-util.version}</version>
     </dependency>
 
     <dependency>
