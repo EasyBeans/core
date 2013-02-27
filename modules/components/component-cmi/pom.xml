@@ -60,8 +60,8 @@
       <artifactId>log-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-event-api</artifactId>
+      <groupId>org.ow2.util.event</groupId>
+      <artifactId>event-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.cmi</groupId>

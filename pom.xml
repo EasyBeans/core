@@ -75,6 +75,7 @@
     <ow2-util-archive.version>2.0.0-SNAPSHOT</ow2-util-archive.version>
     <ow2-util-scan.version>2.0.0-SNAPSHOT</ow2-util-scan.version>
     <ow2-util-pool.version>2.0.0-SNAPSHOT</ow2-util-pool.version>
+    <ow2-util-event.version>2.0.0-SNAPSHOT</ow2-util-event.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -435,15 +436,15 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-event-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.event</groupId>
+        <artifactId>event-api</artifactId>
+        <version>${ow2-util-event.version}</version>
       </dependency>
 
-       <dependency>
-         <groupId>org.ow2.util</groupId>
-        <artifactId>util-event-impl</artifactId>
-        <version>${ow2-util.version}</version>
+      <dependency>
+        <groupId>org.ow2.util.event</groupId>
+        <artifactId>event-impl</artifactId>
+        <version>${ow2-util-event.version}</version>
       </dependency>
 
       <dependency>
