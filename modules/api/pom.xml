@@ -46,8 +46,8 @@
       <artifactId>ow2-jpa-2.0-spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-deploy-api</artifactId>
+      <groupId>org.ow2.util.deploy</groupId>
+      <artifactId>deployment-system-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>

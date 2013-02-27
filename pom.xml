@@ -77,6 +77,7 @@
     <ow2-util-pool.version>2.0.0-SNAPSHOT</ow2-util-pool.version>
     <ow2-util-event.version>2.0.0-SNAPSHOT</ow2-util-event.version>
     <ow2-util-audit.version>2.0.0-SNAPSHOT</ow2-util-audit.version>
+    <ow2-util-deploy-system.version>2.0.0-SNAPSHOT</ow2-util-deploy-system.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -384,15 +385,15 @@
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-deploy-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.deploy</groupId>
+        <artifactId>deployment-system-api</artifactId>
+        <version>${ow2-util-deploy-system.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-deploy-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.deploy</groupId>
+        <artifactId>deployment-system-impl</artifactId>
+        <version>${ow2-util-deploy-system.version}</version>
       </dependency>
 
       <dependency>

@@ -43,14 +43,12 @@
       <version>${project.version}</version>
     </dependency>
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-deploy-api</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.deploy</groupId>
+        <artifactId>deployment-system-api</artifactId>
       </dependency>
       <dependency>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-ee-deploy-impl</artifactId>
-        <version>${ow2-util.version}</version>
+        <groupId>org.ow2.util.deploy</groupId>
+        <artifactId>deployment-system-impl</artifactId>
       </dependency>
       <dependency>
         <groupId>org.ow2.util</groupId>

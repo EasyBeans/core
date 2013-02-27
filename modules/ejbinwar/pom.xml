@@ -57,12 +57,12 @@
       <artifactId>log-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-deploy-api</artifactId>
+      <groupId>org.ow2.util.deploy</groupId>
+      <artifactId>deployment-system-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.util</groupId>
-      <artifactId>util-ee-deploy-impl</artifactId>
+      <groupId>org.ow2.util.deploy</groupId>
+      <artifactId>deployment-system-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>

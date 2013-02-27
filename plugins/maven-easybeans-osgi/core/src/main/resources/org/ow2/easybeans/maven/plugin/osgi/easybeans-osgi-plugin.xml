@@ -378,14 +378,9 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${ow2-util-scan.version}</version>
       </bundle>
       <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-deploy-api</artifactId>
-        <version>${ow2-bundle.version}</version>
-      </bundle>
-      <bundle>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-ee-deploy-impl</artifactId>
-        <version>${ow2-bundle.version}</version>
+        <groupId>org.ow2.util.deploy</groupId>
+        <artifactId>deployment-system-impl</artifactId>
+        <version>${ow2-util-deploy-system.version}</version>
       </bundle>
       <bundle>
         <groupId>org.ow2.util.pool</groupId>
