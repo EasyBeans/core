@@ -98,8 +98,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.ow2.util</groupId>
-        <artifactId>util-maven-plugin-antrmic</artifactId>
+        <groupId>org.ow2.util.maven</groupId>
+        <artifactId>antrmic-maven-plugin</artifactId>
         <executions>
           <execution>
             <id>RMIServerRPCImpl</id>

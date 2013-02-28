@@ -26,19 +26,23 @@
 package org.ow2.easybeans.maven.plugin.osgi;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.ow2.util.maven.osgi.launcher.api.LauncherException;
 import org.ow2.util.maven.osgi.launcher.core.Configuration;
 
 /**
  * Allows to start EasyBeans OSGi.
- * @goal test
- * @phase test
+ *
  * @author Florent Benoit
+ * @author Loic Albertin (Maven 3 plugin migration)
  */
+@Mojo(name = "test", defaultPhase = LifecyclePhase.TEST)
 public class EasyBeansTestOSGiMojo extends EasyBeansStartOSGiMojo {
 
     /**
      * Start the OSGi framework.
+     *
      * @throws MojoExecutionException if there is a failure.
      */
     @Override
@@ -56,7 +60,9 @@ public class EasyBeansTestOSGiMojo extends EasyBeansStartOSGiMojo {
 
     /**
      * Gets the configuration used by the launcher/manager.
+     *
      * @return a configuration object
+     *
      * @throws MojoExecutionException if the configuration can't be built.
      */
     @Override

@@ -37,11 +37,12 @@
   <name>EasyBeans</name>
   <version>2.0.0-RC2-SNAPSHOT</version>
 
+  <prerequisites>
+    <maven>3.0.4</maven>
+  </prerequisites>
 
   <!-- Define properties -->
   <properties>
-    <ow2-util.version>1.0.37</ow2-util.version>
-    <ow2-util-ant-tasks.version>1.0.36</ow2-util-ant-tasks.version>
     <ow2-spec.version>1.0.13-SNAPSHOT</ow2-spec.version>
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>
@@ -79,6 +80,9 @@
     <ow2-util-audit.version>2.0.0-SNAPSHOT</ow2-util-audit.version>
     <ow2-util-deploy-system.version>2.0.0-SNAPSHOT</ow2-util-deploy-system.version>
     <ow2-util-ee-metadata.version>2.0.0-SNAPSHOT</ow2-util-ee-metadata.version>
+
+    <!-- Maven plugins -->
+    <maven-plugin-plugin.version>3.1</maven-plugin-plugin.version>
   </properties>
 
   <!-- Prefered dependencies version -->
@@ -640,9 +644,9 @@
         </plugin>
 
         <plugin>
-          <groupId>org.ow2.util</groupId>
-          <artifactId>util-maven-plugin-antrmic</artifactId>
-          <version>${ow2-util.version}</version>
+          <groupId>org.ow2.util.maven</groupId>
+          <artifactId>antrmic-maven-plugin</artifactId>
+          <version>2.0.0-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>

@@ -26,18 +26,22 @@
 package org.ow2.easybeans.maven.plugin.osgi;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.ow2.util.maven.osgi.launcher.api.LauncherException;
 
 /**
  * Allows to start EasyBeans OSGi.
- * @goal stop
- * @phase post-integration-test
+ *
  * @author Florent Benoit
+ * @author Loic Albertin (Maven 3 plugin migration)
  */
+@Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST)
 public class EasyBeansStopOSGiMojo extends AbsEasyBeansOSGiMojo {
 
     /**
-     * Start the OSGi framework.
+     * Stop the OSGi framework.
+     *
      * @throws MojoExecutionException if there is a failure.
      */
     @Override

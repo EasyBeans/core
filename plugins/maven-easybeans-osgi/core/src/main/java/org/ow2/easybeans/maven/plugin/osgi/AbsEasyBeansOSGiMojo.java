@@ -33,9 +33,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,6 +48,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.ow2.util.maven.osgi.launcher.core.AbsMojo;
 import org.ow2.util.maven.osgi.launcher.core.BundleDesc;
 import org.ow2.util.url.URLUtils;
 import org.w3c.dom.Document;
@@ -58,8 +60,15 @@ import org.xml.sax.SAXException;
 /**
  * Common stuff for bundles used by EasyBeans.
  * @author Florent Benoit
+ * @author Loic Albertin (Maven 3 plugin migration)
  */
-public abstract class AbsEasyBeansOSGiMojo extends AbsInheritedParametersMojo {
+public abstract class AbsEasyBeansOSGiMojo extends AbsMojo {
+
+    /**
+     * Waiting value after the stop.
+     */
+    @Parameter
+    protected long waitAfterStart = 0;
 
     /**
      * Key for keeping the launcher (local or remote).
@@ -158,7 +167,6 @@ public abstract class AbsEasyBeansOSGiMojo extends AbsInheritedParametersMojo {
      */
     @Override
     public void execute() throws MojoExecutionException {
-        init();
 
         // Get OSGi framework configuration
         String frameworkConfiguration = getElementName(this.doc, "//plugin/osgi.framework.configuration");
