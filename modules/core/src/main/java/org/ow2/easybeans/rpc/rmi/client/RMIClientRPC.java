@@ -59,6 +59,10 @@ public class RMIClientRPC implements ClientRPC {
      */
     private Hashtable rmiClientEnvironment = null;
 
+    /**
+     * RPC remote object.
+     */
+    private RMIServerRPC rmiServerRPC = null;
 
     /**
      * Builds a new RMI client RPC with the given rmi environment.
@@ -66,6 +70,7 @@ public class RMIClientRPC implements ClientRPC {
      */
     public RMIClientRPC(final Hashtable<?, ?> rmiClientEnvironment) {
         this.rmiClientEnvironment = rmiClientEnvironment;
+        initRemoteConnection();
     }
 
 
@@ -75,9 +80,23 @@ public class RMIClientRPC implements ClientRPC {
      * @param request the EJB request.
      * @return a response that have been processed by the server.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public EJBResponse sendEJBRequest(final EJBRemoteRequest request) {
 
+        // Send Request and get the answer
+        try {
+            return rmiServerRPC.getEJBResponse(request);
+        } catch (RemoteException re) {
+            throw new RuntimeException("Error while handling answer on the remote side ", re);
+        }
+
+    }
+
+    /**
+     * Initialize the connection to the remote side.
+     */
+    protected void initRemoteConnection() {
         // initial context factory ?
         if (EASYBEANS_INITIAL_FACTORY != null) {
             this.rmiClientEnvironment.put(Context.INITIAL_CONTEXT_FACTORY, EASYBEANS_INITIAL_FACTORY);
@@ -98,14 +117,7 @@ public class RMIClientRPC implements ClientRPC {
             throw new IllegalStateException(ne);
         }
         // Get a connection to the RPC server
-        RMIServerRPC server = (RMIServerRPC) PortableRemoteObject.narrow(serverObject, RMIServerRPC.class);
-
-        // Send Request and get the answer
-        try {
-            return server.getEJBResponse(request);
-        } catch (RemoteException re) {
-            throw new RuntimeException("Error while handling answer on the remote side ", re);
-        }
+        rmiServerRPC = (RMIServerRPC) PortableRemoteObject.narrow(serverObject, RMIServerRPC.class);
 
     }
 

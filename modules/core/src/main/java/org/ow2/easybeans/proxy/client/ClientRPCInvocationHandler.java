@@ -73,6 +73,12 @@ public class ClientRPCInvocationHandler extends AbsInvocationHandler {
     private Hashtable<?, ?> rmiClientEnvironment = null;
 
     /**
+     * Keep the RPC client.
+     */
+    private ClientRPC clientRPC = null;
+
+
+    /**
      * Build a new Invocation handler.
      * @param containerId the id of the container that will be called on the
      *        remote side.
@@ -107,6 +113,7 @@ public class ClientRPCInvocationHandler extends AbsInvocationHandler {
      * @throws Exception the exception to throw from the method invocation on
      *         the proxy instance.
      */
+    @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Exception {
         return invoke(proxy, method, args, null, null);
 
@@ -159,8 +166,9 @@ public class ClientRPCInvocationHandler extends AbsInvocationHandler {
             return new EasyBeansHandle((EJBObject) proxy);
         }
 
-
-        ClientRPC client = RPC.getClient(this.rmiClientEnvironment);
+        if (clientRPC == null) {
+            clientRPC = RPC.getClient(this.rmiClientEnvironment);
+        }
 
         if (getHashedMethods() == null) {
             setHashedMethods(new HashMap<Method, Long>());
@@ -192,7 +200,7 @@ public class ClientRPCInvocationHandler extends AbsInvocationHandler {
         // send response
         EJBResponse response;
         try {
-            response = client.sendEJBRequest(request);
+            response = clientRPC.sendEJBRequest(request);
         } catch (RuntimeException e) {
             // Exception due to protocol
             throw new EJBException("Error while sending a request", e);
