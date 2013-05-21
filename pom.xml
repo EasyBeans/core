@@ -43,7 +43,7 @@
 
   <!-- Define properties -->
   <properties>
-    <ow2-spec.version>1.0.13-SNAPSHOT</ow2-spec.version>
+    <ow2-spec.version>1.0.13</ow2-spec.version>
     <joram.version>5.3.1</joram.version>
     <cmi.version>2.2.6</cmi.version>
     <carol.version>3.0.9</carol.version>
