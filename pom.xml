@@ -64,12 +64,12 @@
     <osgi.felix.framework.version>4.0.2</osgi.felix.framework.version>
 
     <!-- OW2 utils -->
-    <ow2-util-execution.version>2.0.0-SNAPSHOT</ow2-util-execution.version>
+    <ow2-util-execution.version>2.0.0</ow2-util-execution.version>
     <ow2-util-xmlconfig.version>2.0.0-SNAPSHOT</ow2-util-xmlconfig.version>
-    <ow2-util-marshalling.version>2.0.0-SNAPSHOT</ow2-util-marshalling.version>
+    <ow2-util-marshalling.version>2.0.0</ow2-util-marshalling.version>
     <ow2-util-i18n.version>2.0.0</ow2-util-i18n.version>
-    <ow2-util-url.version>2.0.0-SNAPSHOT</ow2-util-url.version>
-    <ow2-util-file.version>2.0.0</ow2-util-file.version>
+    <ow2-util-url.version>2.0.0</ow2-util-url.version>
+    <ow2-util-file.version>2.1.0</ow2-util-file.version>
     <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
     <ow2-util-jmx.version>2.0.0-SNAPSHOT</ow2-util-jmx.version>
     <ow2-util-archive.version>2.0.0-SNAPSHOT</ow2-util-archive.version>
