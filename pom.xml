@@ -71,11 +71,11 @@
     <ow2-util-url.version>2.0.0</ow2-util-url.version>
     <ow2-util-file.version>2.1.0</ow2-util-file.version>
     <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
-    <ow2-util-jmx.version>2.0.0-SNAPSHOT</ow2-util-jmx.version>
-    <ow2-util-archive.version>2.0.0-SNAPSHOT</ow2-util-archive.version>
-    <ow2-util-scan.version>2.0.1-SNAPSHOT</ow2-util-scan.version>
+    <ow2-util-jmx.version>2.0.0</ow2-util-jmx.version>
+    <ow2-util-archive.version>2.0.0</ow2-util-archive.version>
+    <ow2-util-scan.version>2.0.1</ow2-util-scan.version>
     <ow2-util-pool.version>2.0.0-SNAPSHOT</ow2-util-pool.version>
-    <ow2-util-event.version>2.0.0-SNAPSHOT</ow2-util-event.version>
+    <ow2-util-event.version>2.0.0</ow2-util-event.version>
     <ow2-util-audit.version>2.0.0-SNAPSHOT</ow2-util-audit.version>
     <ow2-util-deploy-system.version>2.0.0-SNAPSHOT</ow2-util-deploy-system.version>
     <ow2-util-ee-metadata.version>2.0.0-SNAPSHOT</ow2-util-ee-metadata.version>
@@ -473,7 +473,7 @@
       <dependency>
         <groupId>org.ow2.util.maven</groupId>
         <artifactId>maven-server-management</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.0</version>
       </dependency>
 
     <!-- HSQLDB -->
@@ -645,7 +645,7 @@
         <plugin>
           <groupId>org.ow2.util.maven</groupId>
           <artifactId>antrmic-maven-plugin</artifactId>
-          <version>2.0.0-SNAPSHOT</version>
+          <version>2.0.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
