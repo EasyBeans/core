@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.ow2.easybeans.itests</groupId>
     <artifactId>easybeans-itests</artifactId>
-    <version>2.0.0-RC2-SNAPSHOT</version>
+    <version>3.0.0-M1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>easybeans-itests-basic</artifactId>
@@ -238,12 +238,14 @@
                     <version>${easybeans-tests-applications.version}
                     </version>
                   </artifact>
+
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-lookup</artifactId>
                     <version>${easybeans-tests-applications.version}
                     </version>
                   </artifact>
+
                   <artifact>
                     <groupId>org.ow2.easybeans.tests</groupId>
                     <artifactId>easybeans-tests-applications-ejbjars-exceptions</artifactId>

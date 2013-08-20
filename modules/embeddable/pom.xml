@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.ow2.easybeans</groupId>
     <artifactId>easybeans-modules</artifactId>
-    <version>2.0.0-RC2-SNAPSHOT</version>
+    <version>3.0.0-M1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ow2.easybeans</groupId>
@@ -121,12 +121,7 @@
 
   <!-- TODO: Remove it when mavenization will be finished -->
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-    
+   
     <plugins>
       <!-- maven-bundle-plugin is here to resolve 'bundle' type dependencies when packaging the all-in-one jar-->
       <plugin>

@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.ow2.easybeans.osgi</groupId>
     <artifactId>easybeans-modules</artifactId>
-    <version>2.0.0-RC2-SNAPSHOT</version>
+    <version>3.0.0-M1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>easybeans-modules-core</artifactId>
@@ -64,7 +64,12 @@
                 org.objectweb.jotm,
                 org.ow2.cmi.*;resolution:=optional,
                 org.ow2.util.component.*;resolution:=optional,
-								org.ow2.easybeans.util.osgi;version=${easybeans-utils.version},
+                org.ow2.easybeans.util.osgi;version=${easybeans-utils.version},
+                org.objectweb.carol.*;resolution:=optional,
+                org.ow2.carol.*;resolution:=optional,
+                javax.mail.*;resolution:=optional,
+                org.objectweb.jotm.jta.*;resolution:=optional,
+                org.objectweb.util.monolog.*;resolution:=optional,
                 *
             ]]>
             </Import-Package>
@@ -111,8 +116,8 @@
       </plugin>
     </plugins>
   </build>
-  
-  
+
+
   <dependencies>
       <dependency>
       <groupId>org.ow2.easybeans.osgi</groupId>
@@ -184,7 +189,7 @@
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-component-depmonitor</artifactId>
       <version>${project.version}</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-component-jca-workmanager</artifactId>
@@ -223,7 +228,7 @@
       <artifactId>easybeans-component-statistic</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-component-cmi</artifactId>
@@ -247,7 +252,7 @@
     <dependency>
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-jndi-resolver</artifactId>
-     <version>${project.version}</version>          
+     <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.easybeans</groupId>

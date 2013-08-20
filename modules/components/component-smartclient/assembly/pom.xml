@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.ow2.easybeans</groupId>
     <artifactId>easybeans-component-smartclient-parent</artifactId>
-    <version>2.0.0-RC2-SNAPSHOT</version>
+    <version>3.0.0-M1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ow2.easybeans</groupId>

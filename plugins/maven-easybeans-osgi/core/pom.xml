@@ -30,7 +30,7 @@
   <parent>
     <groupId>org.ow2.easybeans</groupId>
     <artifactId>easybeans-plugins-osgi</artifactId>
-    <version>2.0.0-RC2-SNAPSHOT</version>
+    <version>3.0.0-M1-SNAPSHOT</version>
   </parent>
 
   <artifactId>maven-easybeans-osgi</artifactId>
