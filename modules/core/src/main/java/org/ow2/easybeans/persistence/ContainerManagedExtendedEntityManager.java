@@ -713,13 +713,11 @@ public class ContainerManagedExtendedEntityManager implements EZBExtendedEntityM
 
     }
 
-    @Override
     public void addUsage() {
         this.usage.incrementAndGet();
 
     }
 
-    @Override
     public void closeInternal() {
         int newCount = this.usage.decrementAndGet();
 

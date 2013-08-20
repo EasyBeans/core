@@ -38,11 +38,10 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarFieldMetadata
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.event.naming.JavaContextNamingEvent;
 import org.ow2.easybeans.naming.NamingManager;
-import org.ow2.util.ee.metadata.ejbjar.api.IEjbJarMethodMetadata;
 import org.ow2.util.event.api.IEventDispatcher;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * Builds a Context (java: context).
@@ -148,8 +147,8 @@ public final class JavaContextHelper {
      * @param methodMetaData the metadata to check
      * @return ASM type of the first arg of the method.
      */
-    public static Type getSetterMethodType(final IEjbJarMethodMetadata methodMetaData) {
-        JMethod jMethod = methodMetaData.getJMethod();
+    public static Type getSetterMethodType(final EasyBeansEjbJarMethodMetadata methodMetaData) {
+        IMethod jMethod = methodMetaData.getJMethod();
         // Should be a setter
         if (!jMethod.getName().startsWith("set") || jMethod.getName().equalsIgnoreCase("set")) {
             throw new IllegalStateException("Method '" + jMethod

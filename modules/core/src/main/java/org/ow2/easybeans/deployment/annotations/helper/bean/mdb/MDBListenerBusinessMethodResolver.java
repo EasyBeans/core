@@ -29,7 +29,8 @@ import static org.ow2.easybeans.asm.Opcodes.ACC_PUBLIC;
 
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class finds the listener method of the MDB and mark it as a business
@@ -41,7 +42,7 @@ public final class MDBListenerBusinessMethodResolver {
     /**
      * onMessage method.
      */
-    private static final JMethod ONMESSAGE_METHOD = new JMethod(ACC_PUBLIC, "onMessage", "(Ljavax/jms/Message;)V", null, null);
+    private static final IMethod ONMESSAGE_METHOD = new JMethod(ACC_PUBLIC, "onMessage", "(Ljavax/jms/Message;)V", null, null);
 
     /**
      * Helper class, no public constructor.

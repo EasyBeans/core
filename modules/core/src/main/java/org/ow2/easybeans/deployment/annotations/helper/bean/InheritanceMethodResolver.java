@@ -32,7 +32,9 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class adds method meta data to bean class from the super class.<br>
@@ -100,7 +102,7 @@ public final class InheritanceMethodResolver {
             }
 
             // Get meta data of the super class
-            EasyBeansEjbJarClassMetadata superClassMetadata = beanclassAnnotationMetadata.getLinkedClassMetadata(superClass);
+            EasyBeansEjbJarClassMetadata superClassMetadata = beanclassAnnotationMetadata.getEasyBeansLinkedClassMetadata(superClass);
 
             if (superClassMetadata == null) {
                 // TODO : I18n
@@ -120,7 +122,7 @@ public final class InheritanceMethodResolver {
                     continue;
                 }
                 // check that the method has not be redefined
-                JMethod method = methodAnnotationMetadata.getJMethod();
+                IMethod method = methodAnnotationMetadata.getJMethod();
 
                 EasyBeansEjbJarMethodMetadata beanMethod = beanclassAnnotationMetadata.getMethodMetadata(method);
 
@@ -134,11 +136,11 @@ public final class InheritanceMethodResolver {
 
                     // Add a clone of the method to super class
                     EasyBeansEjbJarMethodMetadata clonedMethodAnnotationMetadata =
-                            (EasyBeansEjbJarMethodMetadata) methodAnnotationMetadata.clone();
+                            methodAnnotationMetadata.clone(methodAnnotationMetadata.getClassMetadata());
 
                     // Change metadata method name
-                    JMethod oldMethod = clonedMethodAnnotationMetadata.getJMethod();
-                    JMethod newMethod = new JMethod(Opcodes.ACC_PUBLIC, oldMethod.getName()
+                    IMethod oldMethod = clonedMethodAnnotationMetadata.getJMethod();
+                    IMethod newMethod = new JMethod(Opcodes.ACC_PUBLIC, oldMethod.getName()
                             + superClassMetadata.getClassName().replace("/", ""), oldMethod.getDescriptor(), oldMethod
                             .getSignature(), oldMethod.getExceptions());
                     // update metadata
@@ -160,13 +162,10 @@ public final class InheritanceMethodResolver {
                 if (beanMethod == null || superMethodIsPrivate) {
                     // Add a clone of the method to bean class
                     EasyBeansEjbJarMethodMetadata clonedMethodAnnotationMetadata =
-                            (EasyBeansEjbJarMethodMetadata) methodAnnotationMetadata.clone();
-                    // set new class linked to this method metadata
-                    clonedMethodAnnotationMetadata
-                            .setClassMetadata(beanclassAnnotationMetadata);
+                            methodAnnotationMetadata.clone(beanclassAnnotationMetadata);
 
                     // method is inherited
-                    clonedMethodAnnotationMetadata.setPrivateSuperCallGenerated(false, null, 0);
+                    clonedMethodAnnotationMetadata.setPrivateSuperCallGenerated(false, (IClassMetadata) null, 0);
                     clonedMethodAnnotationMetadata.setSuperPrivateMethodName(null);
                     clonedMethodAnnotationMetadata.setInherited(true, superClassMetadata);
 

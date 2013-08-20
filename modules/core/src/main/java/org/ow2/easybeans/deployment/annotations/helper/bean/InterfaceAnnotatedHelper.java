@@ -61,7 +61,7 @@ public final class InterfaceAnnotatedHelper {
         String[] interfaces = sessionBean.getInterfaces();
         for (String itf : interfaces) {
 
-            EasyBeansEjbJarClassMetadata itfAnnotationMetadata = sessionBean.getLinkedClassMetadata(itf);
+            EasyBeansEjbJarClassMetadata itfAnnotationMetadata = sessionBean.getEasyBeansLinkedClassMetadata(itf);
 
             // Interface was analyzed, try to see the type of the interface
             if (itfAnnotationMetadata != null) {

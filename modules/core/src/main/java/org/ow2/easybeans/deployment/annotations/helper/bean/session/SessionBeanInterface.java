@@ -34,7 +34,8 @@ import java.util.List;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.util.ee.metadata.common.impl.struct.JAnnotationResource;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class analyze interfaces of the session bean. If the session bean
@@ -53,27 +54,27 @@ public final class SessionBeanInterface {
     /**
      * setSessionContext() method.
      */
-    private static final JMethod SETSESSIONCONTEXT_METHOD = new JMethod(ACC_PUBLIC, "setSessionContext",
+    private static final IMethod SETSESSIONCONTEXT_METHOD = new JMethod(ACC_PUBLIC, "setSessionContext",
             "(Ljavax/ejb/SessionContext;)V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
 
     /**
      * ejbRemove() method.
      */
-    private static final JMethod EJBREMOVE_METHOD = new JMethod(ACC_PUBLIC, "ejbRemove",
+    private static final IMethod EJBREMOVE_METHOD = new JMethod(ACC_PUBLIC, "ejbRemove",
             "()V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
     /**
      * ejbActivate() method.
      */
-    private static final JMethod EJBACTIVATE_METHOD = new JMethod(ACC_PUBLIC, "ejbActivate",
+    private static final IMethod EJBACTIVATE_METHOD = new JMethod(ACC_PUBLIC, "ejbActivate",
             "()V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
 
     /**
      * ejbPassivate() method.
      */
-    private static final JMethod EJBPASSIVATE_METHOD = new JMethod(ACC_PUBLIC, "ejbPassivate",
+    private static final IMethod EJBPASSIVATE_METHOD = new JMethod(ACC_PUBLIC, "ejbPassivate",
             "()V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
 

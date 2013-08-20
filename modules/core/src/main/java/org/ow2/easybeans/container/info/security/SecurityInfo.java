@@ -181,7 +181,7 @@ public class SecurityInfo implements ISecurityInfo {
         Principal principal = new JPrincipal(this.runAsRole);
 
         // Get the EasyBeans DD
-        EasyBeansDD easyBeansDD = this.bean.getEjbJarDeployableMetadata().getEasyBeansDD();
+        EasyBeansDD easyBeansDD = this.bean.getEjbJarMetadata().getEasyBeansDD();
         if (easyBeansDD != null) {
             // Get the current bean name
             String beanName;

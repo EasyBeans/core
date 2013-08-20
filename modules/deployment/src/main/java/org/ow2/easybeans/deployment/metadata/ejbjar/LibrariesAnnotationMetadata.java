@@ -27,6 +27,8 @@ package org.ow2.easybeans.deployment.metadata.ejbjar;
 
 import java.util.List;
 
+import org.ow2.easybeans.deployment.metadata.ejbjar.view.EasyBeansEjbJarView;
+
 
 /**
  * Metadata of libraries that can be packaged within an EAR and used by the EJBs.
@@ -37,13 +39,13 @@ public class LibrariesAnnotationMetadata  {
     /**
      * List of Metadata for each Library.
      */
-    private List<EjbJarArchiveMetadata> ejbJarAnnotationMetadataList = null;
+    private List<EasyBeansEjbJarView> ejbJarAnnotationMetadataList = null;
 
 
     /**
      * @return list of metadata for the given jar.
      */
-    public List<EjbJarArchiveMetadata> getEjbJarAnnotationMetadataList() {
+    public List<EasyBeansEjbJarView> getEjbJarAnnotationMetadataList() {
         return ejbJarAnnotationMetadataList;
     }
 
@@ -51,7 +53,7 @@ public class LibrariesAnnotationMetadata  {
      * Sets the list of jar metadata.
      * @param ejbJarAnnotationMetadataList the list of jar metadata
      */
-    public void setEjbJarAnnotationMetadataList(final List<EjbJarArchiveMetadata> ejbJarAnnotationMetadataList) {
+    public void setEjbJarAnnotationMetadataList(final List<EasyBeansEjbJarView> ejbJarAnnotationMetadataList) {
         this.ejbJarAnnotationMetadataList = ejbJarAnnotationMetadataList;
     }
 

@@ -30,7 +30,8 @@ import static org.ow2.easybeans.deployment.annotations.helper.ResolverHelper.get
 
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * For stateful session beans, flag methods that are part of session synchronization.
@@ -47,20 +48,20 @@ public final class SessionSynchronizationResolver {
     /**
      * afterBegin() method.
      */
-    private static final JMethod AFTER_BEGIN_METHOD = new JMethod(ACC_PUBLIC, "afterBegin",
+    private static final IMethod AFTER_BEGIN_METHOD = new JMethod(ACC_PUBLIC, "afterBegin",
             "()V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
 
     /**
      * beforeCompletion() method.
      */
-    private static final JMethod BEFORE_COMPLETION_METHOD = new JMethod(ACC_PUBLIC, "beforeCompletion",
+    private static final IMethod BEFORE_COMPLETION_METHOD = new JMethod(ACC_PUBLIC, "beforeCompletion",
             "()V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
     /**
      * afterCompletion() method.
      */
-    private static final JMethod AFTER_COMPLETION_METHOD = new JMethod(ACC_PUBLIC, "afterCompletion",
+    private static final IMethod AFTER_COMPLETION_METHOD = new JMethod(ACC_PUBLIC, "afterCompletion",
             "(Z)V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
 

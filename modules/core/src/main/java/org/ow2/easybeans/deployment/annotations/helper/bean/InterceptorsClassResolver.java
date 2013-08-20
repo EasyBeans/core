@@ -25,13 +25,13 @@
 
 package org.ow2.easybeans.deployment.annotations.helper.bean;
 
+import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.Remove;
 
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.api.EasyBeansInterceptor;
@@ -46,10 +46,10 @@ import org.ow2.easybeans.naming.interceptors.ENCManager;
 import org.ow2.util.ee.metadata.common.api.struct.IJInterceptors;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbRemove;
 import org.ow2.util.ee.metadata.ejbjar.impl.JClassInterceptor;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
-
-import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class sets the EasyBeans interceptors used when invoking business methods and also for life cycle events.
@@ -60,7 +60,7 @@ public final class InterceptorsClassResolver {
     /**
      * Signature of EasyBeans interceptors.
      */
-    private static final JMethod EASYBEANS_INTERCEPTOR = new JMethod(0, "intercept",
+    private static final IMethod EASYBEANS_INTERCEPTOR = new JMethod(0, "intercept",
             "(Lorg/ow2/easybeans/api/EasyBeansInvocationContext;)Ljava/lang/Object;",
             null, new String[] {"java/lang/Exception"});
 
@@ -103,7 +103,7 @@ public final class InterceptorsClassResolver {
 
 
         // Default interceptors (only once as it is stored in the ejb metadata)
-        EjbJarArchiveMetadata ejbJarDeployableMetadata = classAnnotationMetadata.getEjbJarDeployableMetadata();
+        EjbJarArchiveMetadata ejbJarDeployableMetadata = classAnnotationMetadata.getEjbJarMetadata();
 
         IJInterceptors defaultInterceptorsClasses = ejbJarDeployableMetadata.getDefaultInterceptorsClasses();
         Map<InterceptorType, List<? extends IJClassInterceptor>> mapDefaultInterceptors =
@@ -165,7 +165,7 @@ public final class InterceptorsClassResolver {
                 : classAnnotationMetadata.getMethodMetadataCollection()) {
 
             // Set global interceptors for a given method (ie : Remove)
-            Remove remove = methodAnnotationMetaData.getJRemove();
+            IJEjbRemove remove = methodAnnotationMetaData.getJRemove();
             if (remove != null) {
                 List<JClassInterceptor> easyBeansMethodGlobalInterceptors = new ArrayList<JClassInterceptor>();
                 String classType = null;
@@ -228,7 +228,7 @@ public final class InterceptorsClassResolver {
 
         // For each interceptors classes, take the method with @AroundInvoke or @PostConstruct, etc. and build list
         for (String className : interceptorsClasses) {
-            EasyBeansEjbJarClassMetadata interceptorMetadata = classMetadata.getLinkedClassMetadata(className);
+            EasyBeansEjbJarClassMetadata interceptorMetadata = classMetadata.getEasyBeansLinkedClassMetadata(className);
             if (interceptorMetadata == null) {
                 throw new ResolverException("No medata for interceptor class " + className
                         + " referenced by " + referencingName);
@@ -323,7 +323,7 @@ public final class InterceptorsClassResolver {
         String superClassName = classAnnotationMetadata.getSuperName();
         // loop while super class is not java.lang.Object
         while (!JAVA_LANG_OBJECT.equals(superClassName)) {
-            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getLinkedClassMetadata(superClassName);
+            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getEasyBeansLinkedClassMetadata(superClassName);
             if (superMetaData != null) {
                 superClassName = superMetaData.getSuperName();
                 superClassesList.addFirst(superMetaData);

@@ -33,7 +33,7 @@ import java.util.Map;
 
 import org.ow2.easybeans.deployment.annotations.helper.ResolverHelper;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
-import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarDeployableFactory;
+import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMetadataFactory;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.easybeans.enhancer.Enhancer;
@@ -41,8 +41,8 @@ import org.ow2.easybeans.loader.EasyBeansClassLoader;
 import org.ow2.easybeans.resolver.ContainerJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.util.archive.api.IArchive;
-import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
+import org.ow2.util.ee.metadata.ejbjar.api.IEjbJarMetadata;
+import org.ow2.util.scan.impl.ASMScannerImpl;
 
 
 /**
@@ -84,6 +84,7 @@ public final class ClassesEnhancer extends Enhancer {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
         PrivilegedAction<EasyBeansClassLoader> privilegedAction = new PrivilegedAction<EasyBeansClassLoader>() {
+            @Override
             public EasyBeansClassLoader run() {
                 return new EasyBeansClassLoader(new URL[]{}, loader);
             }
@@ -112,10 +113,9 @@ public final class ClassesEnhancer extends Enhancer {
 
         IArchive archive = new ArchiveInMemory(loader, classesToEnhance);
 
-        EasyBeansEjbJarDeployableFactory deployableFactory = new EasyBeansEjbJarDeployableFactory();
-        EjbJarArchiveMetadata ejbJarAnnotationMetadata = deployableFactory
-                .createDeployableMetadata(EJB3Deployable.class.cast(DeployableHelper.getDeployable(archive)));
-
+        EasyBeansEjbJarMetadataFactory metadataFactory = new EasyBeansEjbJarMetadataFactory(new ASMScannerImpl());
+        IEjbJarMetadata ejbJarMetadata = metadataFactory.createArchiveMetadata(archive);
+        EjbJarArchiveMetadata ejbJarAnnotationMetadata = ejbJarMetadata.as(EjbJarArchiveMetadata.class);
 
         ResolverHelper.resolve(ejbJarAnnotationMetadata, null);
 

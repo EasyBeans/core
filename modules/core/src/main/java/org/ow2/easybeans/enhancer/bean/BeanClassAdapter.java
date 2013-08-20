@@ -54,7 +54,8 @@ import org.ow2.easybeans.enhancer.interceptors.EasyBeansInvocationContextGenerat
 import org.ow2.easybeans.enhancer.lib.MethodRenamer;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class adds a bean interface to the parsed object.<br>
@@ -87,13 +88,13 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
     /**
      * JMethod object for timeoutCallByEasyBeans.
      */
-    public static final JMethod TIMER_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(TIMER_METHOD),
+    public static final IMethod TIMER_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(TIMER_METHOD),
             "(Ljavax/ejb/Timer;)V", null, null);
 
     /**
      * JMethod object for timeoutCallByEasyBeans.
      */
-    public static final JMethod TIMER_JMETHOD_NOARG = new JMethod(ACC_PUBLIC, MethodRenamer.encode(TIMER_METHOD),
+    public static final IMethod TIMER_JMETHOD_NOARG = new JMethod(ACC_PUBLIC, MethodRenamer.encode(TIMER_METHOD),
             "()V", null, null);
 
     /**
@@ -349,7 +350,7 @@ public class BeanClassAdapter extends ClassAdapter implements Opcodes {
                 // The name of the class where the method is defined (can be a super class)
                 String className = this.classAnnotationMetadata.getClassName();
                 if (method.isInherited()) {
-                    className = method.getOriginalClassMetadata().getClassName();
+                    className = method.getOriginalEasyBeansClassMetadata().getClassName();
                 }
 
                 mv.visitMethodInsn(INVOKESPECIAL, className, method.getMethodName(), method.getJMethod().getDescriptor());

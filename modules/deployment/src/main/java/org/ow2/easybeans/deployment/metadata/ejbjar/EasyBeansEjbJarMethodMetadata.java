@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006-2007 Bull S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -17,97 +17,83 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
- *
- * --------------------------------------------------------------------------
- * $Id: EasyBeansEjbJarMethodMetadata.java 5643 2010-10-18 15:17:00Z benoitf $
- * --------------------------------------------------------------------------
  */
-
 package org.ow2.easybeans.deployment.metadata.ejbjar;
+
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionAttributeType.REQUIRED;
 
 import java.util.List;
 
-import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
-import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
-import org.ow2.util.ee.metadata.ejbjar.impl.EjbJarMethodMetadata;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.easybeans.deployment.metadata.ejbjar.view.EasyBeansMethodView;
+import org.ow2.util.ee.metadata.common.api.struct.ITransactionAttributeType;
+import org.ow2.util.marshalling.Serialization;
+import org.ow2.util.marshalling.SerializationException;
+import org.ow2.util.scan.api.configurator.IViewConfigurator;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
+import org.ow2.util.scan.api.metadata.IMetadata;
+import org.ow2.util.scan.api.metadata.IMethodMetadata;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.MethodMetadata;
 
-/**
- * This class represents the annotation metadata of a method.
- * @author Florent Benoit
- */
-public class EasyBeansEjbJarMethodMetadata
-        extends
-        EjbJarMethodMetadata<EJB3Deployable, EjbJarArchiveMetadata, EasyBeansEjbJarClassMetadata, EasyBeansEjbJarMethodMetadata, EasyBeansEjbJarFieldMetadata>
-        implements Cloneable {
-
-    /**
-     * Serial version UID.
-     */
-    private static final long serialVersionUID = -1491050227163436797L;
+public class EasyBeansEjbJarMethodMetadata extends EasyBeansMethodView {
 
     /**
-     * This method is a method from a super class ?<br>
+     *
      */
-    private boolean inherited = false;
+    private static final long serialVersionUID = -5496916028636922454L;
 
-    /**
-     * This method is a method that should be ignored.
-     */
-    private boolean ignored = false;
-
-    /**
-     * Transacted ?
-     */
-    private boolean transacted = false;
-
-    /**
-     * A method needs to be generated in order to call a super method.
-     */
-    private boolean privateSuperCallGenerated = false;
-
-    /**
-     * Method name of the super method.
-     */
-    private String superPrivateMethodName = null;
-
-    /**
-     * Original parent metadata (if method is inherited).
-     */
-    private EasyBeansEjbJarClassMetadata originalClassMetadata = null;
-
-    /**
-     * Inheritance level. (0 is for current class, 1 is for super class, 2 for super super class, etc)
-     */
-    private int inheritanceLevel = 0;
-
-    /**
-     * EasyBeans method interceptors. These interceptors correspond to a list of
-     * Interceptors like security or transaction.
-     */
-    private List<? extends IJClassInterceptor> interceptors = null;
-
-    /**
-     * Constructor.
-     * @param jMethod the method on which we will set/add metadata
-     * @param classAnnotationMetadata the parent metadata.
-     */
-    public EasyBeansEjbJarMethodMetadata(final JMethod jMethod, final EasyBeansEjbJarClassMetadata classAnnotationMetadata) {
-        super(jMethod, classAnnotationMetadata);
+    public EasyBeansEjbJarMethodMetadata(IMethod method, EasyBeansEjbJarClassMetadata parent) {
+        super(new MethodMetadata(method, parent.getClassMetadata()));
+        // add views
+        List<IViewConfigurator> viewConfigurators = parent.getClassMetadata().getViewConfigurators();
+        for (IViewConfigurator viewConfigurator : viewConfigurators) {
+            getMethodMetadata().addViewConfigurator(viewConfigurator);
+        }
     }
 
-    /**
-     * @return true if this method is inherited from a super class
-     */
-    public boolean isInherited() {
-        return this.inherited;
+
+
+    public EasyBeansEjbJarMethodMetadata(IMetadata methodMetadata) {
+        super(methodMetadata);
     }
 
-    /**
-     * @return true if this method is generated for a super method call
-     */
-    public boolean isPrivateSuperCallGenerated() {
-        return this.privateSuperCallGenerated;
+    public EasyBeansEjbJarClassMetadata getClassMetadata() {
+        IClassMetadata iClassMetadata = getMethodMetadata().getClassMetadata();
+        return iClassMetadata.as(EasyBeansEjbJarClassMetadata.class);
+    }
+
+    public void setInherited(boolean inherited, EasyBeansEjbJarClassMetadata parent) {
+        setInherited(inherited, parent.getClassMetadata());
+    }
+
+
+    public EasyBeansEjbJarClassMetadata getOriginalEasyBeansClassMetadata() {
+        IClassMetadata originalClassMetadata = getOriginalClassMetadata();
+        if (originalClassMetadata != null) {
+            return originalClassMetadata.as(EasyBeansEjbJarClassMetadata.class);
+        }
+        return null;
+    }
+
+    public EasyBeansEjbJarMethodMetadata clone(EasyBeansEjbJarClassMetadata newParent) {
+        // duplicate metadata without parent
+        IMethodMetadata methodMetadata = getMethodMetadata();
+        IMethodMetadata clonedMetadata = null;
+        IClassMetadata parent = methodMetadata.getClassMetadata();
+        try {
+            clonedMetadata = Serialization.cloneObject(methodMetadata);
+            clonedMetadata.setClassMetadata(newParent.getClassMetadata());
+        } catch (SerializationException e) {
+            throw new IllegalStateException("Cannot clone method for '" + methodMetadata.getJMethod().getName() + "'", e);
+        } finally {
+            methodMetadata.setClassMetadata(parent);
+        }
+        return new EasyBeansEjbJarMethodMetadata(clonedMetadata);
+
+    }
+
+    public void setJMethod(IMethod method) {
+        getMethodMetadata().setJMethod(method);
     }
 
     /**
@@ -117,125 +103,17 @@ public class EasyBeansEjbJarMethodMetadata
      *        inherited)
      */
     public void setPrivateSuperCallGenerated(final boolean privateSuperCallGenerated, final EasyBeansEjbJarClassMetadata originalClassMetadata, final int inheritanceLevel) {
-        // disable inheritance
-        this.inherited = false;
-        this.privateSuperCallGenerated = privateSuperCallGenerated;
-        this.originalClassMetadata = originalClassMetadata;
-        this.inheritanceLevel = inheritanceLevel;
+        setPrivateSuperCallGenerated(privateSuperCallGenerated, originalClassMetadata.getClassMetadata(), inheritanceLevel);
     }
 
-    /**
-     * Sets the inheritance of this method.
-     * @param inherited true if method is from a super class
-     * @param originalClassMetadata the metadata of the original class (not
-     *        inherited)
-     */
-    public void setInherited(final boolean inherited, final EasyBeansEjbJarClassMetadata originalClassMetadata) {
-        this.inherited = inherited;
-        this.originalClassMetadata = originalClassMetadata;
-    }
-
-    /**
-     * @return true if this method should be ignored from bytecode processing
-     */
-    public boolean isIgnored() {
-        return this.ignored;
-    }
-
-    /**
-     * Specify if the method will be ignored or not.
-     * @param ignored true/false
-     */
-    public void setIgnored(final boolean ignored) {
-        this.ignored = ignored;
-    }
-
-    /**
-     * @return original parent metadata (class) if inherited.
-     */
-    public EasyBeansEjbJarClassMetadata getOriginalClassMetadata() {
-        return this.originalClassMetadata;
-    }
-
-    /**
-     * Override because
-     * {@link org.ow2.easybeans.enhancer.interceptors.InterceptorClassAdapter}
-     * use it.
-     * @return the method name
-     */
     @Override
-    public String getMethodName() {
-        return getJMethod().getName();
-    }
-
-    /**
-     * @return list of interceptors that enhancer will use. (ie :
-     *         security/transaction)
-     */
-    public List<? extends IJClassInterceptor> getInterceptors() {
-        return this.interceptors;
-    }
-
-    /**
-     * Sets the list of interceptors(tx, security, etc) that enhancers will use.<br>
-     * These interceptors are defined per methods.
-     * @param interceptors list of interceptors that enhancer will use.
-     */
-    public void setInterceptors(final List<? extends IJClassInterceptor> interceptors) {
-        this.interceptors = interceptors;
-    }
-
-    /**
-     * @return a clone of this metadata.
-     */
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            return null;
+    public ITransactionAttributeType getTransactionAttributeType() {
+        ITransactionAttributeType superType = super.getTransactionAttributeType();
+        if (superType == null) {
+            return REQUIRED;
         }
+        return superType;
     }
-
-    /**
-     * @return true if this method is transacted
-     */
-    public boolean isTransacted() {
-        return this.transacted;
-    }
-
-    /**
-     * Sets the transacted mode.
-     * @param transacted true if this method is transacted
-     */
-    public void setTransacted(final boolean transacted) {
-        this.transacted = transacted;
-    }
-
-    /**
-     * @return true if this method is a session synchronization interface.
-     */
-    public boolean isSessionSynchronization() {
-        return isAfterBegin() || isAfterCompletion() || isBeforeCompletion();
-    }
-
-    /**
-     * Inheritance Level.
-     * @return inheritance level
-     */
-    public int getInheritanceLevel() {
-        return this.inheritanceLevel;
-    }
-
-    public String getSuperPrivateMethodName() {
-        return this.superPrivateMethodName;
-    }
-
-    public void setSuperPrivateMethodName(final String superPrivateMethodName) {
-        this.superPrivateMethodName = superPrivateMethodName;
-    }
-
-
 
 
 }

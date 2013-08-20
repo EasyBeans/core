@@ -25,11 +25,11 @@
 
 package org.ow2.easybeans.container.info;
 
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType.CONTAINER;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.TransactionManagementType;
 
 import org.ow2.easybeans.api.bean.info.IApplicationExceptionInfo;
 import org.ow2.easybeans.api.bean.info.IBeanInfo;
@@ -38,8 +38,7 @@ import org.ow2.easybeans.api.bean.info.ISecurityInfo;
 import org.ow2.easybeans.api.bean.info.ITimerInfo;
 import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
 import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
-
-import static javax.ejb.TransactionManagementType.CONTAINER;
+import org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType;
 
 /**
  * This class contains description for a bean.
@@ -61,7 +60,7 @@ public class BeanInfo implements IBeanInfo {
     /**
      * Management type for the bean.
      */
-    private TransactionManagementType transactionManagementType = CONTAINER;
+    private ITransactionManagementType transactionManagementType = CONTAINER;
 
     /**
      * List of application exceptions used on this ejb-jar.
@@ -120,7 +119,7 @@ public class BeanInfo implements IBeanInfo {
     private boolean startup = false;
 
 
-    private List<IJAnnotationSqlDataSourceDefinition> dataSourceDefinitions = new ArrayList<IJAnnotationSqlDataSourceDefinition>();
+    private final List<IJAnnotationSqlDataSourceDefinition> dataSourceDefinitions = new ArrayList<IJAnnotationSqlDataSourceDefinition>();
     /**
      * Default constructor.
      */
@@ -153,7 +152,7 @@ public class BeanInfo implements IBeanInfo {
      * Gets the type of transaction for the given bean.
      * @return transaction management type.
      */
-    public TransactionManagementType getTransactionManagementType() {
+    public ITransactionManagementType getTransactionManagementType() {
         return this.transactionManagementType;
     }
 
@@ -161,7 +160,7 @@ public class BeanInfo implements IBeanInfo {
      * Sets the type of transaction for the given bean.
      * @param transactionManagementType transaction management type.
      */
-    public void setTransactionManagementType(final TransactionManagementType transactionManagementType) {
+    public void setTransactionManagementType(final ITransactionManagementType transactionManagementType) {
         this.transactionManagementType = transactionManagementType;
     }
 

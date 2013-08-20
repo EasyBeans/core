@@ -26,7 +26,7 @@
 package org.ow2.easybeans.naming;
 
 import org.ow2.easybeans.api.EZBContainerConfig;
-import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
+import org.ow2.easybeans.deployment.metadata.ejbjar.view.EasyBeansClassView;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJCommonBean;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
@@ -52,7 +52,7 @@ public final class BeanNamingInfoHelper {
      * @param containerConfig the container configuration
      * @return a BeanNamingInfo instance
      */
-    public static BeanNamingInfo buildInfo(final EasyBeansEjbJarClassMetadata beanClassMetadata, final String interfaceName,
+    public static BeanNamingInfo buildInfo(final EasyBeansClassView beanClassMetadata, final String interfaceName,
             final String mode, final EZBContainerConfig containerConfig) {
         IJCommonBean commonBean = beanClassMetadata.getJCommonBean();
 
@@ -90,7 +90,7 @@ public final class BeanNamingInfoHelper {
             beanNamingInfo.setName(commonBean.getName());
             beanNamingInfo.setMappedName(commonBean.getMappedName());
         }
-        beanNamingInfo.setBeanClassName(beanClassMetadata.getClassName());
+        beanNamingInfo.setBeanClassName(beanClassMetadata.getClassMetadata().getClassName());
         beanNamingInfo.setInterfaceName(interfaceName);
         beanNamingInfo.setMode(mode);
         beanNamingInfo.setModuleName(moduleName);

@@ -37,7 +37,8 @@ import org.ow2.util.ee.metadata.ejbjar.api.struct.IJMessageDriven;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JMessageDriven;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * Helper class for MDB.
@@ -58,13 +59,13 @@ public final class MDBBeanHelper {
     /**
      * ejbRemove() method.
      */
-    private static final JMethod EJBCREATE_METHOD = new JMethod(ACC_PUBLIC, "ejbCreate",
+    private static final IMethod EJBCREATE_METHOD = new JMethod(ACC_PUBLIC, "ejbCreate",
             "()V", null, new String[] {"javax/ejb/CreateException"});
 
     /**
      * ejbRemove() method.
      */
-    private static final JMethod EJBREMOVE_METHOD = new JMethod(ACC_PUBLIC, "ejbRemove",
+    private static final IMethod EJBREMOVE_METHOD = new JMethod(ACC_PUBLIC, "ejbRemove",
             "()V", null, new String[] {"javax/ejb/EJBException", "java/rmi/RemoteException"});
 
     /**

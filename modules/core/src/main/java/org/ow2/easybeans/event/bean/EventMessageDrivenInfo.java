@@ -25,12 +25,12 @@
 
 package org.ow2.easybeans.event.bean;
 
+import java.util.List;
+
 import org.ow2.easybeans.api.event.bean.EZBMessageDrivenInfo;
 import org.ow2.easybeans.container.info.MessageDrivenInfo;
 import org.ow2.easybeans.event.AbstractEvent;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IActivationConfigProperty;
-
-import java.util.List;
 
 /**
  * Message driven info events.

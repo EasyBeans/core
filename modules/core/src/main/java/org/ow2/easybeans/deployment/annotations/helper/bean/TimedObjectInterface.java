@@ -33,7 +33,8 @@ import java.util.List;
 
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class analyze interfaces of the given bean. If the session bean
@@ -51,7 +52,7 @@ public final class TimedObjectInterface {
     /**
      * ejbTimeout() method.
      */
-    private static final JMethod EJBTIMEOUT_METHOD = new JMethod(ACC_PUBLIC, "ejbTimeout",
+    private static final IMethod EJBTIMEOUT_METHOD = new JMethod(ACC_PUBLIC, "ejbTimeout",
             "(Ljavax/ejb/Timer;)V", null, null);
 
     /**

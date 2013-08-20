@@ -50,14 +50,11 @@ import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.CARDeployable;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
 import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
-import org.ow2.util.ee.metadata.car.api.ICarDeployableMetadata;
-import org.ow2.util.ee.metadata.car.impl.CarDeployableMetadataFactory;
+import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
+import org.ow2.util.ee.metadata.car.api.ICarMetadata;
 import org.ow2.util.ee.metadata.common.api.ICommonClassMetadata;
-import org.ow2.util.ee.metadata.common.api.ICommonFieldMetadata;
 import org.ow2.util.ee.metadata.common.api.ICommonMethodMetadata;
-import org.ow2.util.ee.metadata.common.api.interfaces.ISharedMetadata;
 import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationResource;
 import org.ow2.util.ee.metadata.common.api.struct.IJEjbEJB;
 import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceUnit;
@@ -65,9 +62,10 @@ import org.ow2.util.ee.metadata.common.api.struct.IJaxwsWebServiceRef;
 import org.ow2.util.ee.metadata.common.impl.helper.MethodHelper;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JClass;
-import org.ow2.util.scan.api.metadata.structures.JField;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
+import org.ow2.util.scan.impl.metadata.JClass;
+import org.ow2.util.scan.impl.metadata.JField;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class manages the injection.
@@ -108,10 +106,7 @@ public class ArchiveInjection {
     /**
      * Collection of metadata that have been analyzed.
      */
-    private Collection<? extends ICommonClassMetadata<
-                         ? extends ICommonClassMetadata<?, ?, ?>,
-                         ? extends ICommonMethodMetadata<?, ?, ?>,
-                         ? extends ICommonFieldMetadata<?, ?, ?>>> metadataCollection = null;
+    private Collection<IClassMetadata> metadataCollection = null;
 
     /**
      * Default constructor.
@@ -125,8 +120,8 @@ public class ArchiveInjection {
      * Constructor for users that already have the metadatas.
      * @param carMetadata the metadatas to use.
      */
-    public ArchiveInjection(final ICarDeployableMetadata carMetadata) {
-        this.metadataCollection = carMetadata.getCarClassMetadataCollection();
+    public ArchiveInjection(final ICarMetadata carMetadata) {
+        this.metadataCollection = carMetadata.getClassMetadataCollection();
         this.analyzed = true;
     }
 

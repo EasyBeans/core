@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.container.session.stateful;
 
+import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -72,8 +74,6 @@ import org.ow2.util.pool.impl.enhanced.EnhancedCluePool;
 import org.ow2.util.pool.impl.enhanced.api.clue.basiccluemanager.IClueAccessor;
 import org.ow2.util.pool.impl.enhanced.impl.clue.basiccluemanager.BasicClueManager;
 import org.ow2.util.pool.impl.enhanced.manager.clue.optional.IPoolItemRemoveClueManager;
-
-import static org.ow2.easybeans.api.OperationState.BUSINESS_METHOD;
 
 /**
  * This class manages the stateless session bean and its creation/lifecycle.

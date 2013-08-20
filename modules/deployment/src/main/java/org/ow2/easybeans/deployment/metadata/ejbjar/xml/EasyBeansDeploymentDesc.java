@@ -25,6 +25,7 @@
 
 package org.ow2.easybeans.deployment.metadata.ejbjar.xml;
 
+import java.io.Serializable;
 import java.net.URL;
 
 import org.ow2.util.archive.api.ArchiveException;

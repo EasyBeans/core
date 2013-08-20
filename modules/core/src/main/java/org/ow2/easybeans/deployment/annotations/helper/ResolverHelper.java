@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.deployment.annotations.helper;
 
+import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,9 +50,7 @@ import org.ow2.easybeans.deployment.annotations.helper.bean.session.SessionSynch
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
-
-import static org.ow2.easybeans.deployment.annotations.helper.bean.InheritanceInterfacesHelper.JAVA_LANG_OBJECT;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * This class handle some steps that need to be done after the meta-data
@@ -139,7 +139,7 @@ public final class ResolverHelper {
      * @param notFoundException if true, throws an exception if method is not present
      * @return the method metadata, else exception
      */
-    public static EasyBeansEjbJarMethodMetadata getMethod(final EasyBeansEjbJarClassMetadata bean, final JMethod jMethod,
+    public static EasyBeansEjbJarMethodMetadata getMethod(final EasyBeansEjbJarClassMetadata bean, final IMethod jMethod,
             final boolean inherited, final String interfaceName, final boolean notFoundException) {
         EasyBeansEjbJarMethodMetadata method = bean.getMethodMetadata(jMethod);
         if (method == null) {
@@ -154,7 +154,7 @@ public final class ResolverHelper {
             String superClassName = bean.getSuperName();
             // loop while class is not java.lang.Object
             while (!JAVA_LANG_OBJECT.equals(superClassName)) {
-                EasyBeansEjbJarClassMetadata superMetaData = bean.getLinkedClassMetadata(superClassName);
+                EasyBeansEjbJarClassMetadata superMetaData = bean.getEasyBeansLinkedClassMetadata(superClassName);
                 // If the method is found in the super class and is not inherited, use this one
                 if (superMetaData != null) {
                     EasyBeansEjbJarMethodMetadata superMethod = superMetaData.getMethodMetadata(jMethod);
@@ -182,7 +182,7 @@ public final class ResolverHelper {
      * @param interfaceName the name of the interface that the class should have
      * @return the method metadata, else exception
      */
-    public static EasyBeansEjbJarMethodMetadata getMethod(final EasyBeansEjbJarClassMetadata bean, final JMethod jMethod,
+    public static EasyBeansEjbJarMethodMetadata getMethod(final EasyBeansEjbJarClassMetadata bean, final IMethod jMethod,
             final boolean inherited, final String interfaceName) {
         return getMethod(bean, jMethod, inherited, interfaceName, true);
     }
@@ -202,7 +202,7 @@ public final class ResolverHelper {
 
         // loop while class is not java.lang.Object
         while (!JAVA_LANG_OBJECT.equals(className)) {
-            EasyBeansEjbJarClassMetadata metaData = sessionBean.getLinkedClassMetadata(className);
+            EasyBeansEjbJarClassMetadata metaData = sessionBean.getEasyBeansLinkedClassMetadata(className);
             // find metadata, all interfaces found
             if (metaData != null) {
                 String[] interfaces = metaData.getInterfaces();

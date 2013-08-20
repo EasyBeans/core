@@ -1,6 +1,6 @@
 /**
  * EasyBeans
- * Copyright (C) 2006 Bull S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -17,38 +17,50 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
- *
- * --------------------------------------------------------------------------
- * $Id: EasyBeansEjbJarFieldMetadata.java 5369 2010-02-24 14:58:19Z benoitf $
- * --------------------------------------------------------------------------
  */
-
 package org.ow2.easybeans.deployment.metadata.ejbjar;
 
-import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
-import org.ow2.util.ee.metadata.ejbjar.impl.EjbJarFieldMetadata;
-import org.ow2.util.scan.api.metadata.structures.JField;
+import org.ow2.util.ee.metadata.common.api.ICommonFieldMetadataView;
+import org.ow2.util.ee.metadata.common.impl.view.CommonView;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
+import org.ow2.util.scan.api.metadata.IFieldMetadata;
+import org.ow2.util.scan.api.metadata.IMetadata;
+import org.ow2.util.scan.api.metadata.structures.IField;
+
 
 /**
- * This class represents the annotation metadata of a field.
- * @author Florent Benoit
+ *
  */
-public class EasyBeansEjbJarFieldMetadata
-        extends
-        EjbJarFieldMetadata<EJB3Deployable, EjbJarArchiveMetadata, EasyBeansEjbJarClassMetadata, EasyBeansEjbJarMethodMetadata, EasyBeansEjbJarFieldMetadata> {
+public class EasyBeansEjbJarFieldMetadata extends CommonView implements ICommonFieldMetadataView {
 
     /**
-     * Serial version UID.
+     *
      */
-    private static final long serialVersionUID = -5220250112264050579L;
+    private static final long serialVersionUID = -1150060196089118619L;
 
-    /**
-     * Constructor.
-     * @param jField the field on which we will set/add metadata
-     * @param classAnnotationMetadata the parent metadata.
-     */
-    public EasyBeansEjbJarFieldMetadata(final JField jField, final EasyBeansEjbJarClassMetadata classAnnotationMetadata) {
-        super(jField, classAnnotationMetadata);
+    private final IMetadata metadata;
+
+    public EasyBeansEjbJarFieldMetadata(IMetadata metadata) {
+        super(metadata);
+        this.metadata = metadata;
     }
+
+    public IFieldMetadata getFieldMetadata() {
+        return (IFieldMetadata) metadata;
+    }
+
+    public IField getJField() {
+        return getFieldMetadata().getJField();
+    }
+
+    public String getFieldName() {
+        return getJField().getName();
+    }
+
+    public EasyBeansEjbJarClassMetadata getClassMetadata() {
+        IClassMetadata classMetadata = (IClassMetadata) metadata.getParent();
+        return classMetadata.as(EasyBeansEjbJarClassMetadata.class);
+    }
+
 
 }

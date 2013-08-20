@@ -1,4 +1,4 @@
-/**
+ /**
  * EasyBeans
  * Copyright (C) 2009 Bull S.A.S.
  * Contact: easybeans@ow2.org

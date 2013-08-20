@@ -26,11 +26,11 @@
 package org.ow2.easybeans.container;
 
 
-import static javax.ejb.TransactionManagementType.BEAN;
-import static javax.ejb.TransactionManagementType.CONTAINER;
 import static org.ow2.easybeans.api.OperationState.AFTER_COMPLETION;
 import static org.ow2.easybeans.api.OperationState.DEPENDENCY_INJECTION;
 import static org.ow2.easybeans.api.OperationState.LIFECYCLE_CALLBACK_INTERCEPTOR;
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType.BEAN;
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType.CONTAINER;
 
 import java.io.Serializable;
 import java.security.Identity;
@@ -51,7 +51,6 @@ import javax.ejb.ScheduleExpression;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
-import javax.ejb.TransactionManagementType;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.Status;
@@ -68,6 +67,7 @@ import org.ow2.easybeans.container.session.stateless.StatelessSessionFactory;
 import org.ow2.easybeans.security.propagation.context.SecurityCurrent;
 import org.ow2.easybeans.transaction.JTransactionManager;
 import org.ow2.easybeans.transaction.interceptors.CMTSupportsTransactionInterceptor;
+import org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType;
 import org.ow2.util.ee.metadata.common.api.xml.struct.ISecurityRoleRef;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -83,7 +83,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
     /**
      * Logger.
      */
-    private Log logger = LogFactory.getLog(EasyBeansEJBContext.class);
+    private final Log logger = LogFactory.getLog(EasyBeansEJBContext.class);
 
     /**
      * java:comp/env prefix.
@@ -98,7 +98,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
     /**
      * Type of transaction.
      */
-    private TransactionManagementType transactionManagementType = null;
+    private ITransactionManagementType transactionManagementType = null;
 
     /**
      * Bean is using run-as ?
@@ -143,6 +143,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * @throws IllegalStateException if the enterprise bean does not have a
      *         remote home interface.
      */
+    @Override
     public EJBHome getEJBHome() throws IllegalStateException {
         throw new IllegalStateException("No Home");
     }
@@ -153,6 +154,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * @throws IllegalStateException - if the enterprise bean does not have a
      *         local home interface.
      */
+    @Override
     public EJBLocalHome getEJBLocalHome() throws IllegalStateException {
         throw new IllegalStateException("No Local Home");
     }
@@ -164,6 +166,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * an empty java.util.Properties object. This method never returns null.
      * @return The environment properties for the enterprise bean.
      */
+    @Override
     @Deprecated
     public Properties getEnvironment() {
         throw new UnsupportedOperationException();
@@ -176,6 +179,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * enterprise bean should use the getCallerPrincipal method instead.
      * @return The Identity object that identifies the caller.
      */
+    @Override
     @Deprecated
     public Identity getCallerIdentity() {
         throw new UnsupportedOperationException();
@@ -186,6 +190,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * @return The Principal object that identifies the caller. This method
      *         never returns null.
      */
+    @Override
     public Principal getCallerPrincipal() {
         // Disallowed from dependency injection and from stateless lifecycle
         // callbacks
@@ -205,6 +210,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * @param role The java.security.Identity of the role to be tested.
      * @return True if the caller has the specified role.
      */
+    @Override
     @Deprecated
     public boolean isCallerInRole(final Identity role) {
         throw new UnsupportedOperationException();
@@ -216,6 +222,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      *        the security roles that is defined in the deployment descriptor.
      * @return True if the caller has the specified role.
      */
+    @Override
     public boolean isCallerInRole(final String roleName) {
         // Disallowed from dependency injection and from stateless lifecycle
         // callbacks
@@ -269,6 +276,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      *         UserTransaction interface (i.e. the instance is of a bean with
      *         container-managed transactions).
      */
+    @Override
     public UserTransaction getUserTransaction() throws IllegalStateException {
         OperationState operationState = getFactory().getOperationState();
         if (DEPENDENCY_INJECTION == operationState) {
@@ -292,6 +300,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      *         exception if the instance is not allowed to use this method (i.e.
      *         the instance is of a bean with bean-managed transactions).
      */
+    @Override
     public void setRollbackOnly() throws IllegalStateException {
         OperationState operationState = getFactory().getOperationState();
         if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
@@ -342,6 +351,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      *         exception if the instance is not allowed to use this method (i.e.
      *         the instance is of a bean with bean-managed transactions).
      */
+    @Override
     public boolean getRollbackOnly() throws IllegalStateException {
         OperationState operationState = getFactory().getOperationState();
         if (DEPENDENCY_INJECTION == operationState || LIFECYCLE_CALLBACK_INTERCEPTOR == operationState
@@ -395,6 +405,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      *         exception if the instance is not allowed to use this method (e.g.
      *         if the bean is a stateful session bean)
      */
+    @Override
     public TimerService getTimerService() throws IllegalStateException {
         // Disallowed from stateful
         if (getFactory() instanceof StatefulSessionFactory) {
@@ -413,6 +424,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * Get access to the EJB Timer Service.
      * @return Timer service.
      */
+    @Override
     public TimerService getInternalTimerService() {
         return this.timerService;
     }
@@ -433,6 +445,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * @param name given name
      * @return result of the lookup
      */
+    @Override
     public Object lookup(final String name) {
         if (name == null) {
             throw new IllegalArgumentException("Invalid resource name used for lookup '" + name + "'.");
@@ -457,6 +470,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * Gets the factory of this context.
      * @return factory used by this context.
      */
+    @Override
     public FactoryType getFactory() {
         return this.easyBeansFactory;
     }
@@ -467,6 +481,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
      * @return the shared context
      * @since EJB 3.1 version.
      */
+    @Override
     public Map<String, Object> getContextData() {
         return this.easyBeansFactory.getContextDataThreadLocal().get();
     }
@@ -502,6 +517,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          * @throws EJBException - If this method could not complete due to a
          *         system-level failure.
          */
+        @Override
         public Timer createTimer(final Date initialDuration, final long intervalDuration, final Serializable info)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -521,6 +537,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          * @throws EJBException - If this method could not complete due to a
          *         system-level failure.
          */
+        @Override
         public Timer createTimer(final Date expiration, final Serializable info) throws IllegalArgumentException,
                 IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -550,6 +567,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          * @throws EJBException - If this method could not complete due to a
          *         system-level failure.
          */
+        @Override
         public Timer createTimer(final long initialDuration, final long intervalDuration, final Serializable info)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -569,6 +587,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          * @throws EJBException - If this method fails due to a system-level
          *         failure.
          */
+        @Override
         public Timer createTimer(final long duration, final Serializable info) throws IllegalArgumentException,
                 IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -583,6 +602,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          * @throws EJBException - If this method could not complete due to a
          *         system-level failure.
          */
+        @Override
         public Collection<Timer> getTimers() throws IllegalStateException, EJBException {
             return Collections.emptyList();
         }
@@ -602,6 +622,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          *         failure.
          * @since EJB 3.1 version.
          */
+        @Override
         public Timer createSingleActionTimer(final long duration, final TimerConfig timerConfig)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -621,6 +642,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          *         system-level failure.
          * @since EJB 3.1 version.
          */
+        @Override
         public Timer createSingleActionTimer(final Date expiration, final TimerConfig timerConfig)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -650,6 +672,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          *         system-level failure.
          * @since EJB 3.1 version.
          */
+        @Override
         public Timer createIntervalTimer(final long initialDuration, final long intervalDuration, final TimerConfig timerConfig)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -680,6 +703,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          *         system-level failure.
          * @since EJB 3.1 version.
          */
+        @Override
         public Timer createIntervalTimer(final Date initialExpiration, final long intervalDuration,
                 final TimerConfig timerConfig) throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -699,6 +723,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          *         system-level failure.
          * @since EJB 3.1 version.
          */
+        @Override
         public Timer createCalendarTimer(final ScheduleExpression schedule) throws IllegalArgumentException,
                 IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");
@@ -719,6 +744,7 @@ public class EasyBeansEJBContext<FactoryType extends Factory<?, ?>> implements E
          *         system-level failure.
          * @since EJB 3.1 version.
          */
+        @Override
         public Timer createCalendarTimer(final ScheduleExpression schedule, final TimerConfig timerConfig)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
             throw new IllegalStateException("No timer component was found in the EasyBeans components");

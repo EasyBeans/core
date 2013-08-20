@@ -34,7 +34,7 @@ import org.ow2.easybeans.api.interceptor.EZBInterceptorInvoker;
 import org.ow2.easybeans.api.interceptor.EZBInterceptorManager;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * Invoker of an interceptor (that is on a bean).
@@ -63,7 +63,7 @@ public class BeanInterceptorInvokerImpl implements EZBInterceptorInvoker {
      * @param jMethod the method that will be used for the interceptor
      * @param classLoader the given classloader used to load the class
      */
-    public BeanInterceptorInvokerImpl(final String beanClassname, final JMethod jMethod, final ClassLoader classLoader) {
+    public BeanInterceptorInvokerImpl(final String beanClassname, final IMethod jMethod, final ClassLoader classLoader) {
         this.beanClassname = beanClassname;
         this.method = MethodHelper.getMethod(beanClassname, jMethod, classLoader);
     }

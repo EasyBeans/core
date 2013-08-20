@@ -45,7 +45,8 @@ import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class will manage the creation of the invocation context objects.
@@ -62,13 +63,13 @@ public class EasyBeansInvocationContextFactory implements EZBInvocationContextFa
      * Map between the signature of a method and all invokers defined for this
      * method. (for each interceptor type)
      */
-    private Map<String, Map<String, List<EZBInterceptorInvoker>>> methodsInterceptorInvokerList;
+    private final Map<String, Map<String, List<EZBInterceptorInvoker>>> methodsInterceptorInvokerList;
 
     /**
      * Map between the signature of a method and its java.lang.reflect.Method
      * object. (cache)
      */
-    private Map<String, Method> methods;
+    private final Map<String, Method> methods;
 
     /**
      * List of classes that needs to be instantiate in the interceptor manager.
@@ -136,7 +137,7 @@ public class EasyBeansInvocationContextFactory implements EZBInvocationContextFa
 
                     for (IJClassInterceptor interceptor : allInterceptors) {
                         String classname = interceptor.getClassName();
-                        JMethod jMethod = interceptor.getJMethod();
+                        IMethod jMethod = interceptor.getJMethod();
 
                         // interceptor on the bean or outside ?
                         if (classMetadata.getClassName().equals(classname)) {
@@ -155,14 +156,14 @@ public class EasyBeansInvocationContextFactory implements EZBInvocationContextFa
                     }
 
                     // Add the method invocation call
-                    JMethod interceptedMethod = methodMetadata.getJMethod();
+                    IMethod interceptedMethod = methodMetadata.getJMethod();
 
                     String methodName = interceptedMethod.getName();
                     if (!methodMetadata.isLifeCycleMethod() && !methodName.contains("$generated")) {
                         methodName = MethodRenamer.encode(interceptedMethod.getName());
                     }
 
-                    JMethod originalMethod = new JMethod(interceptedMethod.getAccess(), methodName, interceptedMethod.getDescriptor(), interceptedMethod.getSignature(), interceptedMethod
+                    IMethod originalMethod = new JMethod(interceptedMethod.getAccess(), methodName, interceptedMethod.getDescriptor(), interceptedMethod.getSignature(), interceptedMethod
                             .getExceptions());
                     invokers.add(new BeanBusinessMethodInvokerImpl(classMetadata.getClassName(), originalMethod, classLoader));
 

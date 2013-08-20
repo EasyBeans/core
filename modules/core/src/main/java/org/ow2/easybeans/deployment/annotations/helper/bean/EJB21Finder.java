@@ -34,7 +34,8 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JRemove;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class finds the business interface that are used as return type in the
@@ -46,31 +47,31 @@ public final class EJB21Finder {
     /**
      * Signature of the remove method.
      */
-    private static final JMethod REMOVE_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "remove", "()V", null,
+    private static final IMethod REMOVE_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "remove", "()V", null,
             new String[] {"javax/ejb/RemoveException"});
 
     /**
      * Signature of the isIdentical(EJBObject) method.
      */
-    private static final JMethod ISIDENTICAL_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "isIdentical", "(Ljavax/ejb/EJBObject;)Z",
+    private static final IMethod ISIDENTICAL_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "isIdentical", "(Ljavax/ejb/EJBObject;)Z",
             null, new String[] {"java/rmi/RemoteException"});
 
     /**
      * Signature of the isIdentical(EJBLocalObject) method.
      */
-    private static final JMethod ISIDENTICAL_LOCAL_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "isIdentical",
+    private static final IMethod ISIDENTICAL_LOCAL_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "isIdentical",
             "(Ljavax/ejb/EJBLocalObject;)Z", null, new String[] {"javax/ejb/EJBException"});
 
     /**
      * Signature of the getHandle method.
      */
-    private static final JMethod GETHANDLE_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "getHandle", "()Ljavax/ejb/Handle;", null,
+    private static final IMethod GETHANDLE_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "getHandle", "()Ljavax/ejb/Handle;", null,
             new String[] {"java/rmi/RemoteException"});
 
     /**
      * Signature of the getHandle method.
      */
-    private static final JMethod GETPRIMARYKEY_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "getPrimaryKey", "()Ljava/lang/Object;",
+    private static final IMethod GETPRIMARYKEY_METHOD = new JMethod(Opcodes.ACC_PUBLIC, "getPrimaryKey", "()Ljava/lang/Object;",
             null, null);
 
     /**
@@ -95,7 +96,7 @@ public final class EJB21Finder {
         }
 
         // EJB-JAR
-        EjbJarArchiveMetadata ejbJarAnnotationMetadata = bean.getEjbJarDeployableMetadata();
+        EjbJarArchiveMetadata ejbJarAnnotationMetadata = bean.getEjbJarMetadata();
         // List of interfaces found in remote home interfaces.
         List<String> interfacesList = new ArrayList<String>();
 
@@ -113,7 +114,7 @@ public final class EJB21Finder {
         // home interfaces
         for (String itf : interfacesList) {
             // Get metadata of this interface
-            EasyBeansEjbJarClassMetadata interfaceUsed = bean.getLinkedClassMetadata(itf);
+            EasyBeansEjbJarClassMetadata interfaceUsed = bean.getEasyBeansLinkedClassMetadata(itf);
             if (interfaceUsed == null) {
                 throw new IllegalStateException("Cannot find the metadata for the class '" + itf
                         + "' referenced in the home/localhome of the bean '" + bean.getClassName() + "'.");
@@ -121,7 +122,7 @@ public final class EJB21Finder {
 
             // Get all methods
             for (EasyBeansEjbJarMethodMetadata methodData : interfaceUsed.getMethodMetadataCollection()) {
-                JMethod itfMethod = methodData.getJMethod();
+                IMethod itfMethod = methodData.getJMethod();
 
                 // Ignore class init method
                 if (itfMethod.getName().equals(BusinessMethodResolver.CLASS_INIT)
@@ -155,7 +156,7 @@ public final class EJB21Finder {
 
         // Flag ejbXXX() method as business method (so interceptors are invoked)
         for (EasyBeansEjbJarMethodMetadata methodData : bean.getMethodMetadataCollection()) {
-        	JMethod method = methodData.getJMethod();
+        	IMethod method = methodData.getJMethod();
         	if (method.getName().startsWith("ejbActivate") || method.getName().startsWith("ejbCreate")) {
         		if ("()V".equals(method.getDescriptor())) {
         			methodData.setBusinessMethod(true);
@@ -199,7 +200,7 @@ public final class EJB21Finder {
             // if method name begins with "create", it's matching
             if (method.getMethodName().startsWith("create")) {
                 // Get return type
-                JMethod jMethod = method.getJMethod();
+                IMethod jMethod = method.getJMethod();
                 Type returnType = Type.getReturnType(jMethod.getDescriptor());
                 String returnTypeClassname = returnType.getClassName();
                 // Not yet present in the list ? add it

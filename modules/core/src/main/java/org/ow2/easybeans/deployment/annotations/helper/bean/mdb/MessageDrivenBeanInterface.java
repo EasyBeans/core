@@ -34,7 +34,8 @@ import java.util.List;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.util.ee.metadata.common.impl.struct.JAnnotationResource;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class analyze interfaces of the MDB. If the MDB
@@ -53,7 +54,7 @@ public class MessageDrivenBeanInterface {
     /**
      * setMessageDrivenContext() method.
      */
-    private static final JMethod SETMESSAGEDRIVENCONTEXT_METHOD = new JMethod(ACC_PUBLIC, "setMessageDrivenContext",
+    private static final IMethod SETMESSAGEDRIVENCONTEXT_METHOD = new JMethod(ACC_PUBLIC, "setMessageDrivenContext",
             "(Ljavax/ejb/MessageDrivenContext;)V", null, new String[] {"javax/ejb/EJBException"});
 
 

@@ -26,6 +26,7 @@
 package org.ow2.easybeans.event.container;
 
 import javax.persistence.spi.PersistenceUnitInfo;
+
 import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.api.event.container.EZBEventContainerStarting;
 import org.ow2.util.archive.api.IArchive;

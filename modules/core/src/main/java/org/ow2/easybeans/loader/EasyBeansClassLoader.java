@@ -84,7 +84,7 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
      * Map between class name and the bytecode associated to the given
      * classname.
      */
-    private Map<String, byte[]> mapDefined = new HashMap<String, byte[]>();
+    private final Map<String, byte[]> mapDefined = new HashMap<String, byte[]>();
 
     /**
      * List of Class Transformers. Transformer is called when the Container
@@ -138,6 +138,7 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
         if (logger.isDebugEnabled()) {
             String fName = System.getProperty("java.io.tmpdir") + File.separator + className + ".class";
             FileOutputStream fos = null;
+            System.out.println("writing to " + fName);
             try {
                 fos = new FileOutputStream(fName);
                 fos.write(bytecode);
@@ -173,6 +174,7 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
      * @param className the name of the class.
      * @param bytecode the bytes of the given class.
      */
+    @Override
     public void addClassDefinition(final String className, final byte[] bytecode) {
         // check override ?
         if (this.mapDefined.get(className) != null) {
@@ -348,8 +350,10 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
      * It is used for example when Persistence Provider needs a new Temp classloader to load some temporary classes.
      * @return a copy of this object
      */
+    @Override
     public ClassLoader duplicate() {
         PrivilegedAction<EasyBeansClassLoader> privilegedAction = new PrivilegedAction<EasyBeansClassLoader>() {
+            @Override
             public EasyBeansClassLoader run() {
                 return new EasyBeansClassLoader(getURLs(), getParent());
             }
@@ -369,6 +373,7 @@ public class EasyBeansClassLoader extends URLClassLoader implements EZBClassLoad
      * @param transformer A provider-supplied transformer that the Container
      *        invokes at class-(re)definition time
      */
+    @Override
     public void addTransformer(final ClassTransformer transformer) {
 
         // init class transformers list if not set.

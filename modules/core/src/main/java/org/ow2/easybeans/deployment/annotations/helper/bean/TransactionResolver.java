@@ -25,11 +25,11 @@
 
 package org.ow2.easybeans.deployment.annotations.helper.bean;
 
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionAttributeType.NOT_SUPPORTED;
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionAttributeType.REQUIRED;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagementType;
 
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
@@ -47,13 +47,14 @@ import org.ow2.easybeans.transaction.interceptors.ExtendedPersistenceContextInte
 import org.ow2.easybeans.transaction.interceptors.ListenerSFSBTransactionInterceptor;
 import org.ow2.easybeans.transaction.interceptors.ListenerSessionSynchronizationInterceptor;
 import org.ow2.easybeans.transaction.interceptors.MDBCMTRequiredTransactionInterceptor;
+import org.ow2.util.ee.metadata.common.api.struct.ITransactionAttributeType;
+import org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.impl.JClassInterceptor;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
-
-import static javax.ejb.TransactionManagementType.BEAN;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class adds the interceptor for transaction on a given method.
@@ -69,7 +70,7 @@ public final class TransactionResolver {
     /**
      * Signature of EasyBeans interceptors.
      */
-    private static final JMethod EASYBEANS_INTERCEPTOR = new JMethod(0, "intercept",
+    private static final IMethod EASYBEANS_INTERCEPTOR = new JMethod(0, "intercept",
             "(Lorg/ow2/easybeans/api/EasyBeansInvocationContext;)Ljava/lang/Object;", null,
             new String[] {"java/lang/Exception"});
 
@@ -167,8 +168,8 @@ public final class TransactionResolver {
      */
     public static void resolveMethod(final EasyBeansEjbJarClassMetadata bean, final EasyBeansEjbJarMethodMetadata method) {
 
-        TransactionAttributeType beanTxType = bean.getTransactionAttributeType();
-        TransactionManagementType beanTxManaged = bean.getTransactionManagementType();
+        ITransactionAttributeType beanTxType = bean.getTransactionAttributeType();
+        ITransactionManagementType beanTxManaged = bean.getTransactionManagementType();
 
         List<? extends IJClassInterceptor> previousInterceptors = method.getInterceptors();
 
@@ -178,7 +179,7 @@ public final class TransactionResolver {
         }
 
         // Bean managed or container managed ?
-        if (beanTxManaged.equals(BEAN)) {
+        if (ITransactionManagementType.BEAN.equals(beanTxManaged)) {
             // BMT
             if (bean.isStateful()) {
                 interceptors.add(new JClassInterceptor(BMT_STATEFUL_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
@@ -189,7 +190,7 @@ public final class TransactionResolver {
             }
         } else {
             // CMT
-            TransactionAttributeType methodTx = method.getTransactionAttributeType();
+            ITransactionAttributeType methodTx = method.getTransactionAttributeType();
 
             // Set method tx attribute to the class tx attribute if none was
             // set.
@@ -198,7 +199,7 @@ public final class TransactionResolver {
                     methodTx = beanTxType;
                 } else {
                     // inherited method, take value of the original class
-                    methodTx = method.getOriginalClassMetadata().getTransactionAttributeType();
+                    methodTx = method.getOriginalEasyBeansClassMetadata().getTransactionAttributeType();
                 }
             }
 
@@ -218,13 +219,13 @@ public final class TransactionResolver {
                             + "The error is on the method '" + method.getMethodName() + "' of class '"
                             + method.getClassMetadata().getClassName() + "' for the bean '"
                             + method.getClassMetadata().getLinkedBean() + "'. Sets to the default REQUIRED mode.");
-                    methodTx = TransactionAttributeType.REQUIRED;
+                    methodTx = REQUIRED;
                     break;
                 }
 
-                if (TransactionAttributeType.NOT_SUPPORTED == methodTx) {
+                if (NOT_SUPPORTED == methodTx) {
                     interceptors.add(new JClassInterceptor(CMT_NOT_SUPPORTED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
-                } else if (TransactionAttributeType.REQUIRED == methodTx) {
+                } else if (REQUIRED == methodTx) {
                     method.setTransacted(true);
                     interceptors.add(new JClassInterceptor(MDB_CMT_REQUIRED_INTERCEPTOR, EASYBEANS_INTERCEPTOR));
                 } else {

@@ -26,7 +26,7 @@
 package org.ow2.easybeans.deployment.annotations.helper.bean.checks;
 
 import org.ow2.easybeans.deployment.annotations.exceptions.InterceptorsValidationException;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * Utility class for cheking access.
@@ -48,7 +48,7 @@ public final class AccessChecker {
      * @param desc the description of the access.
      * @param className the name of the class of the given method.
      */
-    public static void ensureNoAccess(final int acc, final JMethod jMethod, final String desc, final String className) {
+    public static void ensureNoAccess(final int acc, final IMethod jMethod, final String desc, final String className) {
         if ((jMethod.getAccess() & acc) == acc) {
             throw new InterceptorsValidationException("The method '" + jMethod + "' of the class '" + className
                     + "' is not compliant on the method access. It shouldn't use the '" + desc + "' keyword.");

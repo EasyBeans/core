@@ -1,6 +1,7 @@
 /**
  * EasyBeans
  * Copyright (C) 2008-2009 Bull S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -31,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
-import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarFieldMetadata;
-import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.xml.AbsSpecificBean;
 import org.ow2.easybeans.deployment.metadata.ejbjar.xml.EJB;
@@ -42,10 +41,15 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.xml.PortComponentRef;
 import org.ow2.easybeans.deployment.metadata.ejbjar.xml.ServiceRef;
 import org.ow2.easybeans.deployment.metadata.ejbjar.xml.Session;
 import org.ow2.util.ee.metadata.common.api.struct.IJaxwsWebServiceRef;
+import org.ow2.util.ee.metadata.common.api.view.ICommonView;
 import org.ow2.util.ee.metadata.common.api.xml.struct.IPortComponentRef;
+import org.ow2.util.ee.metadata.ejbjar.api.IEjbJarMetadata;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.pool.api.IPoolConfiguration;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
+import org.ow2.util.scan.api.metadata.IFieldMetadata;
+import org.ow2.util.scan.api.metadata.IMethodMetadata;
 
 /**
  * Merge specific XML data into the metadata model.
@@ -61,13 +65,13 @@ public final class MetadataSpecificMerge {
     /**
      * ejb metadata.
      */
-    private EjbJarArchiveMetadata ejbMetadata;
+    private final IEjbJarMetadata ejbMetadata;
 
     /**
      * Helper class, no public constructor.
      * @param ejbMetadata the metadata corresponding to an EJB-JAR file.
      */
-    private MetadataSpecificMerge(final EjbJarArchiveMetadata ejbMetadata) {
+    private MetadataSpecificMerge(final IEjbJarMetadata ejbMetadata) {
         this.ejbMetadata = ejbMetadata;
     }
 
@@ -76,7 +80,7 @@ public final class MetadataSpecificMerge {
      * metadata.
      * @param ejbMetadata the metadata corresponding to an EJB-JAR file.
      */
-    public static void merge(final EjbJarArchiveMetadata ejbMetadata) {
+    public static void merge(final IEjbJarMetadata ejbMetadata) {
         new MetadataSpecificMerge(ejbMetadata).resolve();
     }
 
@@ -84,7 +88,8 @@ public final class MetadataSpecificMerge {
      * Do all merging operations.
      */
     private void resolve() {
-        EasyBeansDD easybeansDD = this.ejbMetadata.getEasyBeansDD();
+        EjbJarArchiveMetadata ejbJarView = this.ejbMetadata.as(EjbJarArchiveMetadata.class);
+        EasyBeansDD easybeansDD = ejbJarView.getEasyBeansDD();
         if (easybeansDD != null) {
             logger.debug("There is a specific Deployment Descriptor object, performing the merge of the metadata.");
             // Analyze EJBs
@@ -97,11 +102,10 @@ public final class MetadataSpecificMerge {
                     for (Session session : sessionList) {
                         // get ejb-name
                         String ejbName = session.getEjbName();
-                        EasyBeansEjbJarClassMetadata classAnnotationMetadata = this.ejbMetadata
-                                .getEjbJarClassMetadataForEjbName(ejbName);
-
+                        IClassMetadata classAnnotationMetadata = this.ejbMetadata.getEjbJarClassMetadataForEjbName(ejbName);
+                        EasyBeansEjbJarClassMetadata easyBeansClassView = classAnnotationMetadata.as(EasyBeansEjbJarClassMetadata.class);
                         // class is found, then apply all customization.
-                        applySessionBean(session, classAnnotationMetadata);
+                        applySessionBean(session, easyBeansClassView);
                     }
                 }
 
@@ -111,11 +115,11 @@ public final class MetadataSpecificMerge {
                     for (MessageDrivenBean mdb : mdbList) {
                         // get ejb-name
                         String ejbName = mdb.getEjbName();
-                        EasyBeansEjbJarClassMetadata classAnnotationMetadata = this.ejbMetadata
-                                .getEjbJarClassMetadataForEjbName(ejbName);
+                        IClassMetadata classAnnotationMetadata = this.ejbMetadata.getEjbJarClassMetadataForEjbName(ejbName);
+                        EasyBeansEjbJarClassMetadata easyBeansClassView = classAnnotationMetadata.as(EasyBeansEjbJarClassMetadata.class);
 
                         // class is found, then apply all customization.
-                        applyMessageDrivenBean(mdb, classAnnotationMetadata);
+                        applyMessageDrivenBean(mdb, easyBeansClassView);
                     }
                 }
             }
@@ -230,7 +234,7 @@ public final class MetadataSpecificMerge {
                 logger.info("@WebServiceRef({0}) was not found in the class '{1}'"
                             + ", unused overriding information.",
                             name,
-                            classAnnotationMetadata.getClassName());
+                            classAnnotationMetadata.getClassMetadata().getClassName());
             }
 
         }
@@ -250,12 +254,14 @@ public final class MetadataSpecificMerge {
         references = new HashMap<String, IJaxwsWebServiceRef>();
 
         // Class level annotations (must have a name)
-        IJaxwsWebServiceRef ref = classAnnotationMetadata.getJaxwsWebServiceRef();
+        ICommonView classView = classAnnotationMetadata.getClassMetadata().as(ICommonView.class);
+
+        IJaxwsWebServiceRef ref = classView.getJaxwsWebServiceRef();
         if (ref != null) {
             references.put(ref.getName(), ref);
         }
 
-        List<IJaxwsWebServiceRef> refs = classAnnotationMetadata.getJaxwsWebServiceRefs();
+        List<IJaxwsWebServiceRef> refs = classView.getJaxwsWebServiceRefs();
         if ((refs != null) && (!refs.isEmpty())) {
             for (IJaxwsWebServiceRef classLevelReference : refs) {
                 references.put(classLevelReference.getName(), classLevelReference);
@@ -263,16 +269,17 @@ public final class MetadataSpecificMerge {
         }
 
         // Field level annotations (may have a name, if not set, use field name)
-        Collection<EasyBeansEjbJarFieldMetadata> fields = classAnnotationMetadata.getStandardFieldMetadataCollection();
+        Collection<IFieldMetadata> fields = classAnnotationMetadata.getClassMetadata().getFieldMetadataCollection();
         if ((fields != null) && (!fields.isEmpty())) {
-            for (EasyBeansEjbJarFieldMetadata field : fields) {
-                IJaxwsWebServiceRef fieldReference = field.getJaxwsWebServiceRef();
+            for (IFieldMetadata field : fields) {
+                ICommonView fieldView = field.as(ICommonView.class);
+                IJaxwsWebServiceRef fieldReference = fieldView.getJaxwsWebServiceRef();
                 if (fieldReference != null) {
                     String refName = fieldReference.getName();
                     // Is there a usable name ?
                     if (refName == null) {
                         // If not, use the field name
-                        refName = field.getFieldName();
+                        refName = field.getJField().getName();
                     }
                     references.put(refName, fieldReference);
                 }
@@ -280,10 +287,11 @@ public final class MetadataSpecificMerge {
         }
 
         // Method level annotations (may have a name, if not set, use property method name)
-        Collection<EasyBeansEjbJarMethodMetadata> methods = classAnnotationMetadata.getMethodMetadataCollection();
+        Collection<IMethodMetadata> methods = classAnnotationMetadata.getClassMetadata().getMethodMetadataCollection();
         if ((methods != null) && (!methods.isEmpty())) {
-            for (EasyBeansEjbJarMethodMetadata methodMetadata : methods) {
-                IJaxwsWebServiceRef methodReference = methodMetadata.getJaxwsWebServiceRef();
+            for (IMethodMetadata methodMetadata : methods) {
+                ICommonView methodView = methodMetadata.as(ICommonView.class);
+                IJaxwsWebServiceRef methodReference = methodView.getJaxwsWebServiceRef();
                 if (methodReference != null) {
                     String refName = methodReference.getName();
                     // Is there a usable name ?

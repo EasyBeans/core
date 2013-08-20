@@ -27,11 +27,10 @@ package org.ow2.easybeans.container.info.ws;
 
 import java.util.List;
 
-import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
-
-import org.ow2.util.ee.metadata.common.api.xml.struct.IHandlerChains;
-
 import javax.xml.namespace.QName;
+
+import org.ow2.easybeans.api.bean.info.IWebServiceInfo;
+import org.ow2.util.ee.metadata.common.api.xml.struct.IHandlerChains;
 
 /**
  * The WebServiceInfo is ...

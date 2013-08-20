@@ -31,7 +31,7 @@ import java.util.List;
 
 import org.ow2.easybeans.asm.Type;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * Allow to load a java.lang.reflect.method from its metadata.
@@ -63,7 +63,7 @@ public final class MethodHelper {
      * @param classLoader the classloader used to load the method's class
      * @return an instance of the method
      */
-    public static Method getMethod(final String classname, final JMethod jMethod, final ClassLoader classLoader) {
+    public static Method getMethod(final String classname, final IMethod jMethod, final ClassLoader classLoader) {
         // load the class
         Class<?> clazz;
         try {

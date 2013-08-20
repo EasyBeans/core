@@ -36,7 +36,8 @@ import org.ow2.easybeans.security.interceptors.DenyAllInterceptor;
 import org.ow2.easybeans.security.interceptors.RunAsAccessInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.impl.JClassInterceptor;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class adds the interceptor for the security (if required) on a given method.
@@ -47,7 +48,7 @@ public final class SecurityResolver {
     /**
      * Signature of EasyBeans interceptors.
      */
-    private static final JMethod EASYBEANS_INTERCEPTOR = new JMethod(0, "intercept",
+    private static final IMethod EASYBEANS_INTERCEPTOR = new JMethod(0, "intercept",
             "(Lorg/ow2/easybeans/api/EasyBeansInvocationContext;)Ljava/lang/Object;", null,
             new String[] {"java/lang/Exception"});
 
@@ -93,7 +94,7 @@ public final class SecurityResolver {
         String superClassName = bean.getSuperName();
         // Search in super class
         while (runAs == null && !superClassName.equals(Type.getInternalName(Object.class))) {
-            EasyBeansEjbJarClassMetadata superMetadata = bean.getLinkedClassMetadata(superClassName);
+            EasyBeansEjbJarClassMetadata superMetadata = bean.getEasyBeansLinkedClassMetadata(superClassName);
             if (superMetadata != null) {
                 runAs = superMetadata.getRunAs();
                 superClassName = superMetadata.getSuperName();
@@ -112,7 +113,7 @@ public final class SecurityResolver {
         superClassName = bean.getSuperName();
         // if null, search on super classes.
         while (declaredRoles == null && !superClassName.equals(Type.getInternalName(Object.class))) {
-            EasyBeansEjbJarClassMetadata superMetadata = bean.getLinkedClassMetadata(superClassName);
+            EasyBeansEjbJarClassMetadata superMetadata = bean.getEasyBeansLinkedClassMetadata(superClassName);
             if (superMetadata != null) {
                 declaredRoles = superMetadata.getDeclareRoles();
                 superClassName = superMetadata.getSuperName();
@@ -140,7 +141,7 @@ public final class SecurityResolver {
             // not defined on the method, check inheritance or bean's value
             if (!permitAll) {
                 if (method.isInherited()) {
-                    permitAll = method.getOriginalClassMetadata().hasPermitAll();
+                    permitAll = method.getOriginalEasyBeansClassMetadata().hasPermitAll();
                     method.setPermitAll(permitAll);
                 } else {
                     permitAll = beanPermitAll;
@@ -151,7 +152,7 @@ public final class SecurityResolver {
             List<String> rolesAllowed = method.getRolesAllowed();
             if (rolesAllowed == null) {
                 if (method.isInherited()) {
-                    rolesAllowed = method.getOriginalClassMetadata().getRolesAllowed();
+                    rolesAllowed = method.getOriginalEasyBeansClassMetadata().getRolesAllowed();
                     method.setRolesAllowed(rolesAllowed);
                 } else {
                     // Method roles are Bean's roles.

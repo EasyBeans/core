@@ -78,7 +78,7 @@ public final class InheritanceInterfacesHelper {
         if (superClass != null) {
             // try to see if it was analyzed (and not java.lang.Object)
             if (!superClass.equals(JAVA_LANG_OBJECT)) {
-                EasyBeansEjbJarClassMetadata superMetadata = beanClassAnnotationMetadata.getLinkedClassMetadata(superClass);
+                EasyBeansEjbJarClassMetadata superMetadata = beanClassAnnotationMetadata.getEasyBeansLinkedClassMetadata(superClass);
 
                 if (superMetadata == null) {
                     throw new IllegalStateException("No super class named '" + superClass

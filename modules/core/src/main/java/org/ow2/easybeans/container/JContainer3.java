@@ -25,6 +25,10 @@
 
 package org.ow2.easybeans.container;
 
+import static org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory.DEFAULT_ACTIVATION_SPEC_NAME;
+import static org.ow2.util.marshalling.Serialization.loadObject;
+import static org.ow2.util.marshalling.Serialization.storeObject;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
@@ -153,9 +157,8 @@ import org.ow2.easybeans.util.topological.TopologicalSort;
 import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.IDeployable;
-import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
-import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
 import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
+import org.ow2.util.ee.metadata.ejbjar.api.exceptions.EJBJARMetadataException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IApplicationException;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IDependsOn;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbSchedule;
@@ -163,6 +166,7 @@ import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 import org.ow2.util.ee.metadata.ejbjar.impl.struct.JActivationConfigProperty;
 import org.ow2.util.ee.metadata.ws.api.struct.IWebServiceMarker;
+import org.ow2.util.ee.metadata.ws.api.view.IWebservicesView;
 import org.ow2.util.ee.metadata.ws.api.xml.struct.IPortComponent;
 import org.ow2.util.ee.metadata.ws.api.xml.struct.IWebservices;
 import org.ow2.util.event.api.IEventDispatcher;
@@ -171,11 +175,7 @@ import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.pool.api.IPoolConfiguration;
 import org.ow2.util.pool.api.Pool;
-import org.ow2.util.scan.api.ScanException;
-
-import static org.ow2.easybeans.container.mdb.MDBMessageEndPointFactory.DEFAULT_ACTIVATION_SPEC_NAME;
-import static org.ow2.util.marshalling.Serialization.loadObject;
-import static org.ow2.util.marshalling.Serialization.storeObject;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
 
 /**
  * Defines an EJB3 container.
@@ -255,7 +255,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * {@link org.ow2.easybeans.api.EZBExtensor} implementation.
      */
-    private ExtensorSupport extensor = new ExtensorSupport();
+    private final ExtensorSupport extensor = new ExtensorSupport();
 
     /**
      * Map used for the enhancer.
@@ -275,7 +275,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * The key of the returned map is the name of the persistence unit.
      */
-    private InheritableThreadLocal<Map<String, EZBExtendedEntityManager>> currentExtendedPersistenceContexts
+    private final InheritableThreadLocal<Map<String, EZBExtendedEntityManager>> currentExtendedPersistenceContexts
             = new InheritableThreadLocal<Map<String, EZBExtendedEntityManager>>();
 
     /**
@@ -316,6 +316,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return string id.
      */
+    @Override
     public String getId() {
         return this.id;
     }
@@ -327,21 +328,16 @@ public class JContainer3 implements EZBContainer {
      *
      * @throws EZBContainerException if resolve step has failed
      */
+    @Override
     public void resolve() throws EZBContainerException {
         // Analyze files
         long tStart = System.currentTimeMillis();
         try {
             this.deployment.analyze(this.classLoader);
-        } catch (ScanException e) {
+        } catch (EJBJARMetadataException e) {
             throw new EZBContainerException("Cannot analyze archive '" + getArchive().getName() + "'.", e);
         } catch (ResolverException e) {
             throw new EZBContainerException("Cannot resolve some annotations in the archive '" + getName()
-                    + "'.", e);
-        } catch (DeployableHelperException e) {
-            throw new EZBContainerException("Cannot transform in deployable archive '" + getName()
-                    + "'.", e);
-        } catch (DeployableMetadataException e) {
-            throw new EZBContainerException("Cannot create deployable metadata '" + getName()
                     + "'.", e);
         }
 
@@ -379,6 +375,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @throws EZBContainerException if starting fails.
      */
+    @Override
     public void start() throws EZBContainerException {
 
         long tStart = System.currentTimeMillis();
@@ -426,6 +423,7 @@ public class JContainer3 implements EZBContainer {
         // classloader already set)
         if (this.classLoader == null) {
             PrivilegedAction<EasyBeansClassLoader> privilegedAction = new PrivilegedAction<EasyBeansClassLoader>() {
+                @Override
                 public EasyBeansClassLoader run() {
                     return new EasyBeansClassLoader(new URL[]{url}, old);
                 }
@@ -569,6 +567,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @throws EZBContainerException if enhancement fails
      */
+    @Override
     public void enhance(final boolean createBeanFactories) throws EZBContainerException {
         if (!this.resolved) {
             throw new EZBContainerException("Cannot run enhancer without resolving classes");
@@ -1088,8 +1087,12 @@ public class JContainer3 implements EZBContainer {
 
         sessionFactory.setSessionBeanInfo(sessionBeanInfo);
 
+        // WS ?
+        IClassMetadata classMetadata = sessionBean.getClassMetadata();
+        IWebservicesView webservicesView = classMetadata.as(IWebservicesView.class);
+
         // Build WS deploy/time info
-        if (sessionBean.getWebServiceMarker() != null) {
+        if (webservicesView != null && webservicesView.getWebServiceMarker() != null) {
             // Bean is annotated with @WebService or @WebServiceprovider
             IWebServiceInfo info = createWebServiceInfo(sessionBean, factoryName);
             sessionBeanInfo.setWebServiceInfo(info);
@@ -1270,19 +1273,28 @@ public class JContainer3 implements EZBContainer {
             final String beanName) {
 
         // Get the WS marker
-        IWebServiceMarker marker = sessionBean.getWebServiceMarker();
+        IWebservicesView webservicesView = sessionBean.getClassMetadata().as(IWebservicesView.class);
+        if (webservicesView == null) {
+            return null;
+        }
+        IWebServiceMarker marker = webservicesView.getWebServiceMarker();
         String name = marker.getName();
 
         // Use info from webservices.xml if available
-        IWebservices webservicesDD = this.deployment.getEjbJarArchiveMetadata().getWebservices12();
-        IPortComponent portComponent = null;
-        if (webservicesDD != null) {
-            // Resolve the port-component associated with this endpoint
-            portComponent = webservicesDD.findPortComponent(beanName);
+        EjbJarArchiveMetadata ejbJarArchiveMetadata = this.deployment.getEjbJarArchiveMetadata();
 
-            if ((portComponent != null) && (name == null)) {
-                // Find the port name
-                name = portComponent.getName();
+        IPortComponent portComponent = null;
+        IWebservicesView ejbJarArchiveMetadataWebservicesView = ejbJarArchiveMetadata.getEjbJarMetadata().as(IWebservicesView.class);
+        if (ejbJarArchiveMetadataWebservicesView != null) {
+            IWebservices webservicesDD = ejbJarArchiveMetadataWebservicesView.getWebservices12();
+            if (webservicesDD != null) {
+                // Resolve the port-component associated with this endpoint
+                portComponent = webservicesDD.findPortComponent(beanName);
+
+                if ((portComponent != null) && (name == null)) {
+                    // Find the port name
+                    name = portComponent.getName();
+                }
             }
         }
 
@@ -1373,6 +1385,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * Stop this container.
      */
+    @Override
     public void stop() {
         this.available = false;
 
@@ -1753,6 +1766,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return the factory found or null.
      */
+    @Override
     public Factory<?, ?> getFactory(final String factoryName) {
         return this.factories.get(factoryName);
     }
@@ -1769,6 +1783,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return the name.
      */
+    @Override
     public String getName() {
         return getArchive().getName();
     }
@@ -1778,6 +1793,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return classloader of the container
      */
+    @Override
     public ClassLoader getClassLoader() {
         return this.classLoader;
     }
@@ -1787,6 +1803,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return the deployable.
      */
+    @Override
     public IDeployable getDeployable() {
         return this.configuration.getDeployable();
     }
@@ -1797,6 +1814,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return the archive.
      */
+    @Override
     public IArchive getArchive() {
         return this.configuration.getArchive();
     }
@@ -1822,6 +1840,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return true if the container is available.
      */
+    @Override
     public boolean isAvailable() {
         return this.available;
     }
@@ -1832,6 +1851,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return persistence unit manager object
      */
+    @Override
     public EZBPersistenceUnitManager getPersistenceUnitManager() {
         return this.persistenceUnitManager;
     }
@@ -1841,6 +1861,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @param classLoader to be used by the container
      */
+    @Override
     public void setClassLoader(final ClassLoader classLoader) {
         if (this.classLoader != null) {
             throw new IllegalArgumentException("Cannot replace an existing classloader");
@@ -1854,6 +1875,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @param persistenceUnitManager persistence unit manager object to set.
      */
+    @Override
     public void setPersistenceUnitManager(final EZBPersistenceUnitManager persistenceUnitManager) {
         if (this.persistenceUnitManager != null) {
             throw new IllegalArgumentException("Cannot replace an existing persistenceUnitManager");
@@ -1864,6 +1886,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * @return Returns the Container Configuration.
      */
+    @Override
     public EZBContainerConfig getConfiguration() {
         return this.configuration;
     }
@@ -1873,6 +1896,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return permission manager.
      */
+    @Override
     public EZBPermissionManager getPermissionManager() {
         return this.permissionManager;
     }
@@ -1882,6 +1906,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @param ezbPermissionManager the EasyBeans permission manager.
      */
+    @Override
     public void setPermissionManager(final EZBPermissionManager ezbPermissionManager) {
         this.permissionManager = ezbPermissionManager;
     }
@@ -1892,6 +1917,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @param extraArchives the given archives.
      */
+    @Override
     public void setExtraArchives(final List<IArchive> extraArchives) {
         this.deployment.setExtraArchives(extraArchives);
     }
@@ -1901,6 +1927,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @see org.ow2.easybeans.api.EZBExtensor#addExtension(java.lang.Class, java.lang.Object)
      */
+    @Override
     public <T> T addExtension(final Class<T> clazz, final T extension) {
         return this.extensor.addExtension(clazz, extension);
     }
@@ -1910,6 +1937,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @see org.ow2.easybeans.api.EZBExtensor#getExtension(java.lang.Class)
      */
+    @Override
     public <T> T getExtension(final Class<T> clazz) {
         return this.extensor.getExtension(clazz);
     }
@@ -1919,6 +1947,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @see org.ow2.easybeans.api.EZBExtensor#removeExtension(java.lang.Class)
      */
+    @Override
     public <T> T removeExtension(final Class<T> clazz) {
         return this.extensor.removeExtension(clazz);
     }
@@ -1931,6 +1960,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return The component.
      */
+    @Override
     public <T extends EZBComponent> T getComponent(final Class<T> itf) {
         return getEmbedded().getComponent(itf);
     }
@@ -1940,6 +1970,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @return The J2EE managed object id.
      */
+    @Override
     public String getJ2EEManagedObjectId() {
         return this.j2eeManagedObjectId;
     }
@@ -1959,6 +1990,7 @@ public class JContainer3 implements EZBContainer {
      *         This return the current map from a thread local so the data is only on a current thread.
      *         The key of the returned map is the name of the persistence unit
      */
+    @Override
     public Map<String, EZBExtendedEntityManager> getCurrentExtendedPersistenceContexts() {
         return this.currentExtendedPersistenceContexts.get();
     }
@@ -1968,6 +2000,7 @@ public class JContainer3 implements EZBContainer {
      *
      * @param extendedPersistenceContexts a map between the persistence unit name and the associated extended persistence context.
      */
+    @Override
     public void setCurrentExtendedPersistenceContexts(final Map<String, EZBExtendedEntityManager> extendedPersistenceContexts) {
         this.currentExtendedPersistenceContexts.set(extendedPersistenceContexts);
     }

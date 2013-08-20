@@ -37,8 +37,8 @@ import org.ow2.util.ee.deploy.api.deployable.IDeployable;
 import org.ow2.util.ee.deploy.api.deployer.DeployerException;
 import org.ow2.util.ee.deploy.api.deployer.IDeployerManager;
 import org.ow2.util.ee.deploy.api.deployer.UnsupportedDeployerException;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
+import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 

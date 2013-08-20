@@ -34,7 +34,7 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadat
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * This Helper class allow to build a list of interceptors that will be used for
@@ -51,7 +51,7 @@ public class MethodInterceptorsBuilder {
     /**
      * Method metadata that will be used to build the list of interceptors.
      */
-    private EasyBeansEjbJarMethodMetadata methodAnnotationMetadata;
+    private final EasyBeansEjbJarMethodMetadata methodAnnotationMetadata;
 
     /**
      * ClassMetadata (parent) of the method.
@@ -118,7 +118,7 @@ public class MethodInterceptorsBuilder {
         }
 
         // Default interceptors (if they are not excluded) and that the interceptors haven't been ordered
-        EjbJarArchiveMetadata ejbJarAnnotationMetadata = this.classAnnotationMetadata.getEjbJarDeployableMetadata();
+        EjbJarArchiveMetadata ejbJarAnnotationMetadata = this.classAnnotationMetadata.getEjbJarMetadata();
         if (!this.classAnnotationMetadata.isOrderedInterceptors() && ejbJarAnnotationMetadata.getDefaultInterceptors() != null
                 && !this.classAnnotationMetadata.isExcludedDefaultInterceptors()) {
             // Not excluded at method level too
@@ -168,7 +168,7 @@ public class MethodInterceptorsBuilder {
 
 
         // Check that we're not intercepting ourself as interceptor method could be a business method as well
-        JMethod interceptedMethod = this.methodAnnotationMetadata.getJMethod();
+        IMethod interceptedMethod = this.methodAnnotationMetadata.getJMethod();
         String interceptedClassName = this.methodAnnotationMetadata.getClassMetadata().getClassName();
         Iterator<IJClassInterceptor> itInterceptor = this.allInterceptors.iterator();
         while (itInterceptor.hasNext()) {

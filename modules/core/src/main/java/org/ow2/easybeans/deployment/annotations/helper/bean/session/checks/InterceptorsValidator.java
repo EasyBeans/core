@@ -36,7 +36,8 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadata;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.util.ee.metadata.common.api.struct.IJInterceptors;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class ensures that the interceptors have the correct signature.
@@ -87,7 +88,7 @@ public final class InterceptorsValidator {
     public static void validate(final EasyBeansEjbJarClassMetadata bean) {
 
         // Root metadata
-        EjbJarArchiveMetadata ejbMetaData = bean.getEjbJarDeployableMetadata();
+        EjbJarArchiveMetadata ejbMetaData = bean.getEjbJarMetadata();
 
         // Interceptors in the bean
         if (bean.isBean()) {
@@ -106,7 +107,7 @@ public final class InterceptorsValidator {
                 // Look in the interceptor class
                 if (methodInterceptors != null) {
                     for (String className : methodInterceptors.getClasses()) {
-                        analyzeInterceptorClass(ejbMetaData, bean.getLinkedClassMetadata(className));
+                        analyzeInterceptorClass(ejbMetaData, bean.getEasyBeansLinkedClassMetadata(className));
                     }
                 }
             }
@@ -116,7 +117,7 @@ public final class InterceptorsValidator {
             // Look in the interceptor class
             if (methodInterceptors != null) {
                 for (String className : methodInterceptors.getClasses()) {
-                    analyzeInterceptorClass(ejbMetaData, bean.getLinkedClassMetadata(className));
+                    analyzeInterceptorClass(ejbMetaData, bean.getEasyBeansLinkedClassMetadata(className));
                 }
             }
 
@@ -125,7 +126,7 @@ public final class InterceptorsValidator {
             String[] interfaces = bean.getInterfaces();
             if (interfaces != null) {
                 for (String itf : interfaces) {
-                    EasyBeansEjbJarClassMetadata interfaceMetaData = bean.getLinkedClassMetadata(itf);
+                    EasyBeansEjbJarClassMetadata interfaceMetaData = bean.getEasyBeansLinkedClassMetadata(itf);
                     if (interfaceMetaData != null) {
                         for (EasyBeansEjbJarMethodMetadata method : interfaceMetaData
                                 .getMethodMetadataCollection()) {
@@ -170,8 +171,8 @@ public final class InterceptorsValidator {
             int forCurrentClass = 0;
             // for the same classmetadata ?
             for (EasyBeansEjbJarMethodMetadata method : aroundInvokeList) {
-                if (method.getOriginalClassMetadata() != null) {
-                    if (method.getOriginalClassMetadata().equals(interceptorMetaData)) {
+                if (method.getOriginalEasyBeansClassMetadata() != null) {
+                    if (method.getOriginalEasyBeansClassMetadata().getClassMetadata().equals(interceptorMetaData.getClassMetadata())) {
                         throw new InterceptorsValidationException(errMsg);
                     }
                 } else {
@@ -221,7 +222,7 @@ public final class InterceptorsValidator {
      * @param awaitedException exception to ensure.
      * @param className the name of the class of the given method.
      */
-    private static void validateJMethod(final JMethod jMethod, final String desc, final String awaitedException,
+    private static void validateJMethod(final IMethod jMethod, final String desc, final String awaitedException,
             final String className) {
 
         // validate signature

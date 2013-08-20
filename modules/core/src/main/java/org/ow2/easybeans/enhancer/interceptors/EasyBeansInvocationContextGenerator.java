@@ -44,7 +44,7 @@ import org.ow2.util.ee.metadata.ejbjar.api.IJClassInterceptor;
 import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * Generates the implementation of
@@ -117,12 +117,12 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
      * JMethod object which correspond to the current method metadata which is
      * used.
      */
-    private JMethod jMethod = null;
+    private IMethod jMethod = null;
 
     /**
      * Metadata available for a method (given as constructor arg).
      */
-    private EasyBeansEjbJarMethodMetadata methodAnnotationMetadata;
+    private final EasyBeansEjbJarMethodMetadata methodAnnotationMetadata;
 
     /**
      * Bean class descriptor.
@@ -172,7 +172,7 @@ public class EasyBeansInvocationContextGenerator extends CommonClassGenerator {
     /**
      * Classloader used to load classes.
      */
-    private ClassLoader readLoader = null;
+    private final ClassLoader readLoader = null;
 
     /**
      * Constructor It will generate a class for the given method metadata.

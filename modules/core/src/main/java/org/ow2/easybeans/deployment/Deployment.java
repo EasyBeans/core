@@ -32,20 +32,19 @@ import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.deployment.annotations.exceptions.ResolverException;
 import org.ow2.easybeans.deployment.annotations.helper.ResolverHelper;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarClassMetadata;
-import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarDeployableFactory;
+import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMetadataFactory;
 import org.ow2.easybeans.deployment.metadata.ejbjar.EjbJarArchiveMetadata;
 import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
-import org.ow2.util.ee.deploy.api.deployable.EJB3Deployable;
-import org.ow2.util.ee.deploy.api.deployable.metadata.DeployableMetadataException;
-import org.ow2.util.ee.deploy.api.helper.DeployableHelperException;
-import org.ow2.util.ee.deploy.impl.helper.DeployableHelper;
+import org.ow2.util.ee.metadata.ejbjar.api.IEjbJarMetadata;
+import org.ow2.util.ee.metadata.ejbjar.api.exceptions.EJBJARMetadataException;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.util.scan.api.IClassesLocator;
-import org.ow2.util.scan.api.ScanException;
+import org.ow2.util.scan.api.IScanner;
 import org.ow2.util.scan.api.classlocator.ArchiveClassesLocator;
 import org.ow2.util.scan.api.classlocator.ClassLoaderClassesLocator;
+import org.ow2.util.scan.impl.ASMScannerImpl;
 import org.ow2.util.url.URLUtils;
 
 /**
@@ -83,12 +82,18 @@ public class Deployment {
     private EZBContainerConfig configuration;
 
     /**
+     * Scanner.
+     */
+    private final IScanner scanner;
+
+    /**
      * Constructor.
      * @param archive Archive to deploy using the default deployment
      *                configuration.
      */
     public Deployment(final IArchive archive) {
         this.archive = archive;
+        this.scanner = new ASMScannerImpl();
         reset();
     }
 
@@ -110,28 +115,21 @@ public class Deployment {
 
     /**
      * Analyzes the jarFile.
-     * @throws ScanException if analyze of jar file fails.
+     * @throws EJBJARMetadataException  if scan fails
      * @throws ResolverException if resolver fails.
-     * @throws DeployableHelperException if convert archive to deployable fails.
-     * @throws DeployableMetadataException if convert deployable to metadata fails.
      */
-    public void analyze() throws ScanException, ResolverException, DeployableHelperException,
-            DeployableMetadataException {
+    public void analyze() throws EJBJARMetadataException, ResolverException  {
         analyze(null);
     }
 
     /**
      * Analyzes the jarFile.
      * @param classLoader a classloader to use to find classes outside archive
-     * @throws ScanException if analyze of jar file fails.
+     * @throws EJBJARMetadataException  if scan fails
      * @throws ResolverException if resolver fails.
-     * @throws DeployableHelperException if convert archive to deployable fails.
-     * @throws DeployableMetadataException if convert deployable to metadata
-     *         fails.
      */
     @SuppressWarnings("boxing")
-    public void analyze(final ClassLoader classLoader) throws ScanException, ResolverException,
-            DeployableHelperException, DeployableMetadataException {
+    public void analyze(final ClassLoader classLoader) throws EJBJARMetadataException, ResolverException  {
 
 
         if (this.configuration.getModuleName() == null) {
@@ -149,7 +147,7 @@ public class Deployment {
         }
 
         // Create metadata
-        EasyBeansEjbJarDeployableFactory deployableFactory = getDeployableFactory();
+        EasyBeansEjbJarMetadataFactory metadataFactory = getEjbJarMetadataFactory(scanner);
 
         // TODO gaellalire : metadata should be contruct directly with ear
         List<IClassesLocator> lib = null;
@@ -167,8 +165,9 @@ public class Deployment {
             lib.add(new ClassLoaderClassesLocator(classLoader));
         }
 
-        this.ejbJarArchiveMetadata = deployableFactory.createDeployableMetadata(EJB3Deployable.class.cast(DeployableHelper
-                .getDeployable(this.archive, false)), lib);
+        IEjbJarMetadata ejbArchiveMetadata = metadataFactory.createArchiveMetadata(archive, lib);
+
+        this.ejbJarArchiveMetadata = ejbArchiveMetadata.as(EjbJarArchiveMetadata.class);
 
         // Complete metadata
         long tResolverStart = System.currentTimeMillis();
@@ -224,9 +223,9 @@ public class Deployment {
     /**
      * @return Deployable factory.
      */
-    protected EasyBeansEjbJarDeployableFactory getDeployableFactory() {
+    protected EasyBeansEjbJarMetadataFactory getEjbJarMetadataFactory(IScanner scanner) {
         // Allows to override this factory
-        return new EasyBeansEjbJarDeployableFactory();
+        return new EasyBeansEjbJarMetadataFactory(scanner);
     }
 
     /**

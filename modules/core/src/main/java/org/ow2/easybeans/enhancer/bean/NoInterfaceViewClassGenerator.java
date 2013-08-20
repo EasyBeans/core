@@ -39,7 +39,8 @@ import org.ow2.easybeans.deployment.metadata.ejbjar.EasyBeansEjbJarMethodMetadat
 import org.ow2.easybeans.enhancer.CommonClassGenerator;
 import org.ow2.easybeans.enhancer.EasyBeansClassWriter;
 import org.ow2.easybeans.enhancer.lib.ProxyClassEncoder;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 
 /**
@@ -51,17 +52,17 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
     /**
      * JMethod object for toString().
      */
-    public static final JMethod TO_STRING_JMETHOD = new JMethod(ACC_PUBLIC, "toString", "()Ljava/lang/String;", null, null);
+    public static final IMethod TO_STRING_JMETHOD = new JMethod(ACC_PUBLIC, "toString", "()Ljava/lang/String;", null, null);
 
     /**
      * JMethod object for equals(Other object).
      */
-    public static final JMethod EQUALS_JMETHOD = new JMethod(ACC_PUBLIC, "equals", "(Ljava/lang/Object;)Z", null, null);
+    public static final IMethod EQUALS_JMETHOD = new JMethod(ACC_PUBLIC, "equals", "(Ljava/lang/Object;)Z", null, null);
 
     /**
      * JMethod object for hashCode().
      */
-    public static final JMethod HASHCODE_JMETHOD = new JMethod(ACC_PUBLIC, "hashCode", "()I", null, null);
+    public static final IMethod HASHCODE_JMETHOD = new JMethod(ACC_PUBLIC, "hashCode", "()I", null, null);
 
 
     /**
@@ -175,7 +176,7 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
         Collection<EasyBeansEjbJarMethodMetadata> methodsMetadata = this.classMetadata.getMethodMetadataCollection();
         if (methodsMetadata != null) {
             for (EasyBeansEjbJarMethodMetadata methodMetadata : methodsMetadata) {
-                JMethod jMethod = methodMetadata.getJMethod();
+                IMethod jMethod = methodMetadata.getJMethod();
 
                 // Skip special methods
                 if (METHODS_TO_IGNORE.contains(jMethod.getName())) {
@@ -228,7 +229,7 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
      * @param methodMetadata the metadata used to generate the call
      */
     private void addTransformedMethod(final EasyBeansEjbJarMethodMetadata methodMetadata) {
-        JMethod jMethod = methodMetadata.getJMethod();
+        IMethod jMethod = methodMetadata.getJMethod();
         MethodVisitor mv = getCW().visitMethod(jMethod.getAccess(), jMethod.getName(), jMethod.getDescriptor(),
                 jMethod.getSignature(), jMethod.getExceptions());
         mv.visitCode();
@@ -393,7 +394,7 @@ public class NoInterfaceViewClassGenerator extends CommonClassGenerator {
      * </pre>
      * @param jMethod the method used to add the throws
      */
-    private void addThrowsExceptionMethod(final JMethod jMethod) {
+    private void addThrowsExceptionMethod(final IMethod jMethod) {
         // Create the method which throw the exception with the same
         // signature
         MethodVisitor mv = getCW().visitMethod(jMethod.getAccess(), jMethod.getName(), jMethod.getDescriptor(),

@@ -25,6 +25,12 @@
 
 package org.ow2.easybeans.enhancer.injection;
 
+import static org.ow2.easybeans.deployment.helper.JavaContextHelper.getJndiName;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP_ENV;
+import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.REGISTRY;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,16 +73,10 @@ import org.ow2.util.ee.metadata.common.api.struct.IJEjbEJB;
 import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceContext;
 import org.ow2.util.ee.metadata.common.api.struct.IJavaxPersistenceUnit;
 import org.ow2.util.ee.metadata.common.api.struct.IJaxwsWebServiceRef;
-import org.ow2.util.ee.metadata.ejbjar.impl.EjbJarClassMetadata;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
-
-import static org.ow2.easybeans.deployment.helper.JavaContextHelper.getJndiName;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.JAVA_COMP_ENV;
-import static org.ow2.easybeans.injection.JNDILookupHelper.JndiType.REGISTRY;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class adds methods which will inject resources in the bean class.
@@ -92,12 +92,12 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
     /**
      * Metadata available by this adapter for a class.
      */
-    private EasyBeansEjbJarClassMetadata classAnnotationMetadata;
+    private final EasyBeansEjbJarClassMetadata classAnnotationMetadata;
 
     /**
      * Metadata available by this adapter for a child class (the bean).
      */
-    private EasyBeansEjbJarClassMetadata beanChildClassAnnotationMetadata;
+    private final EasyBeansEjbJarClassMetadata beanChildClassAnnotationMetadata;
 
     /**
      * Map containing informations for enhancers.
@@ -177,13 +177,13 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
     /**
      * JMethod object for injectedByEasyBeans.
      */
-    public static final JMethod INJECTED_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(INJECTED_METHOD), "()V", null,
+    public static final IMethod INJECTED_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(INJECTED_METHOD), "()V", null,
             new String[] {"org/ow2/easybeans/api/injection/EasyBeansInjectionException"});
 
     /**
      * JMethod object for internalInjectedByEasyBeans.
      */
-    public static final JMethod INTERNAL_INJECTED_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(INTERNAL_INJECTED_METHOD), "()V", null,
+    public static final IMethod INTERNAL_INJECTED_JMETHOD = new JMethod(ACC_PUBLIC, MethodRenamer.encode(INTERNAL_INJECTED_METHOD), "()V", null,
             new String[] {"org/ow2/easybeans/api/injection/EasyBeansInjectionException"});
 
     /**
@@ -401,7 +401,7 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         // analyzed) and if there is one
         String superNameClass = this.classAnnotationMetadata.getSuperName();
         if (superNameClass != null && !superNameClass.equals(JAVA_LANG_OBJECT)) {
-            EasyBeansEjbJarClassMetadata superMetadata = this.classAnnotationMetadata.getLinkedClassMetadata(superNameClass);
+            EasyBeansEjbJarClassMetadata superMetadata = this.classAnnotationMetadata.getEasyBeansLinkedClassMetadata(superNameClass);
             if (superMetadata != null) {
                 if (!this.staticMode) {
                     // generate call to super method : super.INTERNAL_INJECTED_METHOD();
@@ -799,8 +799,8 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
                     callBindAttributeJndi(jAnnotationResource.getName(), mappedName, mv, fieldMetaData);
                 } else {
                     //Check managed beans
-                    EjbJarClassMetadata resourceClassMetadata =
-                            classAnnotationMetadata.getEjbJarDeployableMetadata().getScannedClassMetadata(itfName.replace(".", "/"));
+                    EasyBeansEjbJarClassMetadata resourceClassMetadata =
+                            classAnnotationMetadata.getEjbJarMetadata().getScannedClassMetadata(itfName.replace(".", "/"));
                     if (resourceClassMetadata != null && resourceClassMetadata.getManagedBeanName() != null) {
                         lookupName = "java:module/" + resourceClassMetadata.getManagedBeanName();
                         callAttributeJndi(lookupName, typeInterface, mv, fieldMetaData, this.classAnnotationMetadata.getClassName(), JAVA);
@@ -1260,7 +1260,7 @@ public class InjectionClassAdapter extends ClassAdapter implements Opcodes {
         // validate access
         validateAccessMethodAnnotation(methodMetaData);
 
-        JMethod jMethod = methodMetaData.getJMethod();
+        IMethod jMethod = methodMetaData.getJMethod();
         // Should be a setter
         if (!jMethod.getName().startsWith("set") || jMethod.getName().equalsIgnoreCase("set")) {
             throw new IllegalStateException("Method '" + jMethod

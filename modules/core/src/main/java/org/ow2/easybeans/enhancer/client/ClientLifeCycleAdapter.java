@@ -42,7 +42,7 @@ public class ClientLifeCycleAdapter extends ClassAdapter implements Opcodes {
     /**
      * Metadata available by this adapter for a class.
      */
-    private EasyBeansEjbJarClassMetadata classAnnotationMetadata;
+    private final EasyBeansEjbJarClassMetadata classAnnotationMetadata;
 
     /**
      * Defines java.lang.Object class.
@@ -77,7 +77,7 @@ public class ClientLifeCycleAdapter extends ClassAdapter implements Opcodes {
         // call super method (if any)
         String superNameClass = this.classAnnotationMetadata.getSuperName();
         if (superNameClass != null && !superNameClass.equals(JAVA_LANG_OBJECT)) {
-            EasyBeansEjbJarClassMetadata superMetadata = this.classAnnotationMetadata.getLinkedClassMetadata(superNameClass);
+            EasyBeansEjbJarClassMetadata superMetadata = this.classAnnotationMetadata.getEasyBeansLinkedClassMetadata(superNameClass);
             if (superMetadata != null) {
                 mv.visitMethodInsn(INVOKESTATIC, superMetadata.getClassName(), "easyBeansLifeCyclePostConstruct", "()V");
             }

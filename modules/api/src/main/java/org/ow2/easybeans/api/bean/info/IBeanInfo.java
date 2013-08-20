@@ -25,13 +25,11 @@
 
 package org.ow2.easybeans.api.bean.info;
 
-
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.TransactionManagementType;
-
 import org.ow2.util.ee.metadata.common.api.struct.IJAnnotationSqlDataSourceDefinition;
+import org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType;
 
 /**
  * This interface is used for containing a description for a bean.
@@ -70,13 +68,13 @@ public interface IBeanInfo {
      * Gets the type of transaction for the given bean.
      * @return transaction management type.
      */
-    TransactionManagementType getTransactionManagementType();
+    ITransactionManagementType getTransactionManagementType();
 
     /**
      * Sets the type of transaction for the given bean.
      * @param transactionManagementType transaction management type.
      */
-    void setTransactionManagementType(final TransactionManagementType transactionManagementType);
+    void setTransactionManagementType(final ITransactionManagementType transactionManagementType);
 
     /**
      * Gets the security info.

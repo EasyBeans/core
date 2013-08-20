@@ -25,6 +25,9 @@
 
 package org.ow2.easybeans.deployment.helper.listener;
 
+
+import static org.ow2.util.ee.metadata.common.api.struct.ITransactionManagementType.CONTAINER;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 
@@ -41,8 +44,6 @@ import org.ow2.easybeans.event.naming.JavaContextNamingEvent;
 import org.ow2.util.event.api.IEvent;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-
-import static javax.ejb.TransactionManagementType.CONTAINER;
 
 /**
  * This ExtensionListener is dedicated to adapt the <code>java:comp</code> Context.
@@ -61,6 +62,7 @@ public class JavaCompExtensionListener extends AbstractExtensionListener {
      * Process the event.
      * @param event the given event
      */
+    @Override
     public void handle(final IEvent event) {
 
         JavaContextNamingEvent cne = (JavaContextNamingEvent) event;

@@ -25,6 +25,8 @@
 
 package org.ow2.easybeans.enhancer;
 
+import static org.ow2.easybeans.enhancer.injection.InjectionClassAdapter.JAVA_LANG_OBJECT;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,8 +54,6 @@ import org.ow2.easybeans.util.topological.NodeWrapper;
 import org.ow2.easybeans.util.topological.TopologicalSort;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-
-import static org.ow2.easybeans.enhancer.injection.InjectionClassAdapter.JAVA_LANG_OBJECT;
 
 /**
  * This class is used for enhancing a set of classes (Beans like Stateless,
@@ -127,7 +127,7 @@ public class Enhancer {
         String superClassName = classAnnotationMetadata.getSuperName();
         // loop while super class is not java.lang.Object
         while (!JAVA_LANG_OBJECT.equals(superClassName)) {
-            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getLinkedClassMetadata(superClassName);
+            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getEasyBeansLinkedClassMetadata(superClassName);
             if (superMetaData != null) {
                 superClassName = superMetaData.getSuperName();
                 superClassesList.addFirst(superMetaData.getClassName());
@@ -284,19 +284,7 @@ public class Enhancer {
 
                     defineClass(this.writeLoader, classAnnotationMetadata.getClassName().replace("/", "."), cw.toByteArray());
 
-                    if (logger.isDebugEnabled()) {
-                        String fName = System.getProperty("java.io.tmpdir") + File.separator
-                                + classAnnotationMetadata.getClassName().replace("/", ".") + ".class";
-                        logger.debug( "Writing Interceptor Manager of class " +
-                                classAnnotationMetadata.getClassName().replace("/", ".") + " to " + fName);
-                        try {
-                            FileOutputStream fos = new FileOutputStream(fName);
-                            fos.write(cw.toByteArray());
-                            fos.close();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+
                 }
             }
         }
@@ -409,7 +397,7 @@ public class Enhancer {
         // And do this only one time.
         String superClass = classAnnotationMetadata.getSuperName();
         if (!superClass.equals(JAVA_LANG_OBJECT)) {
-            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getLinkedClassMetadata(superClass);
+            EasyBeansEjbJarClassMetadata superMetaData = classAnnotationMetadata.getEasyBeansLinkedClassMetadata(superClass);
             if (superMetaData != null && !superMetaData.wasModified()) {
                 ClassReader cr = getClassReader(superMetaData);
                 ClassWriter cw = new EasyBeansClassWriter(this.readLoader);
@@ -516,6 +504,20 @@ public class Enhancer {
                 Class<?> cls = Class.forName("java.lang.ClassLoader");
                 java.lang.reflect.Method method = cls.getDeclaredMethod("defineClass", new Class[] {String.class,
                         byte[].class, int.class, int.class});
+
+                if (logger.isDebugEnabled()) {
+                    String fName = System.getProperty("java.io.tmpdir") + File.separator
+                            + className + ".class";
+                    logger.warn( "Writing class  " +
+                            className + " to " + fName);
+                    try {
+                        FileOutputStream fos = new FileOutputStream(fName);
+                        fos.write(b);
+                        fos.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
 
                 // protected method invocaton
                 method.setAccessible(true);

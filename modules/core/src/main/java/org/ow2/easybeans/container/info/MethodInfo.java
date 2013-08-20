@@ -140,7 +140,7 @@ public class MethodInfo implements IMethodInfo {
 
         EasyBeansEjbJarClassMetadata classMetadata = null;
         if (methodMetadata.isInherited()) {
-            classMetadata = methodMetadata.getOriginalClassMetadata();
+            classMetadata = methodMetadata.getOriginalEasyBeansClassMetadata();
         } else {
             classMetadata = methodMetadata.getClassMetadata();
         }

@@ -35,7 +35,7 @@ import org.ow2.util.ee.metadata.ejbjar.api.struct.IJLocal;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJRemote;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * This class resolves the business method for bean class by looking at the
@@ -125,7 +125,7 @@ public final class BusinessMethodResolver {
             visitedInterfaces.add(itf);
 
             // get meta data of the interface
-            EasyBeansEjbJarClassMetadata itfMetadata = visitingclassAnnotationMetadata.getLinkedClassMetadata(itf);
+            EasyBeansEjbJarClassMetadata itfMetadata = visitingclassAnnotationMetadata.getEasyBeansLinkedClassMetadata(itf);
 
             if (itfMetadata == null) {
                 logger.warn("No class was found for interface {0}.", itf);
@@ -135,7 +135,7 @@ public final class BusinessMethodResolver {
             // for each method of the interface, set the business method to true
             // in bean
             for (EasyBeansEjbJarMethodMetadata methodData : itfMetadata.getMethodMetadataCollection()) {
-                JMethod itfMethod = methodData.getJMethod();
+                IMethod itfMethod = methodData.getJMethod();
 
                 // Ignore class init method
                 if (itfMethod.getName().equals(CLASS_INIT) || itfMethod.getName().equals(CONST_INIT)) {

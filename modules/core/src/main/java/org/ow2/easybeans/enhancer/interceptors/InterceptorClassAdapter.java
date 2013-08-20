@@ -25,6 +25,14 @@
 
 package org.ow2.easybeans.enhancer.interceptors;
 
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.AROUND_INVOKE;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.DEP_INJECT;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_ACTIVATE;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_CONSTRUCT;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_DESTROY;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_PASSIVATE;
+import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.TIMED_OBJECT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,15 +74,9 @@ import org.ow2.util.ee.metadata.ejbjar.api.InterceptorType;
 import org.ow2.util.ee.metadata.ejbjar.api.struct.IJEjbSchedule;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
-
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.AROUND_INVOKE;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.DEP_INJECT;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_ACTIVATE;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.POST_CONSTRUCT;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_DESTROY;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.PRE_PASSIVATE;
-import static org.ow2.util.ee.metadata.ejbjar.api.InterceptorType.TIMED_OBJECT;
+import org.ow2.util.scan.api.metadata.IClassMetadata;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
+import org.ow2.util.scan.impl.metadata.JMethod;
 
 /**
  * This class delegates the creation of an implementation of a
@@ -87,7 +89,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
     /**
      * Logger.
      */
-    private Log LOGGER = LogFactory.getLog(InterceptorClassAdapter.class);
+    private final Log LOGGER = LogFactory.getLog(InterceptorClassAdapter.class);
 
     /**
      * If this flag is enabled, it allows to share the bean class with other frameworks/tools that load the enhanced class.
@@ -97,12 +99,12 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
     /**
      * Metadata available by this adapter for a class.
      */
-    private EasyBeansEjbJarClassMetadata classAnnotationMetadata;
+    private final EasyBeansEjbJarClassMetadata classAnnotationMetadata;
 
     /**
      * List of methods which have been renamed.
      */
-    private List<JMethod> renamedMethods = null;
+    private List<IMethod> renamedMethods = null;
 
     /**
      * Mappping between className and the bytecode.
@@ -165,7 +167,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
             final ClassVisitor cv, final boolean addInterface) {
         super(cv);
         this.classAnnotationMetadata = classAnnotationMetadata;
-        this.renamedMethods = new ArrayList<JMethod>();
+        this.renamedMethods = new ArrayList<IMethod>();
         this.definedClasses = new ArrayList<DefinedClass>();
         this.addInterface = addInterface;
         this.generatedTypes = new ArrayList<InterceptorType>();
@@ -325,7 +327,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
             if (m.isPrivateSuperCallGenerated()) {
                 // Generate super call
                 String originalMethodName = m.getSuperPrivateMethodName();
-                generateCallSuperEncodedMethod(m, m.getMethodName(), originalMethodName, m.getOriginalClassMetadata().getClassName());
+                generateCallSuperEncodedMethod(m, m.getMethodName(), originalMethodName, m.getOriginalEasyBeansClassMetadata().getClassName());
             }
         }
 
@@ -351,14 +353,12 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                 // Found the timer method ?
                 if (m.isTimeout()) {
                     // clone this method (to get the correct interceptors, etc)
-                    timerMethodAnnotationMetadata = (EasyBeansEjbJarMethodMetadata) m.clone();
+                    timerMethodAnnotationMetadata = m.clone(this.classAnnotationMetadata);
                     // Change the method name to the generated method
                     timerMethodAnnotationMetadata.setJMethod(BeanClassAdapter.TIMER_JMETHOD);
 
-                    // set the class
-                    timerMethodAnnotationMetadata.setClassMetadata(this.classAnnotationMetadata);
                     // It is not inherited as it's build on this class level
-                    timerMethodAnnotationMetadata.setInherited(false, null);
+                    timerMethodAnnotationMetadata.setInherited(false, (IClassMetadata) null);
                     break;
                 }
 
@@ -400,7 +400,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
             String generatedClName = this.classAnnotationMetadata.getClassName()
                     + EasyBeansInvocationContextGenerator.SUFFIX_INTERCEPTOR_MANAGER;
             InterceptorManagerGenerator interceptorManagerGenerator = new InterceptorManagerGenerator(
-                    this.classAnnotationMetadata.getEjbJarDeployableMetadata(), generatedClName, this.beanInterceptors,
+                    this.classAnnotationMetadata.getEjbJarMetadata(), generatedClName, this.beanInterceptors,
                     this.readLoader);
             interceptorManagerGenerator.generate();
             DefinedClass dc = new DefinedClass(generatedClName.replace("/", "."), interceptorManagerGenerator.getBytes());
@@ -877,7 +877,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
      */
     private void generateCallSuperEncodedMethod(final EasyBeansEjbJarMethodMetadata method, final String generatedMethodName, final String superMethodName, final String superClassName) {
 
-        JMethod jMethod = method.getJMethod();
+        IMethod jMethod = method.getJMethod();
         MethodVisitor mv = this.cv.visitMethod(jMethod.getAccess(), generatedMethodName,
                 jMethod.getDescriptor(), jMethod.getSignature(), jMethod.getExceptions());
 
@@ -929,7 +929,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
         String superClassName = classMetadata.getSuperName();
 
         // we've metadata of the super class ?
-        EasyBeansEjbJarClassMetadata superClassMetadata = classMetadata.getLinkedClassMetadata(superClassName);
+        EasyBeansEjbJarClassMetadata superClassMetadata = classMetadata.getEasyBeansLinkedClassMetadata(superClassName);
 
         String superMethodName = method.getMethodName();
         if (superClassMetadata.isBean()) {
@@ -1030,7 +1030,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
                 mv.visitVarInsn(ALOAD, 0);
                 int opcode = INVOKEVIRTUAL;
                 if (method.isInherited()) {
-                    clName = method.getOriginalClassMetadata().getClassName();
+                    clName = method.getOriginalEasyBeansClassMetadata().getClassName();
                     opcode = INVOKESPECIAL;
                 }
                 mv.visitMethodInsn(opcode, clName, method.getMethodName(), method.getJMethod().getDescriptor());
@@ -1100,7 +1100,7 @@ public class InterceptorClassAdapter extends ClassAdapter implements Opcodes {
             if (POST_CONSTRUCT == interceptorType || PRE_DESTROY == interceptorType) {
                 // Is there already some interceptors ?
                 if (classMetaData.getPostConstructMethodsMetadata().size() > 0) {
-                    generatedMetadata.setInterceptors(classMetaData.getPostConstructMethodsMetadata().getFirst().getInterceptors());
+                    generatedMetadata.setInterceptors(classMetaData.getPostConstructMethodsMetadata().get(0).getInterceptors());
                 } else {
                     // Add default transaction on this method
                     TransactionResolver.resolveMethod(classMetaData, generatedMetadata);

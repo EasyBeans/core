@@ -25,10 +25,10 @@
 
 package org.ow2.easybeans.container.info;
 
-import org.ow2.util.ee.metadata.ejbjar.api.struct.IActivationConfigProperty;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ow2.util.ee.metadata.ejbjar.api.struct.IActivationConfigProperty;
 
 /**
  * This class contains runtime information about Message driven beans.

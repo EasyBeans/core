@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
 import org.ow2.easybeans.api.interceptor.EZBInterceptorInvoker;
 import org.ow2.easybeans.api.interceptor.EZBInterceptorManager;
-import org.ow2.util.scan.api.metadata.structures.JMethod;
+import org.ow2.util.scan.api.metadata.structures.IMethod;
 
 /**
  * Invoker of an interceptor (that is not in a bean).
@@ -55,7 +55,7 @@ public class StandaloneInterceptorInvokerImpl implements EZBInterceptorInvoker {
      * @param jMethod the method that will be used for the interceptor
      * @param classLoader the given classloader used to load the class
      */
-    public StandaloneInterceptorInvokerImpl(final String interceptorClassname, final JMethod jMethod,
+    public StandaloneInterceptorInvokerImpl(final String interceptorClassname, final IMethod jMethod,
             final ClassLoader classLoader) {
 
         // keep the name of the intercetpor class
