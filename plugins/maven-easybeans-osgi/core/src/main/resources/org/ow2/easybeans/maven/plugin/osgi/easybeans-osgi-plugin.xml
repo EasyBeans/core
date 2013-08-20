@@ -1,5 +1,5 @@
 <plugin>
-  <osgi.framework.configuration><![CDATA[org.osgi.framework.system.packages=org.osgi.framework; version=1.6.0, \
+  <osgi.framework.configuration><![CDATA[org.osgi.framework.system.packages=org.osgi.framework; version=1.7.0, \
  org.osgi.framework.launch; version=1.0.0, \
  org.osgi.framework.wiring; version=1.0.0, \
  org.osgi.framework.startlevel; version=1.0.0, \
@@ -133,7 +133,7 @@
  sun.rmi.transport; \
  sun.rmi.registry; \
  version=1.6.0
- 
+
 org.osgi.framework.bootdelegation=sun.*,com.sun.*
 org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.api
  ]]></osgi.framework.configuration>
@@ -201,7 +201,7 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <artifactId>org.apache.felix.log</artifactId>
         <version>1.0.1</version>
       </bundle>
-      
+
       <!-- Java EE API -->
       <bundle>
         <groupId>org.ow2.spec.ee</groupId>
@@ -222,7 +222,7 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <groupId>org.ow2.spec.ee</groupId>
         <artifactId>ow2-annotation-1.1-spec</artifactId>
         <version>${ow2-spec.version}</version>
-      </bundle>      
+      </bundle>
       <bundle>
         <groupId>org.ow2.spec.ee</groupId>
         <artifactId>ow2-javaee-5-spec</artifactId>
