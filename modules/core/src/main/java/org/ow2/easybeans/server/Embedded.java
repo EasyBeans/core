@@ -208,7 +208,7 @@ public class Embedded implements EZBServer {
      * The list of default naming extensions used to fill the
      * <code>java:comp</code> Context of the beans.
      */
-    private List<IEventListener> defaultNamingExtensions;
+    private final List<IEventListener> defaultNamingExtensions;
 
     /**
      * Components are initialized only once (else it's added after each start/stop).
@@ -464,6 +464,7 @@ public class Embedded implements EZBServer {
      * Stops the EJB3 server.
      * @throws EmbeddedException if container cannot be stopped.
      */
+    @Override
     public synchronized void stop() throws EmbeddedException {
         // ensure started
         if (!this.started) {
@@ -605,6 +606,7 @@ public class Embedded implements EZBServer {
      * @param id the container id.
      * @return the container if it is found, else null.
      */
+    @Override
     public EZBContainer getContainer(final String id) {
         return this.containers.get(id);
     }
@@ -614,6 +616,7 @@ public class Embedded implements EZBServer {
      * @param archive the archive used by the given container.
      * @return the container if it is found, else null.
      */
+    @Override
     public EZBContainer findContainer(final IArchive archive) {
         // Invalid archive
         if (archive == null) {
@@ -653,6 +656,7 @@ public class Embedded implements EZBServer {
      * @param deployable the container deployable.
      * @return the created container.
      */
+    @Override
     public EZBContainer createContainer(final IDeployable<?> deployable) {
         EZBContainerConfig jConfig = null;
 
@@ -679,6 +683,7 @@ public class Embedded implements EZBServer {
      * Add an already created container.
      * @param container the EZBContainer to be added.
      */
+    @Override
     public void addContainer(final EZBContainer container) {
         // Add extensions
         callJContainerConfigExtensions(container.getConfiguration());
@@ -691,6 +696,7 @@ public class Embedded implements EZBServer {
      * Remove a given container.
      * @param container the container to be removed.
      */
+    @Override
     public void removeContainer(final EZBContainer container) {
         this.containers.remove(container.getId());
 
@@ -716,6 +722,7 @@ public class Embedded implements EZBServer {
     /**
      * @return the configuration of this server.
      */
+    @Override
     public EZBServerConfig getServerConfig() {
         return this.serverConfig;
     }
@@ -723,6 +730,7 @@ public class Embedded implements EZBServer {
     /**
      * @return the containers managed by this server.
      */
+    @Override
     public Map<String, EZBContainer> getContainers() {
         return this.containers;
     }
@@ -731,6 +739,7 @@ public class Embedded implements EZBServer {
      * Gets the id of this embedded server.
      * @return the id of this server.
      */
+    @Override
     public Integer getID() {
         return this.id;
     }
@@ -739,6 +748,7 @@ public class Embedded implements EZBServer {
      * Gets a description of the embedded server.
      * @return a description of the embedded server
      */
+    @Override
     public String getDescription() {
         return this.serverConfig.getDescription();
     }
@@ -785,6 +795,7 @@ public class Embedded implements EZBServer {
      * @param itf The interface class.
      * @return The component.
      */
+    @Override
     public <T extends EZBComponent> T getComponent(final Class<T> itf) {
         // ask registry if present.
         if (this.componentManager != null) {
@@ -796,6 +807,7 @@ public class Embedded implements EZBServer {
     /**
      * @return Returns the ComponentManager used by this instance.
      */
+    @Override
     public ComponentManager getComponentManager() {
         return this.componentManager;
     }
@@ -803,6 +815,7 @@ public class Embedded implements EZBServer {
     /**
      * @return true if EasyBeans has been stopped.
      */
+    @Override
     public boolean isStopped() {
         return this.stopped;
     }
@@ -810,6 +823,7 @@ public class Embedded implements EZBServer {
     /**
      * @return true if EasyBeans has been started.
      */
+    @Override
     public boolean isStarted() {
         return this.started;
     }
@@ -817,6 +831,7 @@ public class Embedded implements EZBServer {
     /**
      * @return the JNDI Resolver of this server.
      */
+    @Override
     public EZBServerJNDIResolver getJNDIResolver() {
         return this.jndiResolver;
     }
@@ -825,6 +840,7 @@ public class Embedded implements EZBServer {
      * Get the J2EE managed object id.
      * @return The J2EE managed object id.
      */
+    @Override
     public String getJ2EEManagedObjectId() {
         return this.j2eeManagedObjectId;
     }
@@ -840,6 +856,7 @@ public class Embedded implements EZBServer {
     /**
      * @return the Deployer manager.
      */
+    @Override
     public IDeployerManager getDeployerManager() {
         return this.deployerManager;
     }
@@ -848,6 +865,7 @@ public class Embedded implements EZBServer {
      * Allows to set the deployer manager.
      * @param deployerManager the Deployer manager.
      */
+    @Override
     public void setDeployerManager(final IDeployerManager deployerManager) {
         this.deployerManager = deployerManager;
     }
@@ -856,6 +874,7 @@ public class Embedded implements EZBServer {
      * List of global interceptors classes to use.
      * @return list of classes
      */
+    @Override
     public List<Class<? extends EasyBeansInterceptor>> getGlobalInterceptorsClasses() {
         return this.globalInterceptorsClasses;
     }
@@ -863,6 +882,7 @@ public class Embedded implements EZBServer {
     /**
      * @return the management pool used to managed the pools (creating instance, etc.)
      */
+    @Override
     public EZBManagementPool getManagementThreadPool() {
         return this.managementThreadPool;
     }
@@ -871,6 +891,7 @@ public class Embedded implements EZBServer {
      * Sets the management thread pool.
      * @param managementThreadPool the management pool used to managed the pools (creating instance, etc.)
      */
+    @Override
     public void setManagementThreadPool(final EZBManagementPool managementThreadPool) {
         this.managementThreadPool = managementThreadPool;
     }
@@ -878,6 +899,7 @@ public class Embedded implements EZBServer {
     /**
      * @return true if EasyBeans is being stopped.
      */
+    @Override
     public boolean isStopping() {
         return this.stopping;
     }
