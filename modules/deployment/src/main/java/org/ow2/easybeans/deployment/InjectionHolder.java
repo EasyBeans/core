@@ -26,7 +26,7 @@
 package org.ow2.easybeans.deployment;
 
 import org.ow2.easybeans.deployment.api.EZBInjectionHolder;
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.easybeans.resolver.api.EZBJNDIResolver;
 
 /**

@@ -259,6 +259,16 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
       </bundle>
       <!-- EasyBeans -->
       <bundle>
+        <groupId>org.ow2.easybeans.persistence</groupId>
+         <artifactId>easybeans-persistence-osgi</artifactId>
+        <version>${easybeans-persistence.version}</version>
+      </bundle>
+      <bundle>
+        <groupId>org.ow2.easybeans.osgi</groupId>
+       <artifactId>easybeans-modules-rmi-interceptors</artifactId>
+        <version>${project.version}</version>
+      </bundle>
+      <bundle>
         <groupId>org.ow2.easybeans.osgi</groupId>
         <artifactId>easybeans-api</artifactId>
         <version>${project.version}</version>
@@ -269,14 +279,6 @@ org.osgi.framework.system.packages.extra=org.ow2.util.maven.osgi.launcher.test.a
         <version>${project.version}</version>
         <start>false</start>
       </bundle>
-
-      <!-- Rmi interceptors -->
-      <bundle>
-        <groupId>org.ow2.easybeans.osgi</groupId>
-        <artifactId>easybeans-modules-rmi-interceptors</artifactId>
-        <version>${project.version}</version>
-      </bundle>
-
 
       <!-- OW2 dependencies -->
       <bundle>

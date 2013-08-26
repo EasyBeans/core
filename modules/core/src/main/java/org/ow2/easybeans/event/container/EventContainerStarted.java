@@ -27,7 +27,7 @@ package org.ow2.easybeans.event.container;
 
 import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.api.event.container.EZBEventContainerStarted;
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.util.archive.api.IArchive;
 
 /**
@@ -35,11 +35,11 @@ import org.ow2.util.archive.api.IArchive;
  * @author Vincent Michaud
  */
 public class EventContainerStarted extends AbstractEventContainer implements EZBEventContainerStarted {
-    
+
     /**
      * The persistence unit manager.
      */
-    private EZBPersistenceUnitManager persistenceUnitManager;
+    private final EZBPersistenceUnitManager persistenceUnitManager;
 
     /**
      * The default constructor.
@@ -59,6 +59,7 @@ public class EventContainerStarted extends AbstractEventContainer implements EZB
      * Get the persistence unit manager.
      * @return The persistence unit manager.
      */
+    @Override
     public EZBPersistenceUnitManager getPersistenceUnitManager() {
         return this.persistenceUnitManager;
     }

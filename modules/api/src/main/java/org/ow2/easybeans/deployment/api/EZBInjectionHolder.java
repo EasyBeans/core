@@ -25,7 +25,7 @@
 
 package org.ow2.easybeans.deployment.api;
 
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.easybeans.resolver.api.EZBJNDIResolver;
 
 /**

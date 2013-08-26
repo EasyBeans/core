@@ -34,7 +34,7 @@ import javax.transaction.Transaction;
 import org.ow2.easybeans.api.EZBStatefulSessionFactory;
 import org.ow2.easybeans.api.EasyBeansInvocationContext;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
-import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
+import org.ow2.easybeans.persistence.EZBExtendedEntityManager;
 
 /**
  * Interceptor used to join the current TX for extended persistence contexts.

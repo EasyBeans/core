@@ -25,23 +25,23 @@
 
 package org.ow2.easybeans.mavenplugin.server;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import javax.persistence.spi.PersistenceUnitInfo;
+
 import org.ow2.easybeans.api.event.EZBEventListener;
 import org.ow2.easybeans.api.event.container.EZBEventContainerStarting;
 import org.ow2.easybeans.component.itf.EZBEventComponent;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.util.event.api.EventPriority;
 import org.ow2.util.event.api.IEvent;
 
 /**
- * Manage the persistence provider support. This class receives events from 
+ * Manage the persistence provider support. This class receives events from
  * the server and report all container starting events to its owns listeners.
  * @author Vincent Michaud
  */
 public class PersistenceSupport implements EZBEventListener {
-    
+
     /****************************************************/
     /*     Supported persistence providers constants    */
     /****************************************************/
@@ -128,12 +128,12 @@ public class PersistenceSupport implements EZBEventListener {
     /**
      * Listeners of the notification from audit component.
      */
-    private List<IPersistenceListener> listeners = new LinkedList<IPersistenceListener>();
+    private final List<IPersistenceListener> listeners = new LinkedList<IPersistenceListener>();
 
     /**
      * The EasyBeans event component.
      */
-    private EZBEventComponent eventComponent;
+    private final EZBEventComponent eventComponent;
 
 
     /****************************************************/
@@ -232,22 +232,7 @@ public class PersistenceSupport implements EZBEventListener {
      */
     public void handle(final IEvent event) {
         EZBEventContainerStarting containerEvent = (EZBEventContainerStarting) event;
-        PersistenceUnitInfo[] infos = containerEvent.getPersistenceUnitInfos();
-        if (infos != null && infos.length > 0) {
-            List<Integer> persistenceProvidersImpl = new ArrayList<Integer>(infos.length);
-            int implementationIndex;
-            
-            // Get implementations of persistence providers.
-            for (PersistenceUnitInfo info : infos) {
-                implementationIndex = getImplementation(info.getPersistenceProviderClassName());
-                persistenceProvidersImpl.add(implementationIndex);
-            }
-            
-            // Notify all listeners.
-            for (IPersistenceListener listener : listeners) {
-                listener.reportRequestedPersistenceProviders(persistenceProvidersImpl);
-            }
-        }
+        EZBPersistenceUnitManager persistenceUnitManager = containerEvent.getPersistenceUnitManager();
     }
 
     /**
@@ -268,7 +253,7 @@ public class PersistenceSupport implements EZBEventListener {
     }
 
     /**
-     * Get the event provider filter. The event provider filter is a regular 
+     * Get the event provider filter. The event provider filter is a regular
      * expression that define which event provider the listener needs to listen.
      * @return The event provider filter.
      */

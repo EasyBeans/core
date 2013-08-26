@@ -40,10 +40,9 @@ import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.EZBContainerException;
 import org.ow2.easybeans.api.EZBServer;
 import org.ow2.easybeans.loader.EasyBeansClassLoader;
-import org.ow2.easybeans.persistence.PersistenceUnitManager;
-import org.ow2.easybeans.persistence.api.PersistenceXmlFileAnalyzerException;
-import org.ow2.easybeans.persistence.xml.JPersistenceUnitInfo;
-import org.ow2.easybeans.persistence.xml.PersistenceXmlFileAnalyzer;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceXmlAnalyzer;
+import org.ow2.easybeans.persistence.PersistenceXmlAnalyzerException;
 import org.ow2.util.archive.api.ArchiveException;
 import org.ow2.util.archive.api.IArchive;
 import org.ow2.util.ee.deploy.api.deployable.EARDeployable;
@@ -85,6 +84,9 @@ public abstract class AbsDeployer<T extends IDeployable<T>> extends AbsDeployerL
      * Map between String representation of an URL and the associated Deployable that has been deployed.
      */
     private Map<String, IDeployable<?>> deployedDeployables = null;
+
+
+    private EZBPersistenceXmlAnalyzer persistenceXmlAnalyzer;
 
     /**
      * Default constructor.
@@ -176,6 +178,7 @@ public abstract class AbsDeployer<T extends IDeployable<T>> extends AbsDeployerL
 
 
         PrivilegedAction<EasyBeansClassLoader> privilegedAction = new PrivilegedAction<EasyBeansClassLoader>() {
+            @Override
             public EasyBeansClassLoader run() {
                 return new EasyBeansClassLoader(arrayURLs, Thread.currentThread().getContextClassLoader());
             }
@@ -189,23 +192,18 @@ public abstract class AbsDeployer<T extends IDeployable<T>> extends AbsDeployerL
      * @param appClassLoader the classloader used as deployable
      * @return the given persistence unit manager
      */
-    protected PersistenceUnitManager getPersistenceUnitManager(final EARDeployable earDeployable,
+    protected EZBPersistenceUnitManager getPersistenceUnitManager(final EARDeployable earDeployable,
             final ClassLoader appClassLoader) {
         // Analyze libraries to detect persistence archive (only once for now
         // and for all libraries)
         // Get libraries of this EAR
         List<LibDeployable> libs = earDeployable.getLibDeployables();
-        PersistenceUnitManager persistenceUnitManager = null;
+        EZBPersistenceUnitManager persistenceUnitManager = null;
         for (LibDeployable lib : libs) {
-            PersistenceUnitManager builtPersistenceUnitManager = null;
+            EZBPersistenceUnitManager builtPersistenceUnitManager = null;
             try {
-                JPersistenceUnitInfo[] persistenceUnitInfos =
-                        PersistenceXmlFileAnalyzer.analyzePersistenceXmlFile(lib.getArchive());
-                if (persistenceUnitInfos != null) {
-                    builtPersistenceUnitManager =
-                            PersistenceXmlFileAnalyzer.loadPersistenceProvider(persistenceUnitInfos, appClassLoader);
-                }
-            } catch (PersistenceXmlFileAnalyzerException e) {
+                 builtPersistenceUnitManager = persistenceXmlAnalyzer.analyzePersistenceXmlFile(lib.getArchive(), appClassLoader);
+            } catch (PersistenceXmlAnalyzerException e) {
                 throw new IllegalStateException("Failure when analyzing the persistence.xml file", e);
             }
 
@@ -214,7 +212,7 @@ public abstract class AbsDeployer<T extends IDeployable<T>> extends AbsDeployerL
                 if (builtPersistenceUnitManager != null) {
                     // Add the persistence unit infos to the existing
                     // persistence unit manager
-                    persistenceUnitManager.addExtraPersistenceUnitInfos(builtPersistenceUnitManager.getPersistenceUnitInfos());
+                    persistenceUnitManager.merge(builtPersistenceUnitManager);
                 }
             } else {
                 // New persistence manager use the built manager

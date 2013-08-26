@@ -25,7 +25,7 @@
 
 package org.ow2.easybeans.api.event.container;
 
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 
 
 /**
@@ -33,7 +33,7 @@ import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
  * @author Vincent Michaud
  */
 public interface EZBEventContainerStarted extends EZBEventContainer {
-    
+
     /**
      * Get the persistence unit manager.
      * @return The persistence unit manager

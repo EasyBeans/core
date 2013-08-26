@@ -31,7 +31,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
-import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
+import org.ow2.easybeans.persistence.EZBExtendedEntityManager;
 
 /**
  * Interface for Stateful session factory.

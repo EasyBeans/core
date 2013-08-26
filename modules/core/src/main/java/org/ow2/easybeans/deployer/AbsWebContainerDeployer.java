@@ -38,7 +38,7 @@ import org.ow2.easybeans.api.EZBContainerException;
 import org.ow2.easybeans.deployment.InjectionHolder;
 import org.ow2.easybeans.deployment.api.EZBInjectionHolder;
 import org.ow2.easybeans.loader.EasyBeansClassLoader;
-import org.ow2.easybeans.persistence.PersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.easybeans.resolver.ApplicationJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBApplicationJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
@@ -158,7 +158,7 @@ public abstract class AbsWebContainerDeployer<T extends IDeployable<T>> extends 
         ClassLoader ejbClassLoader = new EasyBeansClassLoader(arrayURLs, Thread.currentThread().getContextClassLoader());
 
         // Get Persistence unit manager
-        PersistenceUnitManager persistenceUnitManager = getPersistenceUnitManager(earDeployable, ejbClassLoader);
+        EZBPersistenceUnitManager persistenceUnitManager = getPersistenceUnitManager(earDeployable, ejbClassLoader);
 
         // Get Extra libraries
         List<IArchive> libArchives = getLibArchives(earDeployable);

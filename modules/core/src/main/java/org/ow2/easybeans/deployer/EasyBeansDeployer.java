@@ -31,7 +31,7 @@ import java.util.List;
 import org.ow2.easybeans.api.EZBContainer;
 import org.ow2.easybeans.api.EZBContainerException;
 import org.ow2.easybeans.deployment.InjectionHolder;
-import org.ow2.easybeans.persistence.PersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.easybeans.resolver.ApplicationJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBApplicationJNDIResolver;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
@@ -109,7 +109,7 @@ public class EasyBeansDeployer extends AbsDeployer implements IDeployer {
         ClassLoader appClassLoader = getClassLoaderForEAR(earDeployable);
 
         // Get Persistence unit manager
-        PersistenceUnitManager persistenceUnitManager = getPersistenceUnitManager(earDeployable, appClassLoader);
+        EZBPersistenceUnitManager persistenceUnitManager = getPersistenceUnitManager(earDeployable, appClassLoader);
 
         // Get Extra libraries
         List<IArchive> libArchives = getLibArchives(earDeployable);

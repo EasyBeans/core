@@ -25,10 +25,9 @@
 
 package org.ow2.easybeans.event.container;
 
-import javax.persistence.spi.PersistenceUnitInfo;
-
 import org.ow2.easybeans.api.EZBContainerConfig;
 import org.ow2.easybeans.api.event.container.EZBEventContainerStarting;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.util.archive.api.IArchive;
 
 /**
@@ -36,11 +35,11 @@ import org.ow2.util.archive.api.IArchive;
  * @author Vincent Michaud
  */
 public class EventContainerStarting extends AbstractEventContainer implements EZBEventContainerStarting {
-    
+
     /**
      * The persistence unit informations.
      */
-    private PersistenceUnitInfo[] persistenceUnitInfos;
+    private final EZBPersistenceUnitManager persistenceUnitManager;
 
     /**
      * The default constructor.
@@ -50,18 +49,18 @@ public class EventContainerStarting extends AbstractEventContainer implements EZ
      * @param containerConfig The configuration of the container.
      */
     public EventContainerStarting(final String source, final IArchive archive,
-                                  final PersistenceUnitInfo[] persistenceUnitInfos,
+                                  final EZBPersistenceUnitManager persistenceUnitManager,
                                   final EZBContainerConfig containerConfig) {
         super(source, archive, containerConfig);
-        this.persistenceUnitInfos = persistenceUnitInfos;
+        this.persistenceUnitManager = persistenceUnitManager;
     }
 
     /**
      * Get the persistence unit informations.
      * @return The persistence unit informations.
      */
-    public PersistenceUnitInfo[] getPersistenceUnitInfos() {
-        return this.persistenceUnitInfos;
+    public EZBPersistenceUnitManager getPersistenceUnitManager() {
+        return this.persistenceUnitManager;
     }
 
 }

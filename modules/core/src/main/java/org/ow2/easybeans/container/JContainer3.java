@@ -135,12 +135,11 @@ import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.easybeans.naming.strategy.EasyBeansV1NamingStrategy;
 import org.ow2.easybeans.naming.strategy.JavaEE6NamingStrategy;
 import org.ow2.easybeans.naming.strategy.ManagedBeanNamingStrategy;
-import org.ow2.easybeans.persistence.PersistenceUnitManager;
-import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
-import org.ow2.easybeans.persistence.api.PersistenceXmlFileAnalyzerException;
-import org.ow2.easybeans.persistence.xml.JPersistenceUnitInfo;
-import org.ow2.easybeans.persistence.xml.PersistenceXmlFileAnalyzer;
+import org.ow2.easybeans.persistence.EZBExtendedEntityManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBPersistenceXmlAnalyzer;
+import org.ow2.easybeans.persistence.PersistenceXmlAnalyzerException;
+import org.ow2.easybeans.persistence.basic.BasicPersistenceXmlAnalyzer;
 import org.ow2.easybeans.proxy.binding.BindingManager;
 import org.ow2.easybeans.proxy.reference.EJBHomeCallRef;
 import org.ow2.easybeans.proxy.reference.EJBLocalHomeCallRef;
@@ -271,6 +270,12 @@ public class JContainer3 implements EZBContainer {
      * The provider id.
      */
     private String j2eeManagedObjectId = null;
+
+    /**
+     * Persistence XML Analyzer.
+     */
+    private final EZBPersistenceXmlAnalyzer persistenceXmlAnalyzer = new BasicPersistenceXmlAnalyzer();
+
 
     /**
      * The key of the returned map is the name of the persistence unit.
@@ -599,22 +604,17 @@ public class JContainer3 implements EZBContainer {
             if (createBeanFactories) {
 
                 // Check if there is META-INF/persistence.xml file
-                PersistenceUnitManager analyzedPersistenceUnitManager = null;
+                EZBPersistenceUnitManager analyzedPersistenceUnitManager = null;
                 try {
-                    JPersistenceUnitInfo[] persistenceUnitInfos =
-                            PersistenceXmlFileAnalyzer.analyzePersistenceXmlFile(getArchive());
+                    analyzedPersistenceUnitManager =
+                            persistenceXmlAnalyzer.analyzePersistenceXmlFile(getArchive(), getClassLoader());
 
                     // Dispatch life cycle event.
                     if (this.dispatcher != null) {
                         this.dispatcher.dispatch(new EventContainerStarting(this.j2eeManagedObjectId, getArchive(),
-                                persistenceUnitInfos, this.configuration));
+                                analyzedPersistenceUnitManager, this.configuration));
                     }
-
-                    if (persistenceUnitInfos != null) {
-                        analyzedPersistenceUnitManager =
-                                PersistenceXmlFileAnalyzer.loadPersistenceProvider(persistenceUnitInfos, getClassLoader());
-                    }
-                } catch (PersistenceXmlFileAnalyzerException e) {
+                } catch (PersistenceXmlAnalyzerException e) {
                     throw new EZBContainerException("Cannot analyze the persistence.xml file in the archive", e);
                 }
 

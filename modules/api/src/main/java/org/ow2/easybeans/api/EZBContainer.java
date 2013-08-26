@@ -29,8 +29,8 @@ package org.ow2.easybeans.api;
 import java.util.List;
 import java.util.Map;
 
-import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBExtendedEntityManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.util.archive.api.IArchive;
 
 /**

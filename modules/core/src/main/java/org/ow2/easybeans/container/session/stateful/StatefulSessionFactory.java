@@ -59,7 +59,7 @@ import org.ow2.easybeans.container.session.SessionFactory;
 import org.ow2.easybeans.event.bean.EventBeanInvocationEnd;
 import org.ow2.easybeans.event.bean.EventBeanInvocationError;
 import org.ow2.easybeans.naming.J2EEManagedObjectNamingHelper;
-import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
+import org.ow2.easybeans.persistence.EZBExtendedEntityManager;
 import org.ow2.easybeans.rpc.JEJBResponse;
 import org.ow2.easybeans.rpc.api.EJBLocalRequest;
 import org.ow2.easybeans.rpc.api.EJBResponse;
@@ -108,7 +108,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
     /**
      * Locks by beans.
      */
-    private Map<Long, Lock> locks;
+    private final Map<Long, Lock> locks;
 
     /**
      * Locks by beans having StatefulTimeout.
@@ -631,6 +631,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @return true if the instance is matching
      */
+    @Override
     public boolean tryMatch(final EasyBeansSFSB easyBeansSFSB, final Long clue) {
         return this.basicClueManager.tryMatch(easyBeansSFSB, clue);
     }
@@ -640,6 +641,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @param easyBeansSFSB the given stateful instance
      */
+    @Override
     public void unMatch(final EasyBeansSFSB easyBeansSFSB) {
         this.basicClueManager.unMatch(easyBeansSFSB);
     }
@@ -649,6 +651,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @return the clue for the given instance.
      */
+    @Override
     public Long getClue(final EasyBeansSFSB easyBeansSFSB) {
         return easyBeansSFSB.getEasyBeansStatefulID();
     }
@@ -659,6 +662,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      * @param easyBeansSFSB the given instance
      * @param clue          the given clue
      */
+    @Override
     public void setClue(final EasyBeansSFSB easyBeansSFSB, final Long clue) {
         logger.debug("Set for bean {0} the clue = {1}", easyBeansSFSB, clue);
         easyBeansSFSB.setEasyBeansStatefulID(clue);
@@ -679,6 +683,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @return the current session synchronization listener
      */
+    @Override
     public Synchronization getSessionSynchronizationListener(final Transaction tx) {
         return this.sessionSynchronizationListeners.get(tx);
     }
@@ -689,6 +694,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      * @param tx                             the given transaction
      * @param sessionSynchronizationListener the session synchronization listener
      */
+    @Override
     public void setSessionSynchronizationListener(final Transaction tx, final Synchronization sessionSynchronizationListener) {
         this.sessionSynchronizationListeners.put(tx, sessionSynchronizationListener);
     }
@@ -698,6 +704,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @param tx the given transaction
      */
+    @Override
     public void unsetSessionSynchronizationListener(final Transaction tx) {
         this.sessionSynchronizationListeners.remove(tx);
     }
@@ -709,6 +716,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @return the list of extended persistence contexts
      */
+    @Override
     public List<EZBExtendedEntityManager> getExtendedPersistenceContexts(final EasyBeansSFSB statefulSessionBean) {
         return this.extendedPersistenceContexts.get(statefulSessionBean);
     }
@@ -720,6 +728,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      * @param statefulSessionBean   the given bean
      * @param extendedEntityManager the given persistence context
      */
+    @Override
     public void addExtendedPersistenceContext(final EasyBeansSFSB statefulSessionBean,
             final EZBExtendedEntityManager extendedEntityManager) {
         List<EZBExtendedEntityManager> list = this.extendedPersistenceContexts.get(statefulSessionBean);
@@ -760,6 +769,7 @@ public class StatefulSessionFactory extends SessionFactory<EasyBeansSFSB> implem
      *
      * @param properties properties specified when the timer was scheduled
      */
+    @Override
     public void execute(Map<String, Object> properties) {
         Lock statefulTimeoutLock = null;
         if (this.getSessionBeanInfo().getStatefulTimeout() != null && properties != null) {

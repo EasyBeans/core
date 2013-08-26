@@ -36,8 +36,8 @@ import org.ow2.easybeans.api.Factory;
 import org.ow2.easybeans.api.bean.EasyBeansBean;
 import org.ow2.easybeans.api.bean.EasyBeansSFSB;
 import org.ow2.easybeans.api.container.EZBEJBContext;
-import org.ow2.easybeans.persistence.api.EZBExtendedEntityManager;
-import org.ow2.easybeans.persistence.api.EZBPersistenceUnitManager;
+import org.ow2.easybeans.persistence.EZBExtendedEntityManager;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 

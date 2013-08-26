@@ -56,6 +56,16 @@
       <artifactId>log-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.ow2.easybeans.persistence</groupId>
+      <artifactId>easybeans-persistence-api</artifactId>
+      <version>3.0.0-M2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.easybeans.persistence</groupId>
+      <artifactId>easybeans-persistence-core</artifactId>
+      <version>3.0.0-M2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-util</artifactId>
       <version>${project.version}</version>
@@ -63,7 +73,7 @@
     <dependency>
       <groupId>org.ow2.util.marshalling</groupId>
       <artifactId>marshalling</artifactId>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.ow2.easybeans</groupId>
       <artifactId>easybeans-api</artifactId>

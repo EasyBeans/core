@@ -76,6 +76,7 @@
             <DynamicImport-Package>*</DynamicImport-Package>
 						<Export-Package>org.ow2.easybeans.component.remotejndiresolver,org.ow2.easybeans.component.audit.rmi.interceptor.jrmp,org.ow2.easybeans.util.osgi;version=${easybeans-utils.version}</Export-Package>
             <_exportcontents><![CDATA[
+                     org.ow2.easybeans.component,
                      org.ow2.easybeans.container.*,
                      org.ow2.easybeans.deployer.*,
                      org.ow2.easybeans.enhancer.*,

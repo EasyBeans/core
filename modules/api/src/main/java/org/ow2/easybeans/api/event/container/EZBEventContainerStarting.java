@@ -25,7 +25,7 @@
 
 package org.ow2.easybeans.api.event.container;
 
-import javax.persistence.spi.PersistenceUnitInfo;
+import org.ow2.easybeans.persistence.EZBPersistenceUnitManager;
 
 
 /**
@@ -38,6 +38,6 @@ public interface EZBEventContainerStarting extends EZBEventContainer {
      * Get the archive.
      * @return The archive.
      */
-    PersistenceUnitInfo[] getPersistenceUnitInfos();
+    EZBPersistenceUnitManager getPersistenceUnitManager();
 
 }
