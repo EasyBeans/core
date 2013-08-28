@@ -158,7 +158,7 @@ public class EasyBeansEJBContainer extends EJBContainer {
             }
         }
 
-        LOGGER.info("Found ''{0}'' containers : ''{1}''", Integer.valueOf(containers.size()), containers);
+        LOGGER.info("Found ''{0}'' containers :ï¿½''{1}''", Integer.valueOf(containers.size()), containers);
 
         try {
             this.embedded.start();
@@ -205,7 +205,7 @@ public class EasyBeansEJBContainer extends EJBContainer {
      */
     @Override
     public Context getContext() {
-        return this.embedded.getContext();
+        return this.embedded.getInitialContext();
     }
 
 }
