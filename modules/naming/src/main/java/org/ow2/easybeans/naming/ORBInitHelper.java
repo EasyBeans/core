@@ -25,13 +25,21 @@
 
 package org.ow2.easybeans.naming;
 
+import org.omg.CORBA.INITIALIZE;
 import org.omg.CORBA.ORB;
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
 
 /**
  * This helper allows to get the current ORB of the system.
  * @author Florent Benoit
  */
 public final class ORBInitHelper {
+
+    /**
+     * Logger.
+     */
+    private static Log logger = LogFactory.getLog(ORBInitHelper.class);
 
     /**
      * Utility class, no public constructor.
@@ -44,7 +52,13 @@ public final class ORBInitHelper {
      * @return the ORB.
      */
     public static ORB getORB() {
-        return ORB.init();
+        try {
+            return ORB.init();
+        } catch (INITIALIZE e) {
+            logger.debug("Unable to get CORBA ORB",  e);
+            // No corba available
+            return null;
+        }
     }
 
 }
