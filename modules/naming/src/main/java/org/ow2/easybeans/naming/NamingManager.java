@@ -1,6 +1,7 @@
 /**
  * EasyBeans
  * Copyright (C) 2006 Bull S.A.S.
+ * Copyright (C) 2013 Peergreen S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +31,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
+import org.omg.CORBA.ORB;
 import org.ow2.easybeans.naming.context.ContextImpl;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -187,7 +189,10 @@ public final class NamingManager {
 
         // bind ORB
         try {
-            compCtx.rebind("ORB", ORBInitHelper.getORB());
+            ORB orb = ORBInitHelper.getORB();
+            if (orb != null) {
+                compCtx.rebind("ORB", orb);
+            }
         } catch (NamingException e) {
             logger.error("Cannot bind ORB", e);
         }
