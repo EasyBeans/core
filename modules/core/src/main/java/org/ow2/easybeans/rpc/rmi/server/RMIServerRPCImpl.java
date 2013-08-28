@@ -25,6 +25,7 @@
 
 package org.ow2.easybeans.rpc.rmi.server;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import javax.rmi.PortableRemoteObject;
@@ -40,7 +41,7 @@ import org.ow2.easybeans.server.Embedded;
  * Server side object which handle the EJB requests.
  * @author Florent Benoit
  */
-public class RMIServerRPCImpl extends PortableRemoteObject implements RMIServerRPC {
+public class RMIServerRPCImpl implements RMIServerRPC, Remote {
 
     /**
      * Server on which it depends.
@@ -59,7 +60,9 @@ public class RMIServerRPCImpl extends PortableRemoteObject implements RMIServerR
      * @throws RemoteException if RPC fails
      */
     public RMIServerRPCImpl(final Embedded ejb3server) throws RemoteException {
-        super();
+        if (ejb3server.isCorbaCompliant()) {
+            PortableRemoteObject.exportObject(this);
+        }
         this.ejb3server = ejb3server;
     }
 
