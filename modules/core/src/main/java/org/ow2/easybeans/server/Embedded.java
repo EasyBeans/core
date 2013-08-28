@@ -1,6 +1,7 @@
 /**
  * EasyBeans
  * Copyright (C) 2006-2009 Bull S.A.S.
+ * Copyright (C) 2013 Peergreen S.A.S.
  * Contact: easybeans@ow2.org
  *
  * This library is free software; you can redistribute it and/or
@@ -226,7 +227,16 @@ public class Embedded implements EZBServer {
      */
      private List<Class<? extends EasyBeansInterceptor>> globalInterceptorsClasses = null;
 
-    private InitialContext context = null;
+     /**
+      * Initial Context.
+      */
+    private Context initialContext;
+
+    /**
+     * Corba compliant ?
+     */
+    private boolean isCorbaCompliant = true;
+
 
     /**
      * Creates a new Embedded server.<br>
@@ -418,14 +428,16 @@ public class Embedded implements EZBServer {
             throw new EmbeddedException("Cannot build RPC invoker", e);
         }
 
-        try {
-            this.context = new InitialContext();
-        } catch (NamingException e) {
-            throw new EmbeddedException("Cannot make initial context", e);
+        if (initialContext == null) {
+            try {
+                this.initialContext = new InitialContext();
+            } catch (NamingException e) {
+                throw new EmbeddedException("Cannot make initial context", e);
+            }
         }
 
         try {
-            this.context.rebind(RMIServerRPC.RPC_JNDI_NAME, this.invoker);
+            this.initialContext.rebind(RMIServerRPC.RPC_JNDI_NAME, this.invoker);
         } catch (NamingException e) {
             throw new EmbeddedException("Cannot bind the RPC invoker", e);
         }
@@ -532,7 +544,9 @@ public class Embedded implements EZBServer {
 
         // Unexport
         try {
-            PortableRemoteObject.unexportObject(this.invoker);
+            if (isCorbaCompliant()) {
+                PortableRemoteObject.unexportObject(this.invoker);
+            }
         } catch (NoSuchObjectException e) {
             // Only log the Exception
             logger.error("Cannot unexport RPC invoker", e);
@@ -907,8 +921,20 @@ public class Embedded implements EZBServer {
     /**
      * @return context
      */
-    public Context getContext() {
-        return this.context;
+    public Context getInitialContext() {
+        return this.initialContext;
+    }
+
+    protected void setInitialContext(Context initialContext) {
+        this.initialContext = initialContext;
+    }
+
+    protected void setCorbaCompliant(boolean isCorbaCompliant) {
+        this.isCorbaCompliant = isCorbaCompliant;
+    }
+
+    public boolean isCorbaCompliant() {
+        return this.isCorbaCompliant;
     }
 
 }
