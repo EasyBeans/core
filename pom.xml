@@ -72,13 +72,13 @@
     <ow2-util-log-bridge-jul.version>2.0.0</ow2-util-log-bridge-jul.version>
     <ow2-util-jmx.version>2.0.0</ow2-util-jmx.version>
     <ow2-util-archive.version>2.0.0</ow2-util-archive.version>
-    <ow2-util-scan.version>3.0.0-M2-SNAPSHOT</ow2-util-scan.version>
+    <ow2-util-scan.version>3.0.0-M2</ow2-util-scan.version>
     <ow2-util-pool.version>2.0.1-SNAPSHOT</ow2-util-pool.version>
     <ow2-util-event.version>2.0.0</ow2-util-event.version>
     <ow2-util-audit.version>2.0.0</ow2-util-audit.version>
-    <ow2-util-deploy-system.version>2.0.0-SNAPSHOT</ow2-util-deploy-system.version>
-    <ow2-util-ee-metadata.version>3.0.0-M2-SNAPSHOT</ow2-util-ee-metadata.version>
-    <easybeans-persistence.version>3.0.0-M2-SNAPSHOT</easybeans-persistence.version>
+    <ow2-util-deploy-system.version>2.0.0</ow2-util-deploy-system.version>
+    <ow2-util-ee-metadata.version>3.0.0-M2</ow2-util-ee-metadata.version>
+    <easybeans-persistence.version>3.0.0-M2</easybeans-persistence.version>
 
     <!-- Maven plugins -->
     <maven-plugin-plugin.version>3.1</maven-plugin-plugin.version>
