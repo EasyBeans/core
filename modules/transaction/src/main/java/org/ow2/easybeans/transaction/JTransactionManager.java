@@ -75,4 +75,9 @@ public final class JTransactionManager {
             throw new IllegalStateException("Cannot get transaction manager", e);
         }
     }
+
+
+    public static void setTransactionManager(TransactionManager transactionManager) {
+        tm = transactionManager;
+    }
 }

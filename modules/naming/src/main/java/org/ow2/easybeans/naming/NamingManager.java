@@ -261,4 +261,9 @@ public final class NamingManager {
     }
 
 
+    public void setUserTransaction(UserTransaction userTransaction) {
+        this.userTransaction = userTransaction;
+    }
+
+
 }
