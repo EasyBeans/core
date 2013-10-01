@@ -28,6 +28,8 @@ package org.ow2.easybeans.api;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.Context;
+
 import org.ow2.easybeans.api.components.EZBComponentManager;
 import org.ow2.easybeans.api.pool.EZBManagementPool;
 import org.ow2.easybeans.component.api.EZBComponent;
@@ -169,5 +171,10 @@ public interface EZBServer extends EZBJ2EEManagedObject {
      * Interested IEventListeners should register to this topic.
      */
     static final String NAMING_EXTENSION_POINT = "/easybeans/container/factory/context";
+
+    /**
+     * @return the initial context.
+     */
+    Context getInitialContext();
 
 }
