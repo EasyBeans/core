@@ -24,7 +24,8 @@
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.ow2.easybeans</groupId>
     <artifactId>parent</artifactId>
@@ -211,6 +212,17 @@
       </dependency>
 
       <dependency>
+        <groupId>org.ow2.easybeans.persistence</groupId>
+        <artifactId>easybeans-persistence-api</artifactId>
+        <version>${easybeans-persistence.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.easybeans.persistence</groupId>
+        <artifactId>easybeans-persistence-core</artifactId>
+        <version>${easybeans-persistence.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.ow2.easybeans.utils</groupId>
         <artifactId>easybeans-utils</artifactId>
         <version>${easybeans-utils.version}</version>
@@ -278,7 +290,7 @@
         <version>${monolog.version}</version>
       </dependency>
 
-    <!-- Joram -->
+      <!-- Joram -->
       <dependency>
         <groupId>org.objectweb.joram</groupId>
         <artifactId>joram-mom</artifactId>
@@ -299,7 +311,7 @@
         <artifactId>joram-shared</artifactId>
         <version>${joram.version}</version>
       </dependency>
-      <!-- Maybe it should work with the latest maven JCup artifact ?-->
+      <!-- Maybe it should work with the latest maven JCup artifact ? -->
       <dependency>
         <groupId>org.objectweb.joram</groupId>
         <artifactId>jcup</artifactId>
@@ -477,14 +489,14 @@
         <version>2.0.0</version>
       </dependency>
 
-    <!-- HSQLDB -->
+      <!-- HSQLDB -->
       <dependency>
         <groupId>hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
         <version>1.8.0.10</version>
       </dependency>
 
-    <!-- Carol -->
+      <!-- Carol -->
       <dependency>
         <groupId>org.ow2.carol</groupId>
         <artifactId>carol</artifactId>
