@@ -110,6 +110,7 @@
                      org.ow2.easybeans.util.*,
                      org.ow2.easybeans.deployment.*]]>
             </_exportcontents>
+            <_nouses>true</_nouses>
             <Implementation-Version>${project.version}</Implementation-Version>
             <Service-Component><![CDATA[OSGI-INF/core-service.xml]]></Service-Component>
           </instructions>
