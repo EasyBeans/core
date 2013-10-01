@@ -150,7 +150,10 @@ public class EasyBeansEjbJarClassMetadata extends EasyBeansClassView {
 
     public EasyBeansEjbJarClassMetadata getEasyBeansLinkedClassMetadata(String className) {
         IClassMetadata classMetadata = getLinkedClassMetadata(className);
-        return classMetadata.as(EasyBeansEjbJarClassMetadata.class);
+        if (classMetadata != null) {
+            return classMetadata.as(EasyBeansEjbJarClassMetadata.class);
+        }
+        return null;
     }
 
 }
