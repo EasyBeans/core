@@ -150,6 +150,7 @@ import org.ow2.easybeans.proxy.reference.RemoteCallRef;
 import org.ow2.easybeans.resolver.api.EZBContainerJNDIResolver;
 import org.ow2.easybeans.security.permissions.PermissionManager;
 import org.ow2.easybeans.server.Embedded;
+import org.ow2.easybeans.transaction.JTransactionManager;
 import org.ow2.easybeans.util.ExtensorSupport;
 import org.ow2.easybeans.util.topological.NodeWrapper;
 import org.ow2.easybeans.util.topological.TopologicalSort;
@@ -274,7 +275,7 @@ public class JContainer3 implements EZBContainer {
     /**
      * Persistence XML Analyzer.
      */
-    private final EZBPersistenceXmlAnalyzer persistenceXmlAnalyzer = new BasicPersistenceXmlAnalyzer();
+    private EZBPersistenceXmlAnalyzer persistenceXmlAnalyzer;
 
 
     /**
@@ -290,6 +291,7 @@ public class JContainer3 implements EZBContainer {
      *               or exploded).
      */
     public JContainer3(final EZBContainerConfig config) {
+        this();
         setContainerConfig(config);
         this.bindingReferences = new ArrayList<EZBRef>();
     }
@@ -511,7 +513,15 @@ public class JContainer3 implements EZBContainer {
 
         this.available = true;
 
+    }
 
+    protected EZBPersistenceXmlAnalyzer getPersistenceXmlAnalyzer() {
+        if (persistenceXmlAnalyzer == null) {
+            BasicPersistenceXmlAnalyzer basicPersistenceXmlAnalyzer = new BasicPersistenceXmlAnalyzer();
+            basicPersistenceXmlAnalyzer.setTransactionManager(JTransactionManager.getTransactionManager());
+            this.persistenceXmlAnalyzer = basicPersistenceXmlAnalyzer;
+        }
+        return this.persistenceXmlAnalyzer;
     }
 
 
@@ -607,7 +617,7 @@ public class JContainer3 implements EZBContainer {
                 EZBPersistenceUnitManager analyzedPersistenceUnitManager = null;
                 try {
                     analyzedPersistenceUnitManager =
-                            persistenceXmlAnalyzer.analyzePersistenceXmlFile(getArchive(), getClassLoader());
+                            getPersistenceXmlAnalyzer().analyzePersistenceXmlFile(getArchive(), getClassLoader());
 
                     // Dispatch life cycle event.
                     if (this.dispatcher != null) {
