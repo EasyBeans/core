@@ -75,7 +75,7 @@
     <ow2-util-archive.version>2.0.0</ow2-util-archive.version>
     <ow2-util-scan.version>3.0.0-M2</ow2-util-scan.version>
     <ow2-util-pool-api.version>2.0.0</ow2-util-pool-api.version>
-    <ow2-util-pool.version>2.0.1-SNAPSHOT</ow2-util-pool.version>
+    <ow2-util-pool.version>2.0.1</ow2-util-pool.version>
     <ow2-util-event.version>2.0.0</ow2-util-event.version>
     <ow2-util-audit.version>2.0.0</ow2-util-audit.version>
     <ow2-util-deploy-system.version>2.0.0</ow2-util-deploy-system.version>
