@@ -121,10 +121,10 @@ public class ScheduleExpressionParser {
         if (input == null) {
             return null;
         }
-        // remove the whitespaces ( § 18.2.1.2)
+        // remove the whitespaces (cf 18.2.1.2)
         String updatedInput = input.replaceAll("\\s+", "");
 
-        // Use tolower as we've to be case insensitive ( § 18.2.1.2)
+        // Use tolower as we've to be case insensitive (cf 18.2.1.2)
         return updatedInput.toLowerCase();
     }
 
