@@ -28,7 +28,7 @@
   <parent>
     <artifactId>easybeans-modules</artifactId>
     <groupId>org.ow2.easybeans</groupId>
-    <version>3.0.0-M1-SNAPSHOT</version>
+    <version>3.0.0-M1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ow2.easybeans.osgi</groupId>
