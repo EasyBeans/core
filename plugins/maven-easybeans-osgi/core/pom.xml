@@ -38,7 +38,7 @@
   <name>EasyBeans: Plugin :: OSGi Plugin</name>
 
   <properties>
-    <ow2-util-deploy-plan.version>2.0.0-SNAPSHOT</ow2-util-deploy-plan.version>
+    <ow2-util-deploy-plan.version>2.0.0</ow2-util-deploy-plan.version>
   </properties>
 
   <dependencies>
